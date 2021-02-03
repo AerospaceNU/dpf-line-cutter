@@ -1,3 +1,6 @@
+// not all of this is necessary for uart
+// but last time I tried to change it I broke it
+
 #include <string.h>
 #include <Arduino.h>
 #include <bluefruit.h>

@@ -22,9 +22,10 @@ void    printHex   (const uint8_t * data, const uint32_t numBytes);
 // Packet buffer
 extern uint8_t packetbuffer[];
 
-// pins
+// pins for nichrome
 const int PIN1 = A1;
 const int PIN2 = A2;
+
 
 void setup(void)
 {
@@ -52,6 +53,7 @@ void setup(void)
 
   Serial.println("Initialized!");
 }
+
 
 void startAdv(void)
 {
@@ -81,6 +83,7 @@ void startAdv(void)
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds  
 }
 
+
 /**************************************************************************/
 /*!
     @brief  Constantly poll for new command or response data
@@ -94,16 +97,19 @@ void loop(void)
     uint8_t ch;
     ch = (uint8_t) bleuart.read();
 
+    // '!' indicates start of a command. anything else is ignored
     if (ch == (uint8_t) '!') {
       parse_command();
     }
   }
 }
 
+
 void parse_command() {
   uint8_t char_array[64];
   int current_num = 0;
- 
+
+  // read all text after '!' which started command
   while ( bleuart.available() && current_num<64 )
   {
     char_array[current_num] = (uint8_t) bleuart.read();
@@ -112,40 +118,52 @@ void parse_command() {
   
   String command = (char *) char_array;
 
+  // keep track of whether each line cut has happened
   boolean status1 = false;
   boolean status2 = false;
-  
+
+  // if user typed '!cut', execute line-cutting
   if ( command.substring(0,3).equals("cut") ) {
     bleuart.write("Received cut command.\n");
+    
     status1 = cut_line( command.substring(4,8).toInt(), PIN1 );
+    // if first cut was canceled, don't execute second cut
     if (status1) {
       status2 = cut_line( command.substring(9,13).toInt(), PIN2 );
     }
+
+    // confirm status of each line
     bleuart.write("Line 1: ");
     if (status1) { bleuart.write("cut\n"); } else {bleuart.write("not cut\n"); }
     bleuart.write("Line 2: ");
     if (status2) { bleuart.write("cut\n"); } else {bleuart.write("not cut\n"); }
     return;
   }
+  // anything other than 'cut' is invalid
   else {
     bleuart.write("Not a valid command.\n");
     return;
   }
 }
 
+
 boolean cut_line(int seconds, int pin) {
   boolean canceled = false;
 
-  bleuart.write("Line will be cut in ");
+  bleuart.write("Cutting line in ");
   bleuart.write( String(seconds).c_str() );
   bleuart.write(" seconds.\n");
   bleuart.write("'!' to cancel.\n");
+
+  // countdown to line cut
   int time_elapsed = 0;
   while ( time_elapsed < seconds && !canceled ) {
+    // check if user has sent a message
     while ( bleuart.available() && !canceled ) {
       uint8_t ch;
       ch = (uint8_t) bleuart.read();
 
+      // if user sends '!', cancel cut
       if (ch == (uint8_t) '!') {
         canceled = true;
       }
@@ -153,14 +171,17 @@ boolean cut_line(int seconds, int pin) {
     delay(1000);
     time_elapsed++;
   }
+
+  // proceed based on reason for loop ending
   if (canceled) {
     bleuart.write("Cut canceled.\n");
-    return false;
+    return false;  // tell parse_command that line was not cut
   } else {
-    execute_pwm(pin);  // on first line
-    return true;
+    execute_pwm(pin);
+    return true;  // tell parse_command that line was cut
   }
 }
+
 
 void execute_pwm(int pin) {
   bleuart.write("Starting PWM on pin "); bleuart.write('0' + pin); bleuart.write('\n');
