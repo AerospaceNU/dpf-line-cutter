@@ -124,8 +124,16 @@ void parse_command() {
 
   // if user typed '!cut', execute line-cutting
   if ( command.substring(0,3).equals("cut") ) {
-    bleuart.write("Received cut command.\n");
     
+    // enforce command structure: 'cut' with two 4-digit ints separated by spaces
+    if ( command.substring(3,4).equals(" ") && command.substring(8,9).equals(" ") ) {
+      bleuart.write("Received cut command.\n");
+    } else {
+      bleuart.write("Please use format 'cut xxxx xxxx'.\n");
+      return;
+    }
+
+    // start cutting procedure
     status1 = cut_line( command.substring(4,8).toInt(), PIN1 );
     // if first cut was canceled, don't execute second cut
     if (status1) {
