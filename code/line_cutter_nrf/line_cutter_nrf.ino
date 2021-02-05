@@ -22,14 +22,17 @@ extern uint8_t packetbuffer[];
 const int PIN1 = A1;
 const int PIN2 = A2;
 
+// INCREASE THESE IF IT DOESN'T CUT FOR SOME REASON
+const int POWER_LEVEL = 90;  // PWM uses this to turn on nichrome (should be between 0 and 255)
+const int PWM_DURATION = 2000  // length of pwm in milliseconds
 
 void setup(void)
 {
   // Turn off pins right away
   pinMode(PIN1, OUTPUT);
-  digitalWrite(PIN1, LOW);
+  analogWrite(PIN1, 0);
   pinMode(PIN2, OUTPUT);
-  digitalWrite(PIN2, LOW);
+  analogWrite(PIN2, 0);
   
   Serial.begin(115200);
   //while ( !Serial ) delay(10);   // for nrf52840 with native usb
@@ -193,9 +196,9 @@ boolean cut_line(int seconds, int pin) {
 void execute_pwm(int pin) {
   bleuart.write("Starting PWM on pin "); bleuart.write('0' + pin); bleuart.write('\n');
   Serial.println("Starting PWM ...");
-  analogWrite(pin, 60);
-  delay(2000);
-  analogWrite(pin, LOW);
+  analogWrite(pin, POWER_LEVEL);
+  delay(PWM_DURATION);
+  analogWrite(pin, 0);
   bleuart.write("Done.\n");
   Serial.println("Done.");
   return;
