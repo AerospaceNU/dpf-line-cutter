@@ -24,7 +24,7 @@ const int PIN2 = A2;
 
 // INCREASE THESE IF IT DOESN'T CUT FOR SOME REASON
 const int POWER_LEVEL = 90;  // PWM uses this to turn on nichrome (should be between 0 and 255)
-const int PWM_DURATION = 2000  // length of pwm in milliseconds
+const int PWM_DURATION = 2000;  // length of pwm in milliseconds
 
 void setup(void)
 {
