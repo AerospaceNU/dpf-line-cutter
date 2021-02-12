@@ -1,3 +1,4 @@
+# requires adafruit-circuitpython-ble
 import time
 
 from adafruit_ble import BLEConnection, BLERadio
