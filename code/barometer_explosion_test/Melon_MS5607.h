@@ -47,8 +47,8 @@ public:
     void printCalibData();
     void setOversamplingRate(uint8_t rate);
 
-    int32_t getTemperature();                 // Returns the temperature, in Celsius, as a double
-    int32_t getPressure();                    // Returns the pressure, in mbar, as a double
+    int32_t getTemperature();                 // Returns the temperature, in Celsius, as a double. Except its actually 100x larger
+    int32_t getPressure();                    // Returns the pressure, in mbar, as a double. Except its actually 100x larger
     
     bool startTemperatureConversion();
     bool startPressureConversion();
@@ -57,6 +57,8 @@ public:
     bool readPressure();
 
     void getPressureBlocking();
+
+private:
 
 /*=========================================================================
 COMMANDS

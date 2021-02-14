@@ -35,14 +35,8 @@ void setup()
     delay(500);
   }
 
-  Serial.println("Barometer connected.");
-
-  Serial.println(baro._calibData.C1);
-  Serial.println(baro._calibData.C2);
-  Serial.println(baro._calibData.C3);
-  Serial.println(baro._calibData.C4);
-  Serial.println(baro._calibData.C5);
-  Serial.println(baro._calibData.C6);
+  Serial.println("Barometer connected with calibration:");
+  baro.printCalibData();
 
 #if CFG_DEBUG
   // Blocking wait for connection when debug mode is enabled via IDE
@@ -119,8 +113,10 @@ void loop()
   baro.getPressureBlocking();
 
   // Print to Serial and Uart
-  Serial.print("Pressure [mBar]: ");
+  Serial.print("Pressure [pa]: ");
   Serial.println( String(baro.getPressure()).c_str());
+  Serial.print("Temp [deg C]: ");
+  Serial.println( String(baro.getTemperature() / 100.0 ).c_str());
   bleuart.write(String(baro.getPressure()).c_str());
   bleuart.write('\n');
   Serial.println("---");
