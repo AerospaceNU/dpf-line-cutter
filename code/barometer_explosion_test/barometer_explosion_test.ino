@@ -32,7 +32,7 @@ void setup()
 
   while (sensor.connect()>0) {
     Serial.println("Error connecting to barometer...");
-    delay(500);\
+    delay(500);
   }
 
   Serial.println("Barometer connected.");
