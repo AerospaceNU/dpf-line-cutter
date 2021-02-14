@@ -120,8 +120,8 @@ void loop()
 
   // Print to Serial and Uart
   Serial.print("Pressure [mBar]: ");
-  Serial.println( baro.getPressure() );
-  bleuart.write( String(baro.getPressure(), 6).c_str() );
+  Serial.println( String(baro.getPressure()).c_str());
+  bleuart.write(String(baro.getPressure()).c_str());
   bleuart.write('\n');
   Serial.println("---");
   delay(500);
