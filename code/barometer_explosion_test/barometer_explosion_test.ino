@@ -15,7 +15,7 @@
 #include <Adafruit_LittleFS.h>
 #include <InternalFileSystem.h>
 #include <Wire.h>
-#include <MS5xxx.h>
+#include "Melon_MS5607.h"
 
 // BLE Service
 BLEDfu  bledfu;  // OTA DFU service
@@ -24,18 +24,25 @@ BLEUart bleuart; // uart over ble
 BLEBas  blebas;  // battery
 
 // Barometer
-MS5xxx sensor(&Wire);
+Melon_MS5607 baro{};
 
 void setup()
 {
   Serial.begin(115200);
 
-  while (sensor.connect()>0) {
+  while (!baro.begin(0x76)) {
     Serial.println("Error connecting to barometer...");
     delay(500);
   }
 
   Serial.println("Barometer connected.");
+
+  Serial.println(baro._calibData.C1);
+  Serial.println(baro._calibData.C2);
+  Serial.println(baro._calibData.C3);
+  Serial.println(baro._calibData.C4);
+  Serial.println(baro._calibData.C5);
+  Serial.println(baro._calibData.C6);
 
 #if CFG_DEBUG
   // Blocking wait for connection when debug mode is enabled via IDE
@@ -109,15 +116,13 @@ void startAdv(void)
 void loop()
 {
   // Get barometer data
-  sensor.ReadProm();
-  sensor.Readout();
+  baro.getPressureBlocking();
 
   // Print to Serial and Uart
-  Serial.print("Pressure [Pa]: ");
-  Serial.println( sensor.GetPres() );
-  bleuart.write( String(sensor.GetPres(), 6).c_str() );
+  Serial.print("Pressure [mBar]: ");
+  Serial.println( baro.getPressure() );
+  bleuart.write( String(baro.getPressure(), 6).c_str() );
   bleuart.write('\n');
-  test_crc();
   Serial.println("---");
   delay(500);
 }
@@ -150,15 +155,15 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason)
   Serial.print("Disconnected, reason = 0x"); Serial.println(reason, HEX);
 }
 
-void test_crc() {
-  sensor.ReadProm();
-  sensor.Readout(); 
-  Serial.print("CRC=0x");
-  Serial.print(sensor.Calc_CRC4(), HEX);
-    Serial.print(" (should be 0x");
-  Serial.print(sensor.Read_CRC4(), HEX);
-  Serial.print(")\n");
-  Serial.print("Test Code CRC=0x");
-  Serial.print(sensor.CRCcodeTest(), HEX);
-  Serial.println(" (should be 0xB)");
-}
+//void test_crc() {
+//  sensor.ReadProm();
+//  sensor.Readout(); 
+//  Serial.print("CRC=0x");
+//  Serial.print(sensor.Calc_CRC4(), HEX);
+//    Serial.print(" (should be 0x");
+//  Serial.print(sensor.Read_CRC4(), HEX);
+//  Serial.print(")\n");
+//  Serial.print("Test Code CRC=0x");
+//  Serial.print(sensor.CRCcodeTest(), HEX);
+//  Serial.println(" (should be 0xB)");
+//}
