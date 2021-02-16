@@ -1,0 +1,11 @@
+{
+    "idf.adapterTargetName": "esp32s2",
+    "idf.openOcdConfigs": [
+        "interface/ftdi/esp32_devkitj_v1.cfg",
+        "target/esp32s2.cfg"
+    ],
+    "idf.portWin": "COM12",
+    "files.associations": {
+        "stdio.h": "c"
+    }
+}
