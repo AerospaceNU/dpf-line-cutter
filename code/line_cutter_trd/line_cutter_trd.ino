@@ -1,22 +1,23 @@
-#include <algorithm>
-#include <iterator>
 #include <Wire.h>
-#include <"Melon_MS5607.h">
-#include <"MovingAvg.h">
+#include "Melon_MS5607.h"
+#include "MovingAvg.h"
 
 
 // states
 int state = 0;
-const int WAITING = 0;  // anytime before parachute deployment
+const int WAITING = 100;  // anytime before parachute deployment
 const int DEPLOYED = 1;
 const int PARTIAL_DISREEF = 2;  // after first line is cut
 const int FULL_DISREEF = 3;  // after second line is cut
 const int LANDED = 4;
 
+// pins
+const int VOLTAGE_DIVIDER = A0;
+const int NICHROME_PIN1 = A1;
+const int NICHROME_PIN2 = A2;
+
 // requirements for state transitions
-const int DELAY = 20  // milliseconds
-const int MIN_SPEED = 3;  // m/s
-const double MIN_DELTA = MIN_SPEED * -(DELAY / 1000.0)
+const double LIMIT_VELOCITY = -3.0;  // m/s
 const int ALTITUDE1 = 200;  // disreefing altitudes, in meters
 const int ALTITUDE2 = 150;
 
@@ -25,28 +26,25 @@ const double PWM_VOLTAGE1 = 1.4;  // voltage applied to nichrome for line cuts
 const double PWM_VOLTAGE2 = 1.4;
 const int PWM_DURATION = 2000;  // length of pwm in milliseconds
 
-// pins
-const int VOLTAGE_DIVIDER = A0;
-const int NICHROME_PIN1 = A1;
-const int NICHROME_PIN2 = A2;
-
 // pressure calculation
 const double SEALEVEL = 101325.0;
 
-// variables for loop()
+// barometer and moving averages
+Melon_MS5607 baro{};
+int ARRAY_SIZE = 50;
+MovingAvg altitudeReadings(ARRAY_SIZE);  // store recent altitude readings
+MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // store differences between recent avgs calculated using ^
+
+// variables used in loop()
+const int DELAY = 1000;  // milliseconds
 unsigned long loopStart;
 unsigned long loopEnd;
 int32_t pressure;  // pascals
 double altitude;  // meters
-int previousAvg;
-int currentAvg;
-int delta;
-int* deltaArray;
-
-// create barometer and moving averages
-Melon_MS5607 baro{};
-movingAvg altitudeReadings(10);  // store last 10 altitude readings
-movingAvg altitudeAvgDeltas(10);  // store differences between last 10 avgs calculated using ^
+double previousAltitudeAvg;
+double currentAltitudeAvg;
+double delta;  // meters/second
+double currentDeltaAvg;
 
 
 /*************************
@@ -54,7 +52,7 @@ movingAvg altitudeAvgDeltas(10);  // store differences between last 10 avgs calc
  ************************/
  
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // connect to barometer
   while ( !baro.begin(0x76) ) {
@@ -66,7 +64,10 @@ void setup() {
 
   // initialize moving averages
   altitudeReadings.begin();
+  baro.getPressureBlocking();
+  altitudeReadings.reading(pressureToAltitude(baro.getPressure()));
   altitudeAvgDeltas.begin();
+  altitudeAvgDeltas.reading(0.0);
 
   // analog pins should give a number from 0 to 1023 when read
   analogReadResolution(10);  // 10 bits
@@ -75,7 +76,7 @@ void setup() {
 
 void loop() {
   loopStart = millis();
-  Serial.println(loopStart + "-----------");
+  Serial.println("------------");
  
   // read pressure, calculate altitude
   baro.getPressureBlocking();
@@ -83,44 +84,41 @@ void loop() {
   Serial.print("Pressure [Pa]: ");
   Serial.println(pressure);
   altitude = pressureToAltitude(pressure);
+  Serial.print("Altitude [m]: ");
+  Serial.println(altitude);
 
   // update moving averages
-  previousAvg = altitudeReadings.getAvg();
-  currentAvg = altitudeReadings.reading(altitude);  // update and return new avg
-  Serial.print("Altitude [m]: ");
-  Serial.println(currentAvg);
-  delta = currentAvg - previousAvg;
-  altitudeAvgDeltas.reading(delta);
-  Serial.print("Change in altitude [m]: ");
+  previousAltitudeAvg = altitudeReadings.getAvg();
+  currentAltitudeAvg = altitudeReadings.reading(altitude);  // update and return new avg
+  Serial.print("Averaged altitude [m]: ");
+  Serial.println(currentAltitudeAvg);
+  delta = (currentAltitudeAvg - previousAltitudeAvg) * (1000.0 / DELAY);
+  Serial.print("Change in altitude [m/s]: ");
   Serial.println(delta);
+  currentDeltaAvg = altitudeAvgDeltas.reading(delta);  // update and return new avg
+  Serial.print("Averaged change in altitude [m/s]: ");
+  Serial.println(currentDeltaAvg);
   
   switch(state) {
     case WAITING:
-      deltaArray = altitudeAvgDeltas.getReadings();
-      if (currentAvg > ALTITUDE1 &&
-          all_of(std::begin(deltaArray), std::end(deltaArray), 
-            // all recent deltas should be lower negative numbers than limit
-            [](int delta){ return delta < MIN_DELTA; })) {
+      if (currentAltitudeAvg > ALTITUDE1 && currentDeltaAvg < LIMIT_VELOCITY) {
         state = DEPLOYED;
       }
       break;
     case DEPLOYED:
-      if (currentAvg < ALTITUDE1) {
+      if (currentAltitudeAvg < ALTITUDE1) {
         pwmExecute(NICHROME_PIN1, PWM_VOLTAGE1);
         state = PARTIAL_DISREEF;
       }
       break;
     case PARTIAL_DISREEF:
-      if (currentAvg < ALTITUDE2) {
+      if (currentAltitudeAvg < ALTITUDE2) {
         pwmExecute(NICHROME_PIN2, PWM_VOLTAGE2);
         state = FULL_DISREEF;
       }
       break;
     case FULL_DISREEF:
-      deltaArray = altitudeAvgDeltas.getReadings();
-      if (all_of(std::begin(deltaArray), std::end(deltaArray),
-            // all recent deltas should be very small if rocket has landed
-            [](int delta){ return abs(delta) < 0.05; }) {
+      if (abs(currentDeltaAvg < 1)) {
         state = LANDED;        
       }
       break;
@@ -131,7 +129,7 @@ void loop() {
   }
   
   loopEnd = millis();
-  // loop should take a consistent amount of time
+  // loop should take a consistent amount of time (will be longer when PWM happens)
   delay(DELAY - constrain(loopEnd - loopStart, 0, DELAY));
 }
 
@@ -146,7 +144,7 @@ double pressureToAltitude(int32_t pressure) {
 
 
 void pwmExecute(int pin, double targetVoltage) {
-  Serial.println("Starting PWM ...");
+  Serial.print("Starting PWM...");
   analogWrite(pin, pwmLevel(targetVoltage));
   delay(PWM_DURATION);
   analogWrite(pin, 0);
@@ -159,7 +157,7 @@ int pwmLevel(double targetVoltage) {
   // get reading from voltage divider and multiply by 2
   int vbatAnalog = 2 * analogRead(VOLTAGE_DIVIDER);
   // analog reading is out of 1023, so divide and then multiply by 3.6 (reference voltage)
-  // to get current vbat
+  // to get current vbat  
   double vbat =  3.6 * (vbatAnalog / 1023.0);
   // find proportion of vbat needed to apply target voltage, then make it out of 255 for analogWrite
   return (targetVoltage / vbat) * 255.0;
