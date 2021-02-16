@@ -47,9 +47,9 @@ double delta;  // meters/second
 double currentDeltaAvg;
 
 
-/*************************
- *      SETUP/LOOP       *
- ************************/
+/*****************************
+ *        SETUP/LOOP         *
+ ****************************/
  
 void setup() {
   Serial.begin(115200);
@@ -134,15 +134,18 @@ void loop() {
 }
 
 
-/*************************
- *        HELPERS        *
- ************************/
+/*****************************
+ *          HELPERS          *
+ ****************************/
 
+// convert pressure (in pascals) to altitude (in meters) using sea-level pressure
+// int32_t -> double
 double pressureToAltitude(int32_t pressure) {
   return 44330.76 * (1.0 - pow(pressure / SEALEVEL, 1.0 / 5.25588));
 }
 
-
+// PWM pin to heat nichrome and cut parachute line
+// int double -> _
 void pwmExecute(int pin, double targetVoltage) {
   Serial.print("Starting PWM...");
   analogWrite(pin, pwmLevel(targetVoltage));
@@ -152,7 +155,8 @@ void pwmExecute(int pin, double targetVoltage) {
   return;
 }
 
-
+// calculate number to be used for analogWrite() of nichrome pin
+// double -> int
 int pwmLevel(double targetVoltage) {
   // get reading from voltage divider and multiply by 2
   int vbatAnalog = 2 * analogRead(VOLTAGE_DIVIDER);
@@ -160,5 +164,5 @@ int pwmLevel(double targetVoltage) {
   // to get current vbat  
   double vbat =  3.6 * (vbatAnalog / 1023.0);
   // find proportion of vbat needed to apply target voltage, then make it out of 255 for analogWrite
-  return (targetVoltage / vbat) * 255.0;
+  return (targetVoltage / vbat) * 255;
 }
