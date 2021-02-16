@@ -5,7 +5,7 @@
 
 // states
 int state = 0;
-const int WAITING = 100;  // anytime before parachute deployment
+const int WAITING = 0;  // anytime before parachute deployment
 const int DEPLOYED = 1;
 const int PARTIAL_DISREEF = 2;  // after first line is cut
 const int FULL_DISREEF = 3;  // after second line is cut
@@ -17,26 +17,27 @@ const int NICHROME_PIN1 = A1;
 const int NICHROME_PIN2 = A2;
 
 // requirements for state transitions
-const double LIMIT_VELOCITY = -3.0;  // m/s
-const int ALTITUDE1 = 200;  // disreefing altitudes, in meters
-const int ALTITUDE2 = 150;
+const double LIMIT_VELOCITY = -0.4;  // m/s
+const double ALTITUDE1 = 7;  // disreefing altitudes, in meters
+const double ALTITUDE2 = 3.5;
 
 // PWM settings
 const double PWM_VOLTAGE1 = 1.4;  // voltage applied to nichrome for line cuts
 const double PWM_VOLTAGE2 = 1.4;
-const int PWM_DURATION = 2000;  // length of pwm in milliseconds
+const int PWM_DURATION = 1000;  // length of pwm in milliseconds
 
-// pressure calculation
-const double SEALEVEL = 101325.0;
+// altitude calculation
+const double SEALEVEL = 102100.0;
+double initialAltitude;
 
 // barometer and moving averages
 Melon_MS5607 baro{};
-int ARRAY_SIZE = 50;
+int ARRAY_SIZE = 12;
 MovingAvg altitudeReadings(ARRAY_SIZE);  // store recent altitude readings
 MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // store differences between recent avgs calculated using ^
 
 // variables used in loop()
-const int DELAY = 1000;  // milliseconds
+const int DELAY = 250;  // milliseconds
 unsigned long loopStart;
 unsigned long loopEnd;
 int32_t pressure;  // pascals
@@ -63,9 +64,12 @@ void setup() {
   baro.printCalibData();
 
   // initialize moving averages
-  altitudeReadings.begin();
   baro.getPressureBlocking();
-  altitudeReadings.reading(pressureToAltitude(baro.getPressure()));
+  initialAltitude = pressureToAltitude(baro.getPressure());
+  Serial.print("Initial altitude [m]: ");
+  Serial.println(initialAltitude);
+  altitudeReadings.begin();
+  altitudeReadings.reading(pressureToAltitude(baro.getPressure()) - initialAltitude);
   altitudeAvgDeltas.begin();
   altitudeAvgDeltas.reading(0.0);
 
@@ -76,49 +80,52 @@ void setup() {
 
 void loop() {
   loopStart = millis();
-  Serial.println("------------");
  
   // read pressure, calculate altitude
   baro.getPressureBlocking();
   pressure = baro.getPressure();
-  Serial.print("Pressure [Pa]: ");
-  Serial.println(pressure);
-  altitude = pressureToAltitude(pressure);
-  Serial.print("Altitude [m]: ");
-  Serial.println(altitude);
+  altitude = pressureToAltitude(pressure) - initialAltitude;
 
   // update moving averages
   previousAltitudeAvg = altitudeReadings.getAvg();
   currentAltitudeAvg = altitudeReadings.reading(altitude);  // update and return new avg
-  Serial.print("Averaged altitude [m]: ");
-  Serial.println(currentAltitudeAvg);
   delta = (currentAltitudeAvg - previousAltitudeAvg) * (1000.0 / DELAY);
-  Serial.print("Change in altitude [m/s]: ");
-  Serial.println(delta);
   currentDeltaAvg = altitudeAvgDeltas.reading(delta);  // update and return new avg
-  Serial.print("Averaged change in altitude [m/s]: ");
-  Serial.println(currentDeltaAvg);
+
+  // printData();
   
   switch(state) {
     case WAITING:
       if (currentAltitudeAvg > ALTITUDE1 && currentDeltaAvg < LIMIT_VELOCITY) {
+        Serial.print("Parachute deployed at time ");
+        Serial.println(millis());
+        printData();
         state = DEPLOYED;
       }
       break;
     case DEPLOYED:
       if (currentAltitudeAvg < ALTITUDE1) {
         pwmExecute(NICHROME_PIN1, PWM_VOLTAGE1);
+        Serial.print("First line cut at time ");
+        Serial.println(millis());
+        printData();
         state = PARTIAL_DISREEF;
       }
       break;
     case PARTIAL_DISREEF:
       if (currentAltitudeAvg < ALTITUDE2) {
         pwmExecute(NICHROME_PIN2, PWM_VOLTAGE2);
+        Serial.print("Second line cut at time ");
+        Serial.println(millis());
+        printData();
         state = FULL_DISREEF;
       }
       break;
     case FULL_DISREEF:
-      if (abs(currentDeltaAvg < 1)) {
+      if (abs(currentDeltaAvg) < 0.05) {
+        Serial.print("Landed at time ");
+        Serial.println(millis());
+        printData();
         state = LANDED;        
       }
       break;
@@ -145,9 +152,10 @@ double pressureToAltitude(int32_t pressure) {
 }
 
 // PWM pin to heat nichrome and cut parachute line
-// int double -> _
+// int, double -> _
 void pwmExecute(int pin, double targetVoltage) {
-  Serial.print("Starting PWM...");
+  Serial.print("Starting PWM on pin ");
+  Serial.println(pin);
   analogWrite(pin, pwmLevel(targetVoltage));
   delay(PWM_DURATION);
   analogWrite(pin, 0);
@@ -165,4 +173,21 @@ int pwmLevel(double targetVoltage) {
   double vbat =  3.6 * (vbatAnalog / 1023.0);
   // find proportion of vbat needed to apply target voltage, then make it out of 255 for analogWrite
   return (targetVoltage / vbat) * 255;
+}
+
+void printData() {
+  Serial.print("State: ");
+  Serial.println(state);
+  Serial.print("Pressure [Pa]: ");
+  Serial.println(pressure);
+  Serial.print("Altitude [m]: ");
+  Serial.println(altitude);
+  Serial.print("Averaged altitude [m]: ");
+  Serial.println(currentAltitudeAvg);
+  Serial.print("Change in altitude [m/s]: ");
+  Serial.println(delta);
+  Serial.print("Averaged change in altitude [m/s]: ");
+  Serial.println(currentDeltaAvg);
+  Serial.println("------------");
+  return;
 }
