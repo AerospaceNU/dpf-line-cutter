@@ -9,6 +9,7 @@ ble = BLERadio()
 csv = open("out.txt", "w")
 while True:
     # Iterate over every bluetooth connection, finding only UART ones
+    start = time.time()
     while ble.connected and any(
         UARTService in connection for connection in ble.connections
     ):
@@ -19,8 +20,9 @@ while True:
             # If we have data waiting, decode it and write it to a file
             if uart.in_waiting > 0:
                 line = uart.readline().decode()
-                print(line, end="")
-                csv.write(line)
+                # print(line, end="")
+                now = time.time() - start
+                csv.write("{},{}".format(now, line))
                 csv.flush()
         time.sleep(0.1)
 
