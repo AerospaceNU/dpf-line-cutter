@@ -50,7 +50,7 @@ void setup(void)
   // Set up and start advertising
   startAdv();
 
-  Serial.println("Initialized!");
+  Serial.println("Bluetooth initialized.");
 }
 
 
