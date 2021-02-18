@@ -218,7 +218,7 @@ double calibrateSeaLevel(int samples) {
   for (int i=0; i<20; i++) {
     baro.getPressureBlocking();
     sum += baro.getPressure();
-    delay(100)
+    delay(100);
   }
   Serial.println("Done.");
   digitalWrite(LED_BUILTIN, LOW);
