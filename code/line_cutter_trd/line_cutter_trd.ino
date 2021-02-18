@@ -38,8 +38,8 @@ MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // store differences between recent av
 
 // variables used in loop()
 const int DELAY = 250;  // milliseconds
-unsigned long loopStart;
-unsigned long loopEnd;
+unsigned long loopEnd = 0;
+unsigned long lastBLE = 0;
 int32_t pressure;  // pascals
 double altitude;  // meters
 double previousAltitudeAvg;
@@ -73,17 +73,6 @@ void setup() {
   
   Serial.begin(115200);
 
-  // set up bluetooth
-  Bluefruit.begin();
-  Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName("Bluefruit52");
-  // To be consistent OTA DFU should be added first if it exists
-  bledfu.begin();
-  // Configure and start the BLE Uart service
-  bleuart.begin();
-  // Set up and start advertising
-  startAdv();
-
   // connect to barometer
   while ( !baro.begin(0x76) ) {
     Serial.println("Error connecting to barometer...");
@@ -103,21 +92,36 @@ void setup() {
 
   // analog pins should give a number from 0 to 1023 when read
   analogReadResolution(10);  // 10 bits
+
+  // set up bluetooth
+  Bluefruit.begin();
+  Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
+  Bluefruit.setName("Bluefruit52");
+  // To be consistent OTA DFU should be added first if it exists
+  bledfu.begin();
+  // Configure and start the BLE Uart service
+  bleuart.begin();
+  // Set up and start advertising
+  startAdv();
 }
 
 
 void loop() {
-  loopStart = millis();
- 
+  while(millis() < loopEnd + DELAY) {}
+  
   // read pressure, calculate altitude
   baro.getPressureBlocking();
   pressure = baro.getPressure();
   altitude = pressureToAltitude(pressure);
+
   // send readings over bleuart
-  bleuart.write(pressure);
-  bleuart.write(',');
-  bleuart.write(altitude);
-  bleuart.write('\n');
+  if (millis() - lastBLE > 1000) {
+    bleuart.write(String(pressure).c_str());
+    bleuart.write(',');
+    bleuart.write(String(altitude).c_str());
+    bleuart.write('\n');
+    lastBLE = millis();
+  }
 
   // update moving averages
   previousAltitudeAvg = altitudeReadings.getAvg();
@@ -171,8 +175,6 @@ void loop() {
   }
   
   loopEnd = millis();
-  // loop should take a consistent amount of time (will be longer when PWM happens)
-  delay(DELAY - constrain(loopEnd - loopStart, 0, DELAY));
 }
 
 
