@@ -82,7 +82,7 @@ void setup() {
   baro.printCalibData();
 
   // initialize moving averages
-  seaLevel = calibrateSeaLevel(20);  // average 20 readings to get "sea level" pressure
+  seaLevel = calibrateSeaLevel(50);  // average 20 readings to get "sea level" pressure
   Serial.print("Sea level pressure [Pa]: ");
   Serial.println(seaLevel);
   altitudeReadings.begin();
@@ -217,7 +217,7 @@ double calibrateSeaLevel(int samples) {
   Serial.println("Reading current pressure...");
   digitalWrite(LED_BUILTIN, HIGH);
   int sum = 0;
-  for (int i=0; i<20; i++) {
+  for (int i=0; i<samples; i++) {
     baro.getPressureBlocking();
     sum += baro.getPressure();
     delay(100);
