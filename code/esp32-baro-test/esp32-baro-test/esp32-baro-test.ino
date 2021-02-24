@@ -19,26 +19,106 @@
 
 */
 
+//#include <Wire.h>
+//
+//#define PROM0 0xA0
+//#define ADDRESS 0x76
+//#define RESET 0x1E
+//
+//void setup() {
+//  Wire.begin();
+//  Serial.begin(115200);
+//
+//  // Reset the barometer
+//  Wire.beginTransmission(ADDRESS);
+//  Wire.write(RESET);
+//  Wire.endTransmission();
+//
+//  // Do we need this delay?
+//  delay(10);
+//
+//  // Next ask for the first 2 prom devices
+//  Wire.beginTransmission(ADDRESS);
+//  Wire.write(0xA2);
+//  Wire.endTransmission();
+//  Wire.requestFrom(ADDRESS, 2);
+//  uint8_t higher_8 = Wire.read();
+//  uint8_t lower_8 = Wire.read();
+//  uint16_t value = (higher_8 << 8) | lower_8; // Read the first 8 bits; shift them left 8; OR with the next 8 bits
+//  Serial.print("Higher 8: "); Serial.print(higher_8, BIN); Serial.print("Lower 8: "); Serial.print(lower_8, BIN); Serial.print("Full: "); Serial.println(value, BIN); 
+//
+//  Wire.beginTransmission(ADDRESS);
+//  Wire.write(0xA4);
+//  Wire.endTransmission();
+//  Wire.requestFrom(ADDRESS, 2);
+//  higher_8 = Wire.read();
+//  lower_8 = Wire.read();
+//  value = (higher_8 << 8) | lower_8; // Read the first 8 bits; shift them left 8; OR with the next 8 bits
+//  Serial.print("Higher 8: "); Serial.print(higher_8, BIN); Serial.print("Lower 8: "); Serial.print(lower_8, BIN); Serial.print("Full: "); Serial.println(value, BIN); 
+//}
+//
+//void loop() {}
+
 #include <Wire.h>
-#include "BluetoothSerial.h"
-#include "Melon.h"
+//#include "BluetoothSerial.h"
 
+#include "Melon2.h"
+#include "nonmelon.h"
+
+// Change this to chagne the library used
+//#define MELON
+
+#ifdef MELON
 Melon_MS5607 baro;
-BluetoothSerial SerialBT;
+#else
+MS5xxx baro(&Wire);
+#endif
 
+//BluetoothSerial SerialBT;
+
+#ifdef MELON
 int32_t maxPressure;
+#else
+double maxPressure;
+#endif
 
 void setup() {
   Serial.begin(115200);
-  SerialBT.begin("ESP32test"); //Bluetooth device name
+//  SerialBT.begin("ESP32test"); //Bluetooth device name
 
+#ifdef MELON
+  Serial.println("Starting on MELON");
   baro.begin(0x76);
+  baro.printCalibData();
+
+#else
+  Serial.println("Starting on MS5xxx");
+  baro.connect();
+
+  baro.ReadProm();
+  baro.Readout();
+  
+  baro.printCalibData();
+
+#endif
 }
 
 void loop() {
+#ifdef MELON
   baro.getPressureBlocking();
 
   maxPressure = max(baro.getPressure(), maxPressure);
-  SerialBT.print(baro.getTemperature() / 100.0); SerialBT.print(", "); SerialBT.print(baro.getPressure()); SerialBT.print(", "); SerialBT.println(maxPressure);
-  delay(100);
+//  SerialBT.print(baro.getTemperature() / 100.0); SerialBT.print(", "); SerialBT.print(baro.getPressure()); SerialBT.print(", "); SerialBT.println(maxPressure);
+  Serial.println(baro.getTemperature() / 100.0);
+#else
+//  baro.ReadProm();
+  baro.Readout();
+
+  maxPressure = max(baro.GetPres(), maxPressure);
+//  SerialBT.print(baro.GetTemp() / 100.0); SerialBT.print(", "); SerialBT.print(baro.GetPres()); SerialBT.print(", "); SerialBT.println(maxPressure);
+
+  Serial.println(baro.GetTemp() / 100.0);
+  Serial.println(baro.GetPres());
+#endif
+  delay(1000);
 }

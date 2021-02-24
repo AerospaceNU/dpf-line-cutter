@@ -9,7 +9,7 @@ Apr 8, 2016
 MIT License
 ***************************************************************************/
 
-#include "Melon.h"
+#include "Melon2.h"
 
 #if ARDUINO >= 100
 #include "Arduino.h"
@@ -74,12 +74,26 @@ void Melon_MS5607::getPressureBlocking(){
     delayMicroseconds(_osrdelay);
     D1 = read24(MS5607_ADC_READ);                           // Read and store the Digital pressure value
 
+    // Print all the things
+
     OFF = (((int64_t)_calibData.C2) << 17) + ((dT * (int64_t)_calibData.C4) >> 6);    // OFF = OFF_t1 + TCO * dT  or  OFF = C2 * 2^17 + (C4 * dT) / 2^6
     SENS = ((int64_t)_calibData.C1 << 16) + ((dT * (int64_t)_calibData.C3) >> 7);  // SENS = SENS_t1 + TCS * dT or SENS = C1 * 2^16 + (C3 * dT) / 2^7
 
     int32_t T2 = 0;
     int64_t OFF2 = 0;
     int64_t SENS2 = 0;
+
+/*
+   if(TEMP<2000) {
+    T2=dT*dT/pow(2,31);
+    OFF2=61*(TEMP-2000)*(TEMP-2000)/pow(2,4);
+    SENS2=2*(TEMP-2000)*(TEMP-2000);
+    if(TEMP<-1500) {
+      OFF2+=15*(TEMP+1500)*(TEMP+1500);
+      SENS2+=8*(TEMP+1500)*(TEMP+1500);
+    }
+  }
+ */
 
     // Low Temperature
     if (TEMP < 2000){
@@ -92,7 +106,11 @@ void Melon_MS5607::getPressureBlocking(){
             OFF2 += 15 * (TEMP + 1500)*(TEMP + 1500);       // OFF2 = OFF2 + 15 * (TEMP + 1500)^2
             SENS2 += 8 * (TEMP + 1500)*(TEMP + 1500);       // SENS2 = SENS2 + 8 * (TEMP + 1500)^2
         }
+
+        Serial.print("Melon::: Temp "); Serial.print(TEMP); Serial.print("T2 "); Serial.print(T2); 
         TEMP = TEMP - T2;
+        Serial.print("Temp after correct"); Serial.println(TEMP);
+        
         OFF = OFF - OFF2;
         SENS = SENS - SENS2;
     }
@@ -167,6 +185,7 @@ void Melon_MS5607::printCalibData(){
  
 /* Reads the PROM from the MS5607 and stores the values into a struct */
 void Melon_MS5607::getCalibrationData(ms5607_calibration &calib){
+    Serial.println("Reading cal data...");
     calib.C1 = read16(MS5607_PROM_READ_C1);
     calib.C2 = read16(MS5607_PROM_READ_C2);
     calib.C3 = read16(MS5607_PROM_READ_C3);
@@ -249,12 +268,16 @@ uint8_t Melon_MS5607::read8(uint8_t reg){
 uint16_t Melon_MS5607::read16(uint8_t reg){
     uint16_t value;
 
+    Serial.print("Reading 16 bits from reg "); Serial.println(reg, HEX);
+
     Wire.beginTransmission(_i2caddr);
     Wire.write(reg);
     Wire.endTransmission();
 
     Wire.requestFrom(_i2caddr, (uint8_t)2);
+    
     value = (Wire.read() << 8) | Wire.read();       // Big-Endian
+    Serial.print("Value: "); Serial.println(value, BIN);
 
     return value;
 }
