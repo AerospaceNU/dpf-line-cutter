@@ -19,46 +19,6 @@
 
 */
 
-//#include <Wire.h>
-//
-//#define PROM0 0xA0
-//#define ADDRESS 0x76
-//#define RESET 0x1E
-//
-//void setup() {
-//  Wire.begin();
-//  Serial.begin(115200);
-//
-//  // Reset the barometer
-//  Wire.beginTransmission(ADDRESS);
-//  Wire.write(RESET);
-//  Wire.endTransmission();
-//
-//  // Do we need this delay?
-//  delay(10);
-//
-//  // Next ask for the first 2 prom devices
-//  Wire.beginTransmission(ADDRESS);
-//  Wire.write(0xA2);
-//  Wire.endTransmission();
-//  Wire.requestFrom(ADDRESS, 2);
-//  uint8_t higher_8 = Wire.read();
-//  uint8_t lower_8 = Wire.read();
-//  uint16_t value = (higher_8 << 8) | lower_8; // Read the first 8 bits; shift them left 8; OR with the next 8 bits
-//  Serial.print("Higher 8: "); Serial.print(higher_8, BIN); Serial.print("Lower 8: "); Serial.print(lower_8, BIN); Serial.print("Full: "); Serial.println(value, BIN); 
-//
-//  Wire.beginTransmission(ADDRESS);
-//  Wire.write(0xA4);
-//  Wire.endTransmission();
-//  Wire.requestFrom(ADDRESS, 2);
-//  higher_8 = Wire.read();
-//  lower_8 = Wire.read();
-//  value = (higher_8 << 8) | lower_8; // Read the first 8 bits; shift them left 8; OR with the next 8 bits
-//  Serial.print("Higher 8: "); Serial.print(higher_8, BIN); Serial.print("Lower 8: "); Serial.print(lower_8, BIN); Serial.print("Full: "); Serial.println(value, BIN); 
-//}
-//
-//void loop() {}
-
 #include <Wire.h>
 //#include "BluetoothSerial.h"
 
@@ -75,6 +35,14 @@ MS5xxx baro(&Wire);
 #endif
 
 //BluetoothSerial SerialBT;
+
+#include <bluefruit.h>
+BLEUart bleuart;
+uint8_t readPacket (BLEUart *ble_uart, uint16_t timeout);
+float   parsefloat (uint8_t *buffer);
+void    printHex   (const uint8_t * data, const uint32_t numBytes);
+extern uint8_t packetbuffer[];
+
 
 #ifdef MELON
 int32_t maxPressure;
@@ -101,6 +69,49 @@ void setup() {
   baro.printCalibData();
 
 #endif
+
+  analogReadResolution(10);  // 10 bits
+
+  Bluefruit.begin();
+  Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
+  Bluefruit.setName("Bluefruit52");
+
+  // To be consistent OTA DFU should be added first if it exists
+//  bledfu.begin();
+
+  // Configure and start the BLE Uart service
+  bleuart.begin();
+
+  // Set up and start advertising
+  startAdv();
+}
+
+void startAdv(void)
+{
+  // Advertising packet
+  Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
+  Bluefruit.Advertising.addTxPower();
+  
+  // Include the BLE UART (AKA 'NUS') 128-bit UUID
+  Bluefruit.Advertising.addService(bleuart);
+
+  // Secondary Scan Response packet (optional)
+  // Since there is no room for 'Name' in Advertising packet
+  Bluefruit.ScanResponse.addName();
+
+  /* Start Advertising
+   * - Enable auto advertising if disconnected
+   * - Interval:  fast mode = 20 ms, slow mode = 152.5 ms
+   * - Timeout for fast mode is 30 seconds
+   * - Start(timeout) with timeout = 0 will advertise forever (until connected)
+   * 
+   * For recommended advertising interval
+   * https://developer.apple.com/library/content/qa/qa1931/_index.html   
+   */
+  Bluefruit.Advertising.restartOnDisconnect(true);
+  Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
+  Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
+  Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds  
 }
 
 void loop() {
@@ -119,6 +130,18 @@ void loop() {
 
   Serial.println(baro.GetTemp() / 100.0);
   Serial.println(baro.GetPres());
+  bleuart.print("temp "); bleuart.print(baro.GetTemp() / 100.0);
+
+
+  int vbatAnalog = 2 * analogRead(A0);
+  // analog reading is out of 1023, so divide and then multiply by 3.6 (reference voltage)
+  // to get current vbat  
+  double vbat =  3.6 * (vbatAnalog / 1023.0);
+  bleuart.print(" vbat "); bleuart.println(vbat);
+
+  Serial.println(vbatAnalog);
+  
+  
 #endif
   delay(1000);
 }

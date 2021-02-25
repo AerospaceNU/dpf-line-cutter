@@ -55,7 +55,7 @@ void MS5xxx::ReadProm() {
 
        _Wire->requestFrom(i2caddr, (uint8_t)2);
 
-       uint8_t c = _Wire->read();
+       unsigned int c = _Wire->read();
        C[i] = (c << 8);
        c = _Wire->read();
        C[i] += c;
@@ -169,6 +169,9 @@ void MS5xxx::Readout() {
   SENS=C[1]*pow(2,16)+dT*C[3]/pow(2,7);
   TEMP=(2000+(dT*C[6])/pow(2,23));
   P=(((D1*SENS)/pow(2,21)-OFF)/pow(2,15));
+
+
+Serial.print("Press before correct: "); Serial.println(P/1000.0);  
    
   // perform higher order corrections
   double T2=0., OFF2=0., SENS2=0.;
@@ -183,14 +186,15 @@ void MS5xxx::Readout() {
   }
 
   
-        Serial.print("MS5XXX::: Temp "); Serial.print(TEMP); Serial.print("T2 "); Serial.print(T2); 
+// Serial.print("MS5XXX::: Temp "); Serial.print(TEMP); Serial.print(" T2 "); Serial.print(T2); 
 
     
   TEMP-=T2;
-          Serial.print("Temp after correct"); Serial.println(TEMP);
+//     Serial.print(" Temp after correct"); Serial.println(TEMP);
   OFF-=OFF2;
   SENS-=SENS2;
   P=(((D1*SENS)/pow(2,21)-OFF)/pow(2,15));  
+  Serial.print("Press after correct: "); Serial.println(P/1000.0);  
 }
 
 double MS5xxx::GetTemp() {

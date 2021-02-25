@@ -45,7 +45,7 @@
 class MS5xxx
 {
   public:
-  uint16_t C[8];
+  unsigned int C[8];
   double P;
   double TEMP;
   char i2caddr;
