@@ -20,13 +20,13 @@ const int NICHROME_PIN1 = A1;
 const int NICHROME_PIN2 = A2;
 
 // requirements for state transitions
-const double LIMIT_VELOCITY = -0.4;  // m/s
+const double LIMIT_VELOCITY = -3;  // m/s
 const double ALTITUDE1 = 7.0;  // disreefing altitudes, in meters
 const double ALTITUDE2 = 3.5;
 
 // PWM settings
-const double PWM_VOLTAGE1 = 0.0;  // voltage applied to nichrome for line cuts
-const double PWM_VOLTAGE2 = 0.0;
+const double PWM_VOLTAGE1 = 0.5;  // voltage applied to nichrome for line cuts
+const double PWM_VOLTAGE2 = 0.5;
 const int PWM_DURATION = 2000;  // length of pwm in milliseconds
 
 // altitude calculation
@@ -34,7 +34,7 @@ double seaLevel;
 
 // barometer and moving averages
 MS5xxx baro(&Wire);
-int ARRAY_SIZE = 40;
+int ARRAY_SIZE = 40; // 2 seconds
 MovingAvg altitudeReadings(ARRAY_SIZE);  // store recent altitude readings
 MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // store differences between recent avgs calculated using ^
 
