@@ -13076,8 +13076,6 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="R13" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="330"/>
 <part name="GND12" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="J1" library="Line Cutter COTS" deviceset="10118192-0001LF" device=""/>
-<part name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="NF"/>
-<part name="R2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="NF"/>
 <part name="GND1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="U1" library="Line Cutter COTS" deviceset="MS560702BA03-50" device=""/>
 <part name="U$2" library="microbuilder" deviceset="3.3V" device=""/>
@@ -13234,16 +13232,8 @@ the NRF has a 3k</text>
 <attribute name="NAME" x="22.86618125" y="43.701" size="1.780159375" layer="95" rot="MR0"/>
 <attribute name="VALUE" x="22.868209375" y="20.2995" size="1.78086875" layer="96" rot="MR0"/>
 </instance>
-<instance part="C2" gate="G$1" x="30.48" y="17.78" smashed="yes" rot="R270" grouprefs="CONN_USB">
-<attribute name="NAME" x="26.924" y="15.621" size="1.778" layer="95"/>
-<attribute name="VALUE" x="26.924" y="20.701" size="1.778" layer="96"/>
-</instance>
-<instance part="R2" gate="G$1" x="27.94" y="10.16" smashed="yes" grouprefs="CONN_USB">
-<attribute name="NAME" x="26.67" y="11.6586" size="1.778" layer="95"/>
-<attribute name="VALUE" x="24.13" y="6.858" size="1.778" layer="96"/>
-</instance>
-<instance part="GND1" gate="1" x="33.02" y="5.08" smashed="yes" grouprefs="CONN_USB">
-<attribute name="VALUE" x="30.48" y="2.54" size="1.778" layer="96"/>
+<instance part="GND1" gate="1" x="33.02" y="20.32" smashed="yes" grouprefs="CONN_USB">
+<attribute name="VALUE" x="30.48" y="17.78" size="1.778" layer="96"/>
 </instance>
 <instance part="U1" gate="G$1" x="147.32" y="33.02" smashed="yes" grouprefs="BAROMETER">
 <attribute name="NAME" x="137.1506" y="41.40978125" size="1.77965" layer="95"/>
@@ -13556,16 +13546,16 @@ the NRF has a 3k</text>
 <attribute name="VALUE" x="292.1" y="155.194" size="1.778" layer="96" align="bottom-center"/>
 </instance>
 <instance part="R7" gate="G$1" x="121.92" y="147.32" smashed="yes" rot="R270" grouprefs="LEDS">
-<attribute name="NAME" x="123.4186" y="148.59" size="1.778" layer="95" rot="R270"/>
+<attribute name="NAME" x="115.7986" y="146.05" size="1.778" layer="95" rot="R270"/>
 <attribute name="VALUE" x="118.618" y="151.13" size="1.778" layer="96" rot="R270"/>
 </instance>
 <instance part="R23" gate="G$1" x="124.46" y="147.32" smashed="yes" rot="R270" grouprefs="LEDS">
-<attribute name="NAME" x="125.9586" y="148.59" size="1.778" layer="95" rot="R270"/>
-<attribute name="VALUE" x="121.158" y="151.13" size="1.778" layer="96" rot="R270"/>
+<attribute name="NAME" x="128.4986" y="153.67" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="118.618" y="146.05" size="1.778" layer="96" rot="R270"/>
 </instance>
 <instance part="R24" gate="G$1" x="127" y="147.32" smashed="yes" rot="R270" grouprefs="LEDS">
 <attribute name="NAME" x="128.4986" y="148.59" size="1.778" layer="95" rot="R270"/>
-<attribute name="VALUE" x="123.698" y="151.13" size="1.778" layer="96" rot="R270"/>
+<attribute name="VALUE" x="116.078" y="151.13" size="1.778" layer="96" rot="R270"/>
 </instance>
 </instances>
 <busses>
@@ -13597,19 +13587,6 @@ the NRF has a 3k</text>
 <pinref part="GND12" gate="1" pin="GND"/>
 <wire x1="208.28" y1="20.32" x2="208.28" y2="15.24" width="0.1524" layer="91" grouprefs="FETS"/>
 <pinref part="Q1" gate="G$1" pin="S"/>
-</segment>
-<segment>
-<wire x1="33.02" y1="7.62" x2="33.02" y2="10.16" width="0.1524" layer="91" grouprefs="CONN_USB"/>
-<wire x1="33.02" y1="10.16" x2="33.02" y2="17.78" width="0.1524" layer="91" grouprefs="CONN_USB"/>
-<wire x1="33.02" y1="17.78" x2="33.02" y2="15.24" width="0.1524" layer="91" grouprefs="CONN_USB"/>
-<junction x="33.02" y="17.78" grouprefs="CONN_USB"/>
-<junction x="33.02" y="10.16" grouprefs="CONN_USB"/>
-<pinref part="C2" gate="G$1" pin="1"/>
-<pinref part="R2" gate="G$1" pin="2"/>
-<pinref part="GND1" gate="1" pin="GND"/>
-<wire x1="33.02" y1="17.78" x2="33.02" y2="30.48" width="0.1524" layer="91" grouprefs="CONN_USB"/>
-<pinref part="J1" gate="G$1" pin="GND"/>
-<wire x1="33.02" y1="30.48" x2="25.4" y2="30.48" width="0.1524" layer="91" grouprefs="CONN_USB"/>
 </segment>
 <segment>
 <pinref part="U$4" gate="G$1" pin="GND"/>
@@ -13807,6 +13784,16 @@ the NRF has a 3k</text>
 <wire x1="200.66" y1="137.16" x2="200.66" y2="139.7" width="0.1524" layer="91" grouprefs="3V3"/>
 <pinref part="U$1" gate="G$1" pin="GND"/>
 <pinref part="R22" gate="G$1" pin="1"/>
+</segment>
+<segment>
+<pinref part="J1" gate="G$1" pin="GND"/>
+<wire x1="33.02" y1="25.4" x2="33.02" y2="30.48" width="0.1524" layer="91" grouprefs="CONN_USB"/>
+<wire x1="33.02" y1="30.48" x2="25.4" y2="30.48" width="0.1524" layer="91" grouprefs="CONN_USB"/>
+<pinref part="J1" gate="G$1" pin="SHIELD"/>
+<wire x1="25.4" y1="25.4" x2="33.02" y2="25.4" width="0.1524" layer="91"/>
+<pinref part="GND1" gate="1" pin="GND"/>
+<wire x1="33.02" y1="25.4" x2="33.02" y2="22.86" width="0.1524" layer="91"/>
+<junction x="33.02" y="25.4"/>
 </segment>
 </net>
 <net name="VUSB" class="0">
@@ -14123,17 +14110,6 @@ the NRF has a 3k</text>
 <pinref part="Q1" gate="G$1" pin="G"/>
 </segment>
 </net>
-<net name="N$2" class="0">
-<segment>
-<wire x1="22.86" y1="10.16" x2="22.86" y2="17.78" width="0.1524" layer="91" grouprefs="CONN_USB"/>
-<wire x1="22.86" y1="17.78" x2="25.4" y2="17.78" width="0.1524" layer="91" grouprefs="CONN_USB"/>
-<wire x1="25.4" y1="25.4" x2="25.4" y2="17.78" width="0.1524" layer="91" grouprefs="CONN_USB"/>
-<junction x="25.4" y="17.78" grouprefs="CONN_USB"/>
-<pinref part="J1" gate="G$1" pin="SHIELD"/>
-<pinref part="C2" gate="G$1" pin="2"/>
-<pinref part="R2" gate="G$1" pin="1"/>
-</segment>
-</net>
 <net name="SCK" class="0">
 <segment>
 <pinref part="U3" gate="G$1" pin="SCK"/>
@@ -14434,6 +14410,11 @@ the NRF has a 3k</text>
 <pinref part="U4" gate="G$1" pin="VIOUT"/>
 <wire x1="248.92" y1="78.74" x2="271.78" y2="78.74" width="0.1524" layer="91" grouprefs="BATTERY"/>
 <label x="254" y="78.74" size="1.778" layer="95" grouprefs="BATTERY"/>
+</segment>
+<segment>
+<pinref part="U2" gate="G$1" pin="P0.05(AIN3)"/>
+<wire x1="76.2" y1="182.88" x2="83.82" y2="182.88" width="0.1524" layer="91"/>
+<label x="78.74" y="182.88" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="VBAT_IN_RAW" class="0">
