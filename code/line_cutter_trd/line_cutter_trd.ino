@@ -67,17 +67,29 @@ void    printHex   (const uint8_t * data, const uint32_t numBytes);
 // Packet buffer
 extern uint8_t packetbuffer[];
 
+// Manually interact with HardwarePWM because Adafruit bade
+// We can only add ONE pin per HardwarePWM; adding more makes them randomly flash it seems
+HardwarePWM& hpwm1 = HwPWM0;
+HardwarePWM& hpwm2 = HwPWM1;
+
 
 /*****************************
  *        SETUP/LOOP         *
  ****************************/
  
 void setup() {
-  // Turn off nichrome pins right away
-  pinMode(NICHROME_PIN1, OUTPUT);
-  nrfAnalogWrite(NICHROME_PIN1, 0);
-  pinMode(NICHROME_PIN2, OUTPUT);
-  nrfAnalogWrite(NICHROME_PIN2, 0);
+//  // Turn off nichrome pins right away
+//  pinMode(NICHROME_PIN1, OUTPUT); pinMode(NICHROME_PIN2, OUTPUT); 
+//  digitalWrite(NICHROME_PIN1, LOW);
+//  digitalWrite(NICHROME_PIN2, LOW);
+
+  // We actually can manually add the pins to our HardwarePWMs and set them
+  hpwm1.setResolution(10);
+  hpwm1.addPin(NICHROME_PIN1);
+  hpwm1.writePin(NICHROME_PIN1, 0);
+  hpwm2.setResolution(10);
+  hpwm2.addPin(NICHROME_PIN2);
+  hpwm2.writePin(NICHROME_PIN2, 0);
   
   Serial.begin(115200);
 
@@ -110,6 +122,10 @@ void setup() {
     Serial.println("Could not start file system...");
   }
 
+  // STUPID HACKY CODE REMOVE ME
+  while(!Serial.available()) {}
+  pwmExecute(NICHROME_PIN1, PWM_VOLTAGE1);
+  pwmExecute(NICHROME_PIN2, PWM_VOLTAGE2);
   
   // set up bluetooth
   Bluefruit.begin();
@@ -285,9 +301,9 @@ double pressureToAltitude(int32_t pressure) {
 void pwmExecute(int pin, double targetVoltage) {
   Serial.print("Starting PWM on pin ");
   Serial.println(pin);
-  nrfAnalogWrite(pin, pwmLevel(targetVoltage));
+  stupidAnalogWrite(pin, pwmLevel(targetVoltage));
   delay(PWM_DURATION);
-  nrfAnalogWrite(pin, 0);
+  stupidAnalogWrite(pin, 0);
   Serial.println("Done.");
   return;
 }
@@ -370,61 +386,9 @@ void printData() {
   return;
 }
 
-/**
- * Generate PWM without pre-configured. this function will
- * configure pin to available HardwarePWM and start it if not started
- * 
- * This version of the method seems to not try to burn lines when initilizing analog pins, which is always a good thing :)
- *
- * @param pin
- * @param value
- */
-void nrfAnalogWrite( uint32_t pin, uint32_t value )
-{
-  // first, handle the case where the pin is already in use by nrfAnalogWrite()
-  for(int i=0; i<HWPWM_MODULE_NUM; i++)
-  {
-    if (HwPWMx[i]->isOwner(0x676f6c41))
-    {
-      int const ch = HwPWMx[i]->pin2channel(pin);
-      if (ch >= 0)
-      {
-        HwPWMx[i]->writeChannel(ch, value);
-        return;
-      }
-    }
-  }
-
-  // Next, handle the case where can add the pin to a PWM instance already owned by nrfAnalogWrite()
-  for(int i=0; i<HWPWM_MODULE_NUM; i++)
-  {
-    if ( HwPWMx[i]->isOwner(0x676f6c41) && HwPWMx[i]->addPin(pin) )
-    {
-      // successfully added the pin, so write the value also
-      HwPWMx[i]->writePin(pin, value);
-      LOG_LV2("Analog", "Added pin %" PRIu32 " to already-owned PWM %d", pin, i);
-      return;
-    }
-  }
-
-  // Attempt to acquire a new HwPWMx instance ... but only where
-  // 1. it's not one already used for analog, and
-  // 2. it currently has no pins in use.
-  for(int i=0; i<HWPWM_MODULE_NUM; i++)
-  {
-    if (HwPWMx[i]->takeOwnership(0x676f6c41))
-    {
-      // apply the cached analog resolution to newly owned instances
-      HwPWMx[i]->setResolution(10);
-      HwPWMx[i]->stop();
-      HwPWMx[i]->addPin(pin);
-      HwPWMx[i]->writePin(pin, value);
-      HwPWMx[i]->begin();
-      LOG_LV2("Analog", "took ownership of, and added pin %" PRIu32 " to, PWM %d", pin, i);
-      return;
-    }
-  }
-
-  LOG_LV1("Analog", "Unable to find a free PWM peripheral");
-  return;
+// Manually interact with our two HardwarePWM objects
+void stupidAnalogWrite(int pin, int level) {
+  Serial.print("Pin "); Serial.print(pin); Serial.print(" level "); Serial.println(level);
+  if(pin == NICHROME_PIN1) hpwm1.writePin(NICHROME_PIN1, level);
+  if(pin == NICHROME_PIN2) hpwm2.writePin(NICHROME_PIN2, level);
 }
