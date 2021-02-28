@@ -75,9 +75,9 @@ extern uint8_t packetbuffer[];
 void setup() {
   // Turn off nichrome pins right away
   pinMode(NICHROME_PIN1, OUTPUT);
-  analogWrite(NICHROME_PIN1, 0);
+  nrfAnalogWrite(NICHROME_PIN1, 0);
   pinMode(NICHROME_PIN2, OUTPUT);
-  analogWrite(NICHROME_PIN2, 0);
+  nrfAnalogWrite(NICHROME_PIN2, 0);
   
   Serial.begin(115200);
 
@@ -88,6 +88,7 @@ void setup() {
   }
 //  Serial.println("Barometer connected with calibration:");
   baro.ReadProm();
+  baro.Readout(); // Get initial pressure so that baro.GetPres() works
 //  baro.printCalibData();
 
   // initialize moving averages
@@ -103,7 +104,12 @@ void setup() {
   analogReadResolution(10);  // 10 bits
 
   // Initialize Internal File System
-  InternalFS.begin();
+  if(InternalFS.begin()) {
+    Serial.println("FS init-ed!");
+  } else {
+    Serial.println("Could not start file system...");
+  }
+
   
   // set up bluetooth
   Bluefruit.begin();
@@ -133,6 +139,10 @@ void loop() {
     bleuart.write(String(pressure).c_str());
     bleuart.write(',');
     bleuart.write(String(altitude).c_str());
+    bleuart.print(',');
+    bleuart.print(baro.GetTemp() / 100.0);
+    bleuart.print(',');
+    bleuart.print(2 * analogRead(VOLTAGE_DIVIDER) * 3.6 / 1023.0);
     bleuart.write('\n');
     lastBLE = millis();
   }
@@ -275,15 +285,15 @@ double pressureToAltitude(int32_t pressure) {
 void pwmExecute(int pin, double targetVoltage) {
   Serial.print("Starting PWM on pin ");
   Serial.println(pin);
-  analogWrite(pin, pwmLevel(targetVoltage));
+  nrfAnalogWrite(pin, pwmLevel(targetVoltage));
   delay(PWM_DURATION);
-  analogWrite(pin, 0);
+  nrfAnalogWrite(pin, 0);
   Serial.println("Done.");
   return;
 }
 
 
-// calculate number to be used for analogWrite() of nichrome pin
+// calculate number to be used for nrfAnalogWrite() of nichrome pin
 // double -> int
 int pwmLevel(double targetVoltage) {
   // get reading from voltage divider and multiply by 2
@@ -291,7 +301,7 @@ int pwmLevel(double targetVoltage) {
   // analog reading is out of 1023, so divide and then multiply by 3.6 (reference voltage)
   // to get current vbat  
   double vbat =  3.6 * (vbatAnalog / 1023.0);
-  // find proportion of vbat needed to apply target voltage, then make it out of 255 for analogWrite
+  // find proportion of vbat needed to apply target voltage, then make it out of 255 for nrfAnalogWrite
   return (targetVoltage / vbat) * 255;
 }
 
@@ -357,5 +367,64 @@ void printData() {
   Serial.print("Averaged change in altitude [m/s]: ");
   Serial.println(currentDeltaAvg);
   Serial.println("------------");
+  return;
+}
+
+/**
+ * Generate PWM without pre-configured. this function will
+ * configure pin to available HardwarePWM and start it if not started
+ * 
+ * This version of the method seems to not try to burn lines when initilizing analog pins, which is always a good thing :)
+ *
+ * @param pin
+ * @param value
+ */
+void nrfAnalogWrite( uint32_t pin, uint32_t value )
+{
+  // first, handle the case where the pin is already in use by nrfAnalogWrite()
+  for(int i=0; i<HWPWM_MODULE_NUM; i++)
+  {
+    if (HwPWMx[i]->isOwner(0x676f6c41))
+    {
+      int const ch = HwPWMx[i]->pin2channel(pin);
+      if (ch >= 0)
+      {
+        HwPWMx[i]->writeChannel(ch, value);
+        return;
+      }
+    }
+  }
+
+  // Next, handle the case where can add the pin to a PWM instance already owned by nrfAnalogWrite()
+  for(int i=0; i<HWPWM_MODULE_NUM; i++)
+  {
+    if ( HwPWMx[i]->isOwner(0x676f6c41) && HwPWMx[i]->addPin(pin) )
+    {
+      // successfully added the pin, so write the value also
+      HwPWMx[i]->writePin(pin, value);
+      LOG_LV2("Analog", "Added pin %" PRIu32 " to already-owned PWM %d", pin, i);
+      return;
+    }
+  }
+
+  // Attempt to acquire a new HwPWMx instance ... but only where
+  // 1. it's not one already used for analog, and
+  // 2. it currently has no pins in use.
+  for(int i=0; i<HWPWM_MODULE_NUM; i++)
+  {
+    if (HwPWMx[i]->takeOwnership(0x676f6c41))
+    {
+      // apply the cached analog resolution to newly owned instances
+      HwPWMx[i]->setResolution(10);
+      HwPWMx[i]->stop();
+      HwPWMx[i]->addPin(pin);
+      HwPWMx[i]->writePin(pin, value);
+      HwPWMx[i]->begin();
+      LOG_LV2("Analog", "took ownership of, and added pin %" PRIu32 " to, PWM %d", pin, i);
+      return;
+    }
+  }
+
+  LOG_LV1("Analog", "Unable to find a free PWM peripheral");
   return;
 }
