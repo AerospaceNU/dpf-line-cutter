@@ -68,8 +68,8 @@ class MS5xxx
 
     unsigned int Read_C(unsigned int index);
     
-    double GetTemp();
-    double GetPres();
+    double GetTemp();// Get the temp in deg C. Must call ReadProm once to calibrate, and Readout at least once, before calling this.
+    double GetPres(); // Get the pressure in pA. Must call ReadProm once to calibrate, and Readout at least once, before calling this.
 };
 
 #endif
