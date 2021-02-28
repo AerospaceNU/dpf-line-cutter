@@ -1,7 +1,9 @@
+#include <Adafruit_LittleFS.h>
 #include <bluefruit.h>
+#include <InternalFileSystem.h>
 #include <Wire.h>
-#include "Melon_MS5607.h"
 #include "MovingAvg.h"
+#include "MS5xxx.h"
 
 
 // states
@@ -19,25 +21,31 @@ const int NICHROME_PIN2 = A2;
 
 // requirements for state transitions
 const double LIMIT_VELOCITY = -0.4;  // m/s
-const double ALTITUDE1 = 7;  // disreefing altitudes, in meters
+const double ALTITUDE1 = 7.0;  // disreefing altitudes, in meters
 const double ALTITUDE2 = 3.5;
 
 // PWM settings
-const double PWM_VOLTAGE1 = 1.4;  // voltage applied to nichrome for line cuts
-const double PWM_VOLTAGE2 = 1.4;
-const int PWM_DURATION = 1000;  // length of pwm in milliseconds
+const double PWM_VOLTAGE1 = 0.0;  // voltage applied to nichrome for line cuts
+const double PWM_VOLTAGE2 = 0.0;
+const int PWM_DURATION = 2000;  // length of pwm in milliseconds
 
 // altitude calculation
 double seaLevel;
 
 // barometer and moving averages
-Melon_MS5607 baro{};
-int ARRAY_SIZE = 12;
+MS5xxx baro(&Wire);
+int ARRAY_SIZE = 40;
 MovingAvg altitudeReadings(ARRAY_SIZE);  // store recent altitude readings
 MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // store differences between recent avgs calculated using ^
 
+// for logging data in internal filesystem
+using namespace Adafruit_LittleFS_Namespace;
+const char* FILENAME = "stateChangeLog.txt";
+File file(InternalFS);
+
 // variables used in loop()
-const int DELAY = 250;  // milliseconds
+const int DELAY = 50;  // milliseconds
+unsigned long loopStart = 0;
 unsigned long loopEnd = 0;
 unsigned long lastBLE = 0;
 int32_t pressure;  // pascals
@@ -74,29 +82,33 @@ void setup() {
   Serial.begin(115200);
 
   // connect to barometer
-  while ( !baro.begin(0x76) ) {
+  while ( baro.connect() > 0 ) {
     Serial.println("Error connecting to barometer...");
     delay(500);
   }
-  Serial.println("Barometer connected with calibration:");
-  baro.printCalibData();
+//  Serial.println("Barometer connected with calibration:");
+  baro.ReadProm();
+//  baro.printCalibData();
 
   // initialize moving averages
   seaLevel = calibrateSeaLevel(50);  // average 20 readings to get "sea level" pressure
   Serial.print("Sea level pressure [Pa]: ");
   Serial.println(seaLevel);
   altitudeReadings.begin();
-  altitudeReadings.reading(pressureToAltitude(baro.getPressure()));
+  altitudeReadings.reading(pressureToAltitude(baro.GetPres()));
   altitudeAvgDeltas.begin();
   altitudeAvgDeltas.reading(0.0);
 
   // analog pins should give a number from 0 to 1023 when read
   analogReadResolution(10);  // 10 bits
 
+  // Initialize Internal File System
+  InternalFS.begin();
+  
   // set up bluetooth
   Bluefruit.begin();
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName("Bluefruit52");
+  Bluefruit.setName("Condor");
   // To be consistent OTA DFU should be added first if it exists
   bledfu.begin();
   // Configure and start the BLE Uart service
@@ -109,9 +121,11 @@ void setup() {
 void loop() {
   while(millis() < loopEnd + DELAY) {}
   
+  loopStart = millis();  // used for timestamps in data log
+ 
   // read pressure, calculate altitude
-  baro.getPressureBlocking();
-  pressure = baro.getPressure();
+  baro.Readout();
+  pressure = baro.GetPres();
   altitude = pressureToAltitude(pressure);
 
   // send readings over bleuart
@@ -134,36 +148,57 @@ void loop() {
   switch(state) {
     case WAITING:
       if (currentAltitudeAvg > ALTITUDE1 && currentDeltaAvg < LIMIT_VELOCITY) {
-        Serial.print("Parachute deployed at time ");
-        Serial.println(millis());
-        printData();
         state = DEPLOYED;
+        
+        InternalFS.remove(FILENAME);
+        writeStateChangeData(file, loopStart, state, 
+                             pressure, altitude, currentAltitudeAvg, 
+                             delta, currentDeltaAvg);
+        
+        Serial.print("Parachute deployed at time ");
+        Serial.println(loopStart);
+        printData();
       }
       break;
     case DEPLOYED:
       if (currentAltitudeAvg < ALTITUDE1) {
         pwmExecute(NICHROME_PIN1, PWM_VOLTAGE1);
-        Serial.print("First line cut at time ");
-        Serial.println(millis());
-        printData();
         state = PARTIAL_DISREEF;
+
+        writeStateChangeData(file, loopStart, state, 
+                             pressure, altitude, currentAltitudeAvg, 
+                             delta, currentDeltaAvg);
+        
+        Serial.print("First line cut at time ");
+        Serial.println(loopStart);
+        printData();
       }
       break;
     case PARTIAL_DISREEF:
       if (currentAltitudeAvg < ALTITUDE2) {
         pwmExecute(NICHROME_PIN2, PWM_VOLTAGE2);
-        Serial.print("Second line cut at time ");
-        Serial.println(millis());
-        printData();
         state = FULL_DISREEF;
+
+        writeStateChangeData(file, loopStart, state, 
+                             pressure, altitude, currentAltitudeAvg, 
+                             delta, currentDeltaAvg);
+        
+        Serial.print("Second line cut at time ");
+        Serial.println(loopStart);
+        printData();
       }
       break;
     case FULL_DISREEF:
       if (abs(currentDeltaAvg) < 0.05) {
+        state = LANDED;
+
+        writeStateChangeData(file, loopStart, state, 
+                             pressure, altitude, currentAltitudeAvg, 
+                             delta, currentDeltaAvg);
+        
         Serial.print("Landed at time ");
-        Serial.println(millis());
-        printData();
-        state = LANDED;        
+        Serial.println(loopStart);
+        printData();  
       }
       break;
     case LANDED:
@@ -218,8 +253,8 @@ double calibrateSeaLevel(int samples) {
   digitalWrite(LED_BUILTIN, HIGH);
   int sum = 0;
   for (int i=0; i<samples; i++) {
-    baro.getPressureBlocking();
-    sum += baro.getPressure();
+    baro.Readout();
+    sum += baro.GetPres();
     delay(100);
   }
   Serial.println("Done.");
@@ -260,6 +295,53 @@ int pwmLevel(double targetVoltage) {
   return (targetVoltage / vbat) * 255;
 }
 
+void writeStateChangeData(File f, unsigned long timestamp, int state, 
+                          int32_t pressure, double altitude, double avgAltitude, 
+                          double delta, double avgDelta) {
+  char* filename = "stateChangeLog.txt";
+  if ( f.open(filename, FILE_O_WRITE) ) {
+    Serial.println("Writing data to file.");
+    uint8_t buff[4] = {};
+
+    uint32_t iAltitude = double_to_uint32_bits(altitude);
+    uint32_t iAvgAltitude = double_to_uint32_bits(avgAltitude);
+    uint32_t iDelta = double_to_uint32_bits(delta);
+    uint32_t iAvgDelta = double_to_uint32_bits(avgDelta);
+    
+    f.write("t", 1);
+    f.write( u32_to_u8(timestamp, buff), 4 );
+    f.write("s", 1);
+    f.write( u32_to_u8(state, buff), 4 );
+    f.write("p", 1);
+    f.write( u32_to_u8(pressure, buff), 4 );
+    f.write("a", 1);
+    f.write( u32_to_u8(iAltitude, buff), 4 );
+    f.write("b", 1);
+    f.write( u32_to_u8(iAvgAltitude, buff), 4 );
+    f.write("d", 1);
+    f.write( u32_to_u8(iDelta, buff), 4 );
+    f.write("e", 1);
+    f.write( u32_to_u8(iAvgDelta, buff), 4 );
+    f.close();
+  } else {
+    Serial.print("Failed to write ");
+    Serial.println(filename);
+  }
+}
+
+uint32_t double_to_uint32_bits(double d) {
+  float f = (float)d;
+  uint32_t result = * ( uint32_t * ) &f;
+  return result;
+}
+
+uint8_t* u32_to_u8(const uint32_t u32, uint8_t buff[4]) {
+  buff[0] = (u32 & 0xff000000) >> 24;
+  buff[1] = (u32 & 0x00ff0000) >> 16;
+  buff[2] = (u32 & 0x0000ff00) >> 8;
+  buff[3] = u32 & 0x000000ff;
+  return buff;
+}
 
 void printData() {
   Serial.print("State: ");

@@ -19,11 +19,13 @@ void    printHex   (const uint8_t * data, const uint32_t numBytes);
 extern uint8_t packetbuffer[];
 
 // pins for nichrome
+const int VOLTAGE_DIVIDER = A0;
 const int PIN1 = A1;
 const int PIN2 = A2;
 
 // INCREASE THESE IF IT DOESN'T CUT FOR SOME REASON
-const int POWER_LEVEL = 90;  // PWM uses this to turn on nichrome (should be between 0 and 255)
+const int POWER_LEVEL1 = 1.0;  // PWM uses this voltages to turn on nichrome
+const int POWER_LEVEL2 = 1.0;
 const int PWM_DURATION = 2000;  // length of pwm in milliseconds
 
 void setup(void)
@@ -39,7 +41,7 @@ void setup(void)
   
   Bluefruit.begin();
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName("Bluefruit52");
+  Bluefruit.setName("Condor");
 
   // To be consistent OTA DFU should be added first if it exists
   bledfu.begin();
@@ -136,10 +138,10 @@ void parse_command() {
     }
 
     // start cutting procedure
-    status1 = cut_line( command.substring(4,8).toInt(), PIN1 );
+    status1 = cut_line( command.substring(4,8).toInt(), PIN1, POWER_LEVEL1 );
     // if first cut was canceled, don't execute second cut
     if (status1) {
-      status2 = cut_line( command.substring(9,13).toInt(), PIN2 );
+      status2 = cut_line( command.substring(9,13).toInt(), PIN2, POWER_LEVEL2 );
     }
 
     // confirm status of each line
@@ -157,7 +159,7 @@ void parse_command() {
 }
 
 
-boolean cut_line(int seconds, int pin) {
+boolean cut_line(int seconds, int pin, double targetVoltage) {
   boolean canceled = false;
 
   bleuart.write("Cutting line in ");
@@ -187,19 +189,31 @@ boolean cut_line(int seconds, int pin) {
     bleuart.write("Cut canceled.\n");
     return false;  // tell parse_command that line was not cut
   } else {
-    execute_pwm(pin);
+    execute_pwm(pin, targetVoltage);
     return true;  // tell parse_command that line was cut
   }
 }
 
 
-void execute_pwm(int pin) {
+void execute_pwm(int pin, double targetVoltage) {
   bleuart.write("Starting PWM on pin "); bleuart.write('0' + pin); bleuart.write('\n');
   Serial.println("Starting PWM ...");
-  analogWrite(pin, POWER_LEVEL);
+  analogWrite(pin, pwmLevel(targetVoltage));
   delay(PWM_DURATION);
   analogWrite(pin, 0);
   bleuart.write("Done.\n");
   Serial.println("Done.");
   return;
+}
+
+// calculate number to be used for analogWrite() of nichrome pin
+// double -> int
+int pwmLevel(double targetVoltage) {
+  // get reading from voltage divider and multiply by 2
+  int vbatAnalog = 2 * analogRead(VOLTAGE_DIVIDER);
+  // analog reading is out of 1023, so divide and then multiply by 3.6 (reference voltage)
+  // to get current vbat  
+  double vbat =  3.6 * (vbatAnalog / 1023.0);
+  // find proportion of vbat needed to apply target voltage, then make it out of 255 for analogWrite
+  return (targetVoltage / vbat) * 255;
 }
