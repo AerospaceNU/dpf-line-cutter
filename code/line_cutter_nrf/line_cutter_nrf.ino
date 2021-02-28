@@ -24,8 +24,8 @@ const int PIN1 = A1;
 const int PIN2 = A2;
 
 // INCREASE THESE IF IT DOESN'T CUT FOR SOME REASON
-const int POWER_LEVEL1 = 1.0;  // PWM uses this voltages to turn on nichrome
-const int POWER_LEVEL2 = 1.0;
+const double POWER_LEVEL1 = 0.3;  // PWM uses this voltages to turn on nichrome
+const double POWER_LEVEL2 = POWER_LEVEL1;
 const int PWM_DURATION = 2000;  // length of pwm in milliseconds
 
 void setup(void)
