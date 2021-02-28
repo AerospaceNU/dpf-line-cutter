@@ -121,11 +121,6 @@ void setup() {
   } else {
     Serial.println("Could not start file system...");
   }
-
-  // STUPID HACKY CODE REMOVE ME
-  while(!Serial.available()) {}
-  pwmExecute(NICHROME_PIN1, PWM_VOLTAGE1);
-  pwmExecute(NICHROME_PIN2, PWM_VOLTAGE2);
   
   // set up bluetooth
   Bluefruit.begin();
