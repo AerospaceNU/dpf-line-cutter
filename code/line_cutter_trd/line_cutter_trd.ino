@@ -20,14 +20,16 @@ const int NICHROME_PIN1 = A1;
 const int NICHROME_PIN2 = A2;
 
 // requirements for state transitions
-const double LIMIT_VELOCITY = -3;  // m/s
-const double ALTITUDE1 = 7.0;  // disreefing altitudes, in meters
-const double ALTITUDE2 = 3.5;
+const double LIMIT_VELOCITY = -3.0;  // m/s
+const double ALTITUDE1 = 400;  // disreefing altitudes, in meters
+const double ALTITUDE2 = 100;
 
 // PWM settings
-const double PWM_VOLTAGE1 = 0.5;  // voltage applied to nichrome for line cuts
-const double PWM_VOLTAGE2 = 0.5;
-const int PWM_DURATION = 2000;  // length of pwm in milliseconds
+// On the black backed PCB, 1.8, 1.8 work well (for now at least lmao)
+// White pcb takes 1.6, 1.6 ok (although uh only channel 1 actually works...)
+const double PWM_VOLTAGE1 = 1.6;  // voltage applied to nichrome for line cuts
+const double PWM_VOLTAGE2 = 1.6;
+const int PWM_DURATION = 2500;  // length of pwm in milliseconds
 
 // altitude calculation
 double seaLevel;
@@ -103,6 +105,16 @@ void setup() {
   baro.Readout(); // Get initial pressure so that baro.GetPres() works
 //  baro.printCalibData();
 
+  /*
+  // TODO remove code!! this is bad!! 
+  while(!Serial.available()) {}
+  Serial.println("Cutting in 3 seconds...");
+  delay(3000);
+  pwmExecute(NICHROME_PIN1, PWM_VOLTAGE1);
+  pwmExecute(NICHROME_PIN2, PWM_VOLTAGE2);
+  Serial.println("Cut!!!");
+  */
+
   // initialize moving averages
   seaLevel = calibrateSeaLevel(50);  // average 20 readings to get "sea level" pressure
   Serial.print("Sea level pressure [Pa]: ");
@@ -125,7 +137,7 @@ void setup() {
   // set up bluetooth
   Bluefruit.begin();
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName("Condor");
+  Bluefruit.setName("Single Trouble");
   // To be consistent OTA DFU should be added first if it exists
   bledfu.begin();
   // Configure and start the BLE Uart service
