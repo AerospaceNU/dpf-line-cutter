@@ -10647,10 +10647,8 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <smd name="9" x="1.195" y="0.5" dx="0.84" dy="0.27" layer="1" roundness="25"/>
 <smd name="10" x="1.195" y="1" dx="0.84" dy="0.27" layer="1" roundness="25"/>
 <smd name="11" x="0" y="0" dx="1.2" dy="2" layer="1" cream="no"/>
-<pad name="12" x="0.35" y="0" drill="0.2" diameter="0.3" stop="no"/>
-<pad name="13" x="-0.35" y="0" drill="0.2" diameter="0.3" stop="no"/>
-<pad name="14" x="0" y="0.75" drill="0.2" diameter="0.3" stop="no"/>
-<pad name="15" x="0" y="-0.75" drill="0.2" diameter="0.3" stop="no"/>
+<pad name="14" x="0" y="0.75" drill="0.3048" diameter="0.508" stop="no"/>
+<pad name="15" x="0" y="-0.75" drill="0.3048" diameter="0.508" stop="no"/>
 </package>
 <package name="NR3015T1R5N">
 <wire x1="-1.7" y1="-1.6" x2="-1.7" y2="1.5" width="0.127" layer="21"/>
@@ -13082,18 +13080,16 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value=".1u"/>
 <part name="U$4" library="microbuilder" deviceset="GND" device=""/>
 <part name="U3" library="Line Cutter COTS" deviceset="S25FL128SDPMFIG13" device="S03016" package3d_urn="urn:adsk.eagle:package:24783623/1"/>
-<part name="C6" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value=".1u"/>
 <part name="C7" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value=".1u"/>
 <part name="U$5" library="microbuilder" deviceset="GND" device=""/>
 <part name="U$6" library="microbuilder" deviceset="GND" device=""/>
 <part name="U$7" library="microbuilder" deviceset="3.3V" device=""/>
-<part name="U$8" library="microbuilder" deviceset="3.3V" device=""/>
 <part name="R6" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="330"/>
 <part name="GND2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R8" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="330"/>
-<part name="PWR" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="CHIP-LED0805" package3d_urn="urn:adsk.eagle:package:15818/2" value="RED"/>
-<part name="R11" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="330"/>
 <part name="USER" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="CHIP-LED0805" package3d_urn="urn:adsk.eagle:package:15818/2" value="RED"/>
+<part name="R11" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="330"/>
+<part name="PWR" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="CHIP-LED0805" package3d_urn="urn:adsk.eagle:package:15818/2" value="RED"/>
 <part name="GND9" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="SUPPLY7" library="SparkFun-PowerSymbols" deviceset="3.3V" device=""/>
 <part name="R12" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="4.7k"/>
@@ -13221,9 +13217,9 @@ the NRF has a 3k</text>
 <instance part="GND17" gate="1" x="15.24" y="76.2" smashed="yes" grouprefs="BATT_CHG">
 <attribute name="VALUE" x="12.7" y="73.66" size="1.778" layer="96"/>
 </instance>
-<instance part="R13" gate="G$1" x="195.58" y="22.86" smashed="yes" rot="R180" grouprefs="FETS">
-<attribute name="NAME" x="196.85" y="21.3614" size="1.778" layer="95" rot="R180"/>
-<attribute name="VALUE" x="199.39" y="26.162" size="1.778" layer="96" rot="R180"/>
+<instance part="R13" gate="G$1" x="193.04" y="22.86" smashed="yes" rot="R180" grouprefs="FETS">
+<attribute name="NAME" x="194.31" y="21.3614" size="1.778" layer="95" rot="R180"/>
+<attribute name="VALUE" x="196.85" y="26.162" size="1.778" layer="96" rot="R180"/>
 </instance>
 <instance part="GND12" gate="1" x="208.28" y="12.7" smashed="yes" grouprefs="FETS">
 <attribute name="VALUE" x="205.74" y="10.16" size="1.778" layer="96"/>
@@ -13250,10 +13246,6 @@ the NRF has a 3k</text>
 <attribute name="VALUE" x="168.656" y="10.16" size="1.27" layer="96"/>
 </instance>
 <instance part="U3" gate="G$1" x="106.68" y="83.82" smashed="yes" grouprefs="FLASH"/>
-<instance part="C6" gate="G$1" x="162.56" y="81.28" smashed="yes" rot="R180" grouprefs="FLASH">
-<attribute name="NAME" x="166.116" y="80.899" size="1.778" layer="95" rot="R180"/>
-<attribute name="VALUE" x="166.116" y="85.979" size="1.778" layer="96" rot="R180"/>
-</instance>
 <instance part="C7" gate="G$1" x="93.98" y="81.28" smashed="yes" rot="R180" grouprefs="FLASH">
 <attribute name="NAME" x="97.536" y="80.899" size="1.778" layer="95" rot="R180"/>
 <attribute name="VALUE" x="97.536" y="85.979" size="1.778" layer="96" rot="R180"/>
@@ -13264,15 +13256,12 @@ the NRF has a 3k</text>
 <instance part="U$6" gate="G$1" x="162.56" y="71.12" smashed="yes" grouprefs="FLASH">
 <attribute name="VALUE" x="161.036" y="68.58" size="1.27" layer="96"/>
 </instance>
-<instance part="U$7" gate="G$1" x="93.98" y="93.98" smashed="yes" grouprefs="FLASH">
-<attribute name="VALUE" x="92.456" y="94.996" size="1.27" layer="96"/>
+<instance part="U$7" gate="G$1" x="93.98" y="101.6" smashed="yes" grouprefs="FLASH">
+<attribute name="VALUE" x="92.456" y="102.616" size="1.27" layer="96"/>
 </instance>
-<instance part="U$8" gate="G$1" x="162.56" y="93.98" smashed="yes" grouprefs="FLASH">
-<attribute name="VALUE" x="161.036" y="94.996" size="1.27" layer="96"/>
-</instance>
-<instance part="R6" gate="G$1" x="251.46" y="22.86" smashed="yes" rot="R180" grouprefs="FETS">
-<attribute name="NAME" x="252.73" y="21.3614" size="1.778" layer="95" rot="R180"/>
-<attribute name="VALUE" x="255.27" y="26.162" size="1.778" layer="96" rot="R180"/>
+<instance part="R6" gate="G$1" x="248.92" y="22.86" smashed="yes" rot="R180" grouprefs="FETS">
+<attribute name="NAME" x="250.19" y="21.3614" size="1.778" layer="95" rot="R180"/>
+<attribute name="VALUE" x="252.73" y="26.162" size="1.778" layer="96" rot="R180"/>
 </instance>
 <instance part="GND2" gate="1" x="264.16" y="12.7" smashed="yes" grouprefs="FETS">
 <attribute name="VALUE" x="261.62" y="10.16" size="1.778" layer="96"/>
@@ -13281,7 +13270,7 @@ the NRF has a 3k</text>
 <attribute name="NAME" x="141.1986" y="138.43" size="1.778" layer="95" rot="R270"/>
 <attribute name="VALUE" x="136.398" y="140.97" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="PWR" gate="G$1" x="139.7" y="127" smashed="yes" grouprefs="LEDS">
+<instance part="USER" gate="G$1" x="139.7" y="127" smashed="yes" grouprefs="LEDS">
 <attribute name="NAME" x="143.256" y="122.428" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="145.415" y="122.428" size="1.778" layer="96" rot="R90"/>
 </instance>
@@ -13289,7 +13278,7 @@ the NRF has a 3k</text>
 <attribute name="NAME" x="156.4386" y="138.43" size="1.778" layer="95" rot="R270"/>
 <attribute name="VALUE" x="151.638" y="140.97" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="USER" gate="G$1" x="154.94" y="127" smashed="yes" grouprefs="LEDS">
+<instance part="PWR" gate="G$1" x="154.94" y="127" smashed="yes" grouprefs="LEDS">
 <attribute name="NAME" x="158.496" y="122.428" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="160.655" y="122.428" size="1.778" layer="96" rot="R90"/>
 </instance>
@@ -13310,19 +13299,19 @@ the NRF has a 3k</text>
 <instance part="SUPPLY9" gate="G$1" x="172.72" y="134.62" smashed="yes" grouprefs="I2C-PULLUP">
 <attribute name="VALUE" x="172.72" y="137.414" size="1.778" layer="96" align="bottom-center"/>
 </instance>
-<instance part="R1" gate="G$1" x="193.04" y="15.24" smashed="yes" grouprefs="FETS">
-<attribute name="NAME" x="191.77" y="16.7386" size="1.778" layer="95"/>
-<attribute name="VALUE" x="189.23" y="11.938" size="1.778" layer="96"/>
+<instance part="R1" gate="G$1" x="200.66" y="15.24" smashed="yes" rot="R270" grouprefs="FETS">
+<attribute name="NAME" x="202.1586" y="16.51" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="197.358" y="19.05" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="GND8" gate="1" x="200.66" y="12.7" smashed="yes" grouprefs="FETS">
-<attribute name="VALUE" x="198.12" y="10.16" size="1.778" layer="96"/>
+<instance part="GND8" gate="1" x="200.66" y="5.08" smashed="yes" grouprefs="FETS">
+<attribute name="VALUE" x="198.12" y="2.54" size="1.778" layer="96"/>
 </instance>
-<instance part="R5" gate="G$1" x="248.92" y="15.24" smashed="yes" grouprefs="FETS">
-<attribute name="NAME" x="247.65" y="16.7386" size="1.778" layer="95"/>
-<attribute name="VALUE" x="245.11" y="11.938" size="1.778" layer="96"/>
+<instance part="R5" gate="G$1" x="256.54" y="15.24" smashed="yes" rot="R270" grouprefs="FETS">
+<attribute name="NAME" x="258.0386" y="16.51" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="253.238" y="19.05" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="GND13" gate="1" x="256.54" y="12.7" smashed="yes" grouprefs="FETS">
-<attribute name="VALUE" x="254" y="10.16" size="1.778" layer="96"/>
+<instance part="GND13" gate="1" x="256.54" y="5.08" smashed="yes" grouprefs="FETS">
+<attribute name="VALUE" x="254" y="2.54" size="1.778" layer="96"/>
 </instance>
 <instance part="U2" gate="G$1" x="53.34" y="160.02" smashed="yes" grouprefs="NRF52840">
 <attribute name="NAME" x="33.02" y="198.374" size="1.778" layer="95" font="vector"/>
@@ -13605,13 +13594,10 @@ the NRF has a 3k</text>
 <pinref part="U$5" gate="G$1" pin="GND"/>
 </segment>
 <segment>
-<wire x1="162.56" y1="78.74" x2="162.56" y2="76.2" width="0.1524" layer="91" grouprefs="FLASH"/>
-<pinref part="C6" gate="G$1" pin="1"/>
 <pinref part="U$6" gate="G$1" pin="GND"/>
 <pinref part="U3" gate="G$1" pin="VSS"/>
 <wire x1="162.56" y1="76.2" x2="162.56" y2="73.66" width="0.1524" layer="91" grouprefs="FLASH"/>
 <wire x1="149.86" y1="76.2" x2="162.56" y2="76.2" width="0.1524" layer="91" grouprefs="FLASH"/>
-<junction x="162.56" y="76.2" grouprefs="FLASH"/>
 </segment>
 <segment>
 <pinref part="GND2" gate="1" pin="GND"/>
@@ -13619,9 +13605,9 @@ the NRF has a 3k</text>
 <pinref part="Q2" gate="G$1" pin="S"/>
 </segment>
 <segment>
-<pinref part="PWR" gate="G$1" pin="C"/>
-<wire x1="139.7" y1="121.92" x2="139.7" y2="119.38" width="0.1524" layer="91" grouprefs="LEDS"/>
 <pinref part="USER" gate="G$1" pin="C"/>
+<wire x1="139.7" y1="121.92" x2="139.7" y2="119.38" width="0.1524" layer="91" grouprefs="LEDS"/>
+<pinref part="PWR" gate="G$1" pin="C"/>
 <wire x1="139.7" y1="119.38" x2="147.32" y2="119.38" width="0.1524" layer="91" grouprefs="LEDS"/>
 <wire x1="147.32" y1="119.38" x2="154.94" y2="119.38" width="0.1524" layer="91" grouprefs="LEDS"/>
 <wire x1="154.94" y1="119.38" x2="154.94" y2="121.92" width="0.1524" layer="91" grouprefs="LEDS"/>
@@ -13632,11 +13618,11 @@ the NRF has a 3k</text>
 <segment>
 <pinref part="GND8" gate="1" pin="GND"/>
 <pinref part="R1" gate="G$1" pin="2"/>
-<wire x1="200.66" y1="15.24" x2="198.12" y2="15.24" width="0.1524" layer="91" grouprefs="FETS"/>
+<wire x1="200.66" y1="7.62" x2="200.66" y2="10.16" width="0.1524" layer="91" grouprefs="FETS"/>
 </segment>
 <segment>
 <pinref part="GND13" gate="1" pin="GND"/>
-<wire x1="256.54" y1="15.24" x2="254" y2="15.24" width="0.1524" layer="91" grouprefs="FETS"/>
+<wire x1="256.54" y1="7.62" x2="256.54" y2="10.16" width="0.1524" layer="91" grouprefs="FETS"/>
 <pinref part="R5" gate="G$1" pin="2"/>
 </segment>
 <segment>
@@ -14001,16 +13987,14 @@ the NRF has a 3k</text>
 <pinref part="U3" gate="G$1" pin="VCC"/>
 <wire x1="93.98" y1="88.9" x2="109.22" y2="88.9" width="0.1524" layer="91" grouprefs="FLASH"/>
 <pinref part="U$7" gate="G$1" pin="3.3V"/>
-<wire x1="93.98" y1="88.9" x2="93.98" y2="91.44" width="0.1524" layer="91" grouprefs="FLASH"/>
+<wire x1="93.98" y1="88.9" x2="93.98" y2="99.06" width="0.1524" layer="91" grouprefs="FLASH"/>
 <junction x="93.98" y="88.9" grouprefs="FLASH"/>
-</segment>
-<segment>
-<pinref part="C6" gate="G$1" pin="2"/>
-<pinref part="U$8" gate="G$1" pin="3.3V"/>
 <wire x1="162.56" y1="91.44" x2="162.56" y2="86.36" width="0.1524" layer="91" grouprefs="FLASH"/>
 <pinref part="U3" gate="G$1" pin="VIO/RFU"/>
 <wire x1="149.86" y1="86.36" x2="162.56" y2="86.36" width="0.1524" layer="91" grouprefs="FLASH"/>
-<junction x="162.56" y="86.36" grouprefs="FLASH"/>
+<wire x1="93.98" y1="99.06" x2="162.56" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="162.56" y1="99.06" x2="162.56" y2="91.44" width="0.1524" layer="91"/>
+<junction x="93.98" y="99.06"/>
 </segment>
 <segment>
 <pinref part="R11" gate="G$1" pin="1"/>
@@ -14106,8 +14090,12 @@ the NRF has a 3k</text>
 <net name="N$10" class="0">
 <segment>
 <pinref part="R13" gate="G$1" pin="1"/>
-<wire x1="200.66" y1="22.86" x2="203.2" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
+<wire x1="198.12" y1="22.86" x2="200.66" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
 <pinref part="Q1" gate="G$1" pin="G"/>
+<pinref part="R1" gate="G$1" pin="1"/>
+<wire x1="200.66" y1="22.86" x2="203.2" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
+<wire x1="200.66" y1="22.86" x2="200.66" y2="20.32" width="0.1524" layer="91"/>
+<junction x="200.66" y="22.86"/>
 </segment>
 </net>
 <net name="SCK" class="0">
@@ -14161,12 +14149,8 @@ the NRF has a 3k</text>
 <net name="CUT1" class="0">
 <segment>
 <pinref part="R13" gate="G$1" pin="2"/>
-<wire x1="190.5" y1="22.86" x2="187.96" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
 <label x="180.34" y="22.86" size="1.778" layer="95" grouprefs="FETS"/>
 <wire x1="187.96" y1="22.86" x2="182.88" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
-<wire x1="187.96" y1="22.86" x2="187.96" y2="15.24" width="0.1524" layer="91" grouprefs="FETS"/>
-<junction x="187.96" y="22.86" grouprefs="FETS"/>
-<pinref part="R1" gate="G$1" pin="1"/>
 </segment>
 <segment>
 <pinref part="U2" gate="G$1" pin="P0.06"/>
@@ -14177,8 +14161,12 @@ the NRF has a 3k</text>
 <net name="N$3" class="0">
 <segment>
 <pinref part="R6" gate="G$1" pin="1"/>
-<wire x1="256.54" y1="22.86" x2="259.08" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
+<wire x1="254" y1="22.86" x2="256.54" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
 <pinref part="Q2" gate="G$1" pin="G"/>
+<pinref part="R5" gate="G$1" pin="1"/>
+<wire x1="256.54" y1="22.86" x2="259.08" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
+<wire x1="256.54" y1="20.32" x2="256.54" y2="22.86" width="0.1524" layer="91"/>
+<junction x="256.54" y="22.86"/>
 </segment>
 </net>
 <net name="N$6" class="0">
@@ -14194,12 +14182,8 @@ the NRF has a 3k</text>
 <net name="CUT2" class="0">
 <segment>
 <pinref part="R6" gate="G$1" pin="2"/>
-<wire x1="246.38" y1="22.86" x2="243.84" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
 <label x="241.3" y="22.86" size="1.778" layer="95" grouprefs="FETS"/>
-<wire x1="243.84" y1="22.86" x2="243.84" y2="15.24" width="0.1524" layer="91" grouprefs="FETS"/>
-<pinref part="R5" gate="G$1" pin="1"/>
 <wire x1="243.84" y1="22.86" x2="241.3" y2="22.86" width="0.1524" layer="91" grouprefs="FETS"/>
-<junction x="243.84" y="22.86" grouprefs="FETS"/>
 </segment>
 <segment>
 <pinref part="U2" gate="G$1" pin="P0.08"/>
@@ -14211,14 +14195,14 @@ the NRF has a 3k</text>
 <segment>
 <wire x1="139.7" y1="132.08" x2="139.7" y2="129.54" width="0.1524" layer="91" grouprefs="LEDS"/>
 <pinref part="R8" gate="G$1" pin="2"/>
-<pinref part="PWR" gate="G$1" pin="A"/>
+<pinref part="USER" gate="G$1" pin="A"/>
 </segment>
 </net>
 <net name="N$9" class="0">
 <segment>
 <wire x1="154.94" y1="132.08" x2="154.94" y2="129.54" width="0.1524" layer="91" grouprefs="LEDS"/>
 <pinref part="R11" gate="G$1" pin="2"/>
-<pinref part="USER" gate="G$1" pin="A"/>
+<pinref part="PWR" gate="G$1" pin="A"/>
 </segment>
 </net>
 <net name="N$11" class="0">
@@ -14353,12 +14337,6 @@ the NRF has a 3k</text>
 <pinref part="LIPO" gate="G$1" pin="2"/>
 <pinref part="Q4" gate="G$1" pin="D"/>
 <wire x1="175.26" y1="73.66" x2="182.88" y2="73.66" width="0.1524" layer="91" grouprefs="BATTERY"/>
-</segment>
-</net>
-<net name="N$13" class="0">
-<segment>
-<pinref part="JP2" gate="A" pin="7"/>
-<wire x1="127" y1="228.6" x2="116.84" y2="228.6" width="0.1524" layer="91" grouprefs="HEADER"/>
 </segment>
 </net>
 <net name="LED_G" class="0">
