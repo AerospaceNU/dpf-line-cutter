@@ -86,10 +86,10 @@ void setup() {
 //  digitalWrite(NICHROME_PIN2, LOW);
 
   // We actually can manually add the pins to our HardwarePWMs and set them
-  hpwm1.setResolution(10);
+  hpwm1.setResolution(8);
   hpwm1.addPin(NICHROME_PIN1);
   hpwm1.writePin(NICHROME_PIN1, 0);
-  hpwm2.setResolution(10);
+  hpwm2.setResolution(8);
   hpwm2.addPin(NICHROME_PIN2);
   hpwm2.writePin(NICHROME_PIN2, 0);
   
