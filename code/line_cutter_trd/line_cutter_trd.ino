@@ -6,46 +6,44 @@
 #include "MS5xxx.h"
 
 
-// states
+// States
 int state = 0;
-const int WAITING = 0;  // anytime before parachute deployment
+const int WAITING = 0;  // Anytime before parachute deployment
 const int DEPLOYED = 1;
-const int PARTIAL_DISREEF = 2;  // after first line is cut
-const int FULL_DISREEF = 3;  // after second line is cut
+const int PARTIAL_DISREEF = 2;  // After first line is cut
+const int FULL_DISREEF = 3;  // After second line is cut
 const int LANDED = 4;
 
-// pins
+// Pins
 const int VOLTAGE_DIVIDER = A0;
 const int NICHROME_PIN1 = A1;
 const int NICHROME_PIN2 = A2;
 
-// requirements for state transitions
-const double LIMIT_VELOCITY = -3.0;  // m/s
-const double ALTITUDE1 = 400;  // disreefing altitudes, in meters
+// Requirements for state transitions
+const double LIMIT_VELOCITY = -3.0;  // meters/second
+const double ALTITUDE1 = 400;  // Disreefing altitudes, in meters (higher one first!!)
 const double ALTITUDE2 = 100;
 
 // PWM settings
-// On the black backed PCB, 1.8, 1.8 work well (for now at least lmao)
-// White pcb takes 1.6, 1.6 ok (although uh only channel 1 actually works...)
-const double PWM_VOLTAGE1 = 1.6;  // voltage applied to nichrome for line cuts
-const double PWM_VOLTAGE2 = 1.6;
-const int PWM_DURATION = 2500;  // length of pwm in milliseconds
+const double PWM_VOLTAGE1 = 0.8;  // Voltage applied to nichrome for line cuts
+const double PWM_VOLTAGE2 = 0.8;
+const int PWM_DURATION = 2500;  // Length of PWM, in milliseconds
 
-// altitude calculation
+// Altitude calculation
 double seaLevel;
 
-// barometer and moving averages
+// Barometer and moving averages
 MS5xxx baro(&Wire);
 int ARRAY_SIZE = 40; // 2 seconds
-MovingAvg altitudeReadings(ARRAY_SIZE);  // store recent altitude readings
-MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // store differences between recent avgs calculated using ^
+MovingAvg altitudeReadings(ARRAY_SIZE);  // Store recent altitude readings
+MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // Store differences between avgs calculated using ^
 
-// for logging data in internal filesystem
+// For logging data in internal filesystem
 using namespace Adafruit_LittleFS_Namespace;
 const char* FILENAME = "stateChangeLog.txt";
 File file(InternalFS);
 
-// variables used in loop()
+// Variables used in loop()
 const int DELAY = 50;  // milliseconds
 unsigned long loopStart = 0;
 unsigned long loopEnd = 0;
@@ -69,8 +67,8 @@ void    printHex   (const uint8_t * data, const uint32_t numBytes);
 // Packet buffer
 extern uint8_t packetbuffer[];
 
-// Manually interact with HardwarePWM because Adafruit bade
-// We can only add ONE pin per HardwarePWM; adding more makes them randomly flash it seems
+// Manually interact with HardwarePWM
+// We can only add ONE pin per HardwarePWM; adding more makes them randomly flash
 HardwarePWM& hpwm1 = HwPWM0;
 HardwarePWM& hpwm2 = HwPWM1;
 
@@ -80,52 +78,35 @@ HardwarePWM& hpwm2 = HwPWM1;
  ****************************/
  
 void setup() {
-//  // Turn off nichrome pins right away
-//  pinMode(NICHROME_PIN1, OUTPUT); pinMode(NICHROME_PIN2, OUTPUT); 
-//  digitalWrite(NICHROME_PIN1, LOW);
-//  digitalWrite(NICHROME_PIN2, LOW);
-
-  // We actually can manually add the pins to our HardwarePWMs and set them
-  hpwm1.setResolution(8);
+  // Manually add nichrome pins to HardwarePWMs and set them
+  hpwm1.setResolution(8);  // Write values in range [0, 255]
   hpwm1.addPin(NICHROME_PIN1);
   hpwm1.writePin(NICHROME_PIN1, 0);
-  hpwm2.setResolution(8);
+  hpwm2.setResolution(8);  // Write values in range [0, 255]
   hpwm2.addPin(NICHROME_PIN2);
   hpwm2.writePin(NICHROME_PIN2, 0);
+  analogReadResolution(10);  // Read values in range [0, 1023]
   
   Serial.begin(115200);
 
-  // connect to barometer
+  // Connect to barometer
   while ( baro.connect() > 0 ) {
     Serial.println("Error connecting to barometer...");
     delay(500);
   }
-//  Serial.println("Barometer connected with calibration:");
+
+  // Calibrate barometer and get initial reading
   baro.ReadProm();
-  baro.Readout(); // Get initial pressure so that baro.GetPres() works
-//  baro.printCalibData();
+  baro.Readout();
 
-  /*
-  // TODO remove code!! this is bad!! 
-  while(!Serial.available()) {}
-  Serial.println("Cutting in 3 seconds...");
-  delay(3000);
-  pwmExecute(NICHROME_PIN1, PWM_VOLTAGE1);
-  pwmExecute(NICHROME_PIN2, PWM_VOLTAGE2);
-  Serial.println("Cut!!!");
-  */
-
-  // initialize moving averages
-  seaLevel = calibrateSeaLevel(50);  // average 20 readings to get "sea level" pressure
+  // Initialize moving averages
+  seaLevel = calibrateSeaLevel(50);
   Serial.print("Sea level pressure [Pa]: ");
   Serial.println(seaLevel);
   altitudeReadings.begin();
   altitudeReadings.reading(pressureToAltitude(baro.GetPres()));
   altitudeAvgDeltas.begin();
   altitudeAvgDeltas.reading(0.0);
-
-  // analog pins should give a number from 0 to 1023 when read
-  analogReadResolution(10);  // 10 bits
 
   // Initialize Internal File System
   if(InternalFS.begin()) {
@@ -134,7 +115,7 @@ void setup() {
     Serial.println("Could not start file system...");
   }
   
-  // set up bluetooth
+  // Set up bluetooth
   Bluefruit.begin();
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
   Bluefruit.setName("Single Trouble");
@@ -150,14 +131,14 @@ void setup() {
 void loop() {
   while(millis() < loopEnd + DELAY) {}
   
-  loopStart = millis();  // used for timestamps in data log
+  loopStart = millis();  // Used for timestamps in data log
  
-  // read pressure, calculate altitude
+  // Read pressure, calculate altitude
   baro.Readout();
   pressure = baro.GetPres();
   altitude = pressureToAltitude(pressure);
 
-  // send readings over bleuart
+  // Send readings over BLEUart
   if (millis() - lastBLE > 1000) {
     bleuart.write(String(pressure).c_str());
     bleuart.write(',');
@@ -170,11 +151,11 @@ void loop() {
     lastBLE = millis();
   }
 
-  // update moving averages
+  // Update moving averages
   previousAltitudeAvg = altitudeReadings.getAvg();
-  currentAltitudeAvg = altitudeReadings.reading(altitude);  // update and return new avg
+  currentAltitudeAvg = altitudeReadings.reading(altitude);  // Update and return new avg
   delta = (currentAltitudeAvg - previousAltitudeAvg) * (1000.0 / DELAY);
-  currentDeltaAvg = altitudeAvgDeltas.reading(delta);  // update and return new avg
+  currentDeltaAvg = altitudeAvgDeltas.reading(delta);  // Update and return new avg
 
   // printData();
   
@@ -235,8 +216,7 @@ void loop() {
       }
       break;
     case LANDED:
-      // this doesn't do anything right now.
-      // if anyone has thoughts on whether the line cutter should do anything after landing, lmk.
+      // Nothing happens after landing
       break;
     default:
       Serial.println("Something has gone horribly wrong if none of the states match.");
@@ -279,8 +259,7 @@ void startAdv(void)
 }
 
 
-// average several readings to get "sea level" pressure
-// int -> double
+// Average several readings to get "sea level" pressure
 double calibrateSeaLevel(int samples) {
   Serial.println("Reading current pressure...");
   digitalWrite(LED_BUILTIN, HIGH);
@@ -296,15 +275,13 @@ double calibrateSeaLevel(int samples) {
 }
 
 
-// convert pressure (in pascals) to altitude (in meters) using sea-level pressure
-// int32_t -> double
+// Convert pressure (in pascals) to altitude (in meters) using sea level pressure
 double pressureToAltitude(int32_t pressure) {
   return 44330.76 * (1.0 - pow(pressure / seaLevel, 1.0 / 5.25588));
 }
 
 
 // PWM pin to heat nichrome and cut parachute line
-// int, double -> _
 void pwmExecute(int pin, double targetVoltage) {
   Serial.print("Starting PWM on pin ");
   Serial.println(pin);
@@ -315,18 +292,22 @@ void pwmExecute(int pin, double targetVoltage) {
   return;
 }
 
+// Manually interact with HardwarePWM objects
+void stupidAnalogWrite(int pin, int level) {
+  Serial.print("Pin "); Serial.print(pin); Serial.print(" level "); Serial.println(level);
+  if(pin == NICHROME_PIN1) hpwm1.writePin(NICHROME_PIN1, level);
+  if(pin == NICHROME_PIN2) hpwm2.writePin(NICHROME_PIN2, level);
+}
 
-// calculate number to be used for nrfAnalogWrite() of nichrome pin
-// double -> int
+// Calculate number to be used for PWM of nichrome pin
 int pwmLevel(double targetVoltage) {
-  // get reading from voltage divider and multiply by 2
   int vbatAnalog = 2 * analogRead(VOLTAGE_DIVIDER);
-  // analog reading is out of 1023, so divide and then multiply by 3.6 (reference voltage)
-  // to get current vbat  
+  // Analog reading is out of 1023, so divide and then multiply by 3.6 (reference voltage)
   double vbat =  3.6 * (vbatAnalog / 1023.0);
-  // find proportion of vbat needed to apply target voltage, then make it out of 255 for nrfAnalogWrite
+  // Find proportion of vbat needed to apply target voltage, then make out of 255 for analog write
   return (targetVoltage / vbat) * 255;
 }
+
 
 void writeStateChangeData(File f, unsigned long timestamp, int state, 
                           int32_t pressure, double altitude, double avgAltitude, 
@@ -376,6 +357,7 @@ uint8_t* u32_to_u8(const uint32_t u32, uint8_t buff[4]) {
   return buff;
 }
 
+
 void printData() {
   Serial.print("State: ");
   Serial.println(state);
@@ -391,11 +373,4 @@ void printData() {
   Serial.println(currentDeltaAvg);
   Serial.println("------------");
   return;
-}
-
-// Manually interact with our two HardwarePWM objects
-void stupidAnalogWrite(int pin, int level) {
-  Serial.print("Pin "); Serial.print(pin); Serial.print(" level "); Serial.println(level);
-  if(pin == NICHROME_PIN1) hpwm1.writePin(NICHROME_PIN1, level);
-  if(pin == NICHROME_PIN2) hpwm2.writePin(NICHROME_PIN2, level);
 }
