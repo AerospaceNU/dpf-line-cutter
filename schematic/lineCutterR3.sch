@@ -12915,7 +12915,7 @@ Source: http://www.onsemi.com/pub/Collateral/MC33269-D.PDF</description>
 <part name="GND19" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND22" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="SUPPLY10" library="SparkFun-PowerSymbols" deviceset="3.3V" device=""/>
-<part name="U4" library="Line Cutter COTS" deviceset="ACS711KEXLT-31AB-T" device=""/>
+<part name="U4" library="Line Cutter COTS" deviceset="ACS711KEXLT-31AB-T" device="" value="ACS711KEXLT-15AB-T"/>
 <part name="D2" library="SparkFun-LED" deviceset="SUNLED" device="SMD1" value="XZM2CRKM2DGFBB45SCCB"/>
 <part name="GND7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="SUPPLY4" library="SparkFun-PowerSymbols" deviceset="3.3V" device=""/>
