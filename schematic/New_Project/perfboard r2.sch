@@ -5816,7 +5816,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="0.365" y1="2" x2="1.665" y2="0.9" width="0.2032" layer="21" curve="-72.598009"/>
 <wire x1="-0.238" y1="-2" x2="-1.538" y2="-0.9" width="0.2032" layer="21" curve="-72.598009"/>
 <pad name="1" x="-1.238" y="0" drill="0.8" diameter="1.6764"/>
-<pad name="2" x="1.365" y="0" drill="0.8" diameter="1.6764"/>
+<pad name="2" x="1.2888" y="0" drill="0.8" diameter="1.6764"/>
 <text x="0.762" y="2.159" size="0.6096" layer="25" font="vector" ratio="20" align="bottom-center">&gt;NAME</text>
 <text x="0.762" y="-2.159" size="0.6096" layer="27" font="vector" ratio="20" align="top-center">&gt;VALUE</text>
 </package>
