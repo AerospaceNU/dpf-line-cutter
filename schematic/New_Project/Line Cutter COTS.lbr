@@ -3050,6 +3050,21 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <circle x="0" y="0" radius="2.85" width="0.1524" layer="21"/>
 <pad name="B5,5" x="0" y="0" drill="5.5" diameter="9"/>
 </package>
+<package name="MS5607BREAKOUT">
+<pad name="3V3" x="-3.81" y="3.937" drill="0.6" shape="square"/>
+<pad name="PS" x="-3.81" y="1.397" drill="0.6" shape="square"/>
+<pad name="GND" x="-3.81" y="-1.143" drill="0.6" shape="square"/>
+<pad name="CSB1" x="-3.81" y="-3.683" drill="0.6" shape="square"/>
+<pad name="CSB2" x="3.81" y="-3.683" drill="0.6" shape="square"/>
+<pad name="SDO" x="3.81" y="-1.143" drill="0.6" shape="square"/>
+<pad name="SDA" x="3.81" y="1.397" drill="0.6" shape="square"/>
+<pad name="SCL" x="3.81" y="3.937" drill="0.6" shape="square"/>
+<text x="-3.648" y="6.526665625" size="1.27" layer="25">&gt;NAME</text>
+<wire x1="-6.0325" y1="6.477" x2="-6.0325" y2="-6.223" width="0.127" layer="21"/>
+<wire x1="-6.0325" y1="-6.223" x2="6.0325" y2="-6.223" width="0.127" layer="21"/>
+<wire x1="6.0325" y1="-6.223" x2="6.0325" y2="6.477" width="0.127" layer="21"/>
+<wire x1="6.0325" y1="6.477" x2="-6.0325" y2="6.477" width="0.127" layer="21"/>
+</package>
 </packages>
 <packages3d>
 <package3d name="SOIC127P1032X265-16N" urn="urn:adsk.eagle:package:24783623/1" type="model">
@@ -4419,6 +4434,19 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <text x="2.794" y="0.5842" size="1.778" layer="95">&gt;NAME</text>
 <text x="2.794" y="-2.4638" size="1.778" layer="96">&gt;VALUE</text>
 <pin name="MOUNT" x="-2.54" y="0" visible="off" length="short" direction="pas"/>
+</symbol>
+<symbol name="MS5607BREAKOUT">
+<pin name="CSB" x="-5.08" y="0" length="middle"/>
+<pin name="GND" x="-5.08" y="2.54" length="middle"/>
+<pin name="PS" x="-5.08" y="5.08" length="middle"/>
+<pin name="3V3" x="-5.08" y="7.62" length="middle"/>
+<pin name="SCK" x="20.32" y="7.62" length="middle" rot="R180"/>
+<pin name="SDA" x="20.32" y="5.08" length="middle" rot="R180"/>
+<pin name="SDO" x="20.32" y="2.54" length="middle" rot="R180"/>
+<wire x1="-2.54" y1="-2.54" x2="17.78" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="17.78" y1="-2.54" x2="17.78" y2="10.16" width="0.254" layer="94"/>
+<wire x1="17.78" y1="10.16" x2="-2.54" y2="10.16" width="0.254" layer="94"/>
+<wire x1="-2.54" y1="10.16" x2="-2.54" y2="-2.54" width="0.254" layer="94"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -6541,6 +6569,27 @@ Source: http://www.murata.com .. GRM43DR72E224KW01.pdf</description>
 <technology name="">
 <attribute name="POPULARITY" value="6" constant="no"/>
 </technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="MS5607_BREAKOUT">
+<gates>
+<gate name="G$1" symbol="MS5607BREAKOUT" x="-2.032" y="-3.81"/>
+</gates>
+<devices>
+<device name="" package="MS5607BREAKOUT">
+<connects>
+<connect gate="G$1" pin="3V3" pad="3V3"/>
+<connect gate="G$1" pin="CSB" pad="CSB1 CSB2"/>
+<connect gate="G$1" pin="GND" pad="GND"/>
+<connect gate="G$1" pin="PS" pad="PS"/>
+<connect gate="G$1" pin="SCK" pad="SCL"/>
+<connect gate="G$1" pin="SDA" pad="SDA"/>
+<connect gate="G$1" pin="SDO" pad="SDO"/>
+</connects>
+<technologies>
+<technology name=""/>
 </technologies>
 </device>
 </devices>
