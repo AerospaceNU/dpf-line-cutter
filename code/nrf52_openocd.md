@@ -1,6 +1,6 @@
 # Programming NRF52 chips with OpenOCD
 
-Taken from [here](https://iosoft.blog/2019/01/28/raspberry-pi-openocd/) -- great diagrams n such
+Diagrams taken from [here](https://iosoft.blog/2019/01/28/raspberry-pi-openocd/) -- the Medium article went poof but we have the [Internet Archive](https://web.archive.org/web/20191204234928/https://medium.com/@ly.lee/coding-nrf52-with-rust-and-apache-mynewt-on-visual-studio-code-9521bcba6004) for that.
 
 Wire the nRF52 to a Pi 2+ with the following:
 
