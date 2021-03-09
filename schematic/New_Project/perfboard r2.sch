@@ -5973,7 +5973,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="SUPPLY1" library="SparkFun-PowerSymbols" deviceset="3.3V" device=""/>
 <part name="GND5" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R6" library="SparkFun-Sensors" deviceset="PHOTOCELL" device="PTH"/>
-<part name="R7" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2" value="100k"/>
+<part name="R7" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/2" value="10k"/>
 <part name="GND6" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="SUPPLY2" library="SparkFun-PowerSymbols" deviceset="3.3V" device=""/>
 </parts>
@@ -6022,7 +6022,6 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </instance>
 <instance part="R3" gate="G$1" x="109.22" y="7.62" smashed="yes">
 <attribute name="NAME" x="107.95" y="9.1186" size="1.778" layer="95"/>
-<attribute name="VALUE" x="105.41" y="4.318" size="1.778" layer="96"/>
 </instance>
 <instance part="GND2" gate="1" x="116.84" y="5.08" smashed="yes">
 <attribute name="VALUE" x="114.3" y="2.54" size="1.778" layer="96"/>
@@ -6063,11 +6062,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <attribute name="NAME" x="8.89" y="70.0786" size="1.778" layer="95"/>
 <attribute name="VALUE" x="6.35" y="65.278" size="1.778" layer="96"/>
 </instance>
-<instance part="GND6" gate="1" x="35.56" y="66.04" smashed="yes">
-<attribute name="VALUE" x="33.02" y="63.5" size="1.778" layer="96"/>
+<instance part="GND6" gate="1" x="2.54" y="63.5" smashed="yes">
+<attribute name="VALUE" x="0" y="60.96" size="1.778" layer="96"/>
 </instance>
-<instance part="SUPPLY2" gate="G$1" x="-2.54" y="68.58" smashed="yes">
-<attribute name="VALUE" x="-2.54" y="68.834" size="1.778" layer="96" align="bottom-center"/>
+<instance part="SUPPLY2" gate="G$1" x="33.02" y="71.12" smashed="yes">
+<attribute name="VALUE" x="33.02" y="71.374" size="1.778" layer="96" align="bottom-center"/>
 </instance>
 </instances>
 <busses>
@@ -6111,9 +6110,10 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="144.78" y1="27.94" x2="149.86" y2="27.94" width="0.1524" layer="91"/>
 </segment>
 <segment>
+<pinref part="R7" gate="G$1" pin="1"/>
+<wire x1="5.08" y1="68.58" x2="2.54" y2="68.58" width="0.1524" layer="91"/>
 <pinref part="GND6" gate="1" pin="GND"/>
-<pinref part="R6" gate="G$1" pin="P$2"/>
-<wire x1="35.56" y1="68.58" x2="30.48" y2="68.58" width="0.1524" layer="91"/>
+<wire x1="2.54" y1="68.58" x2="2.54" y2="66.04" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$10" class="0">
@@ -6125,17 +6125,18 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="CUT1" class="0">
 <segment>
-<pinref part="R13" gate="G$1" pin="2"/>
-<wire x1="55.88" y1="15.24" x2="53.34" y2="15.24" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="15.24" x2="48.26" y2="15.24" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="15.24" x2="53.34" y2="7.62" width="0.1524" layer="91"/>
-<junction x="53.34" y="15.24"/>
-<pinref part="R1" gate="G$1" pin="1"/>
-</segment>
-<segment>
 <pinref part="MS1" gate="G$1" pin="GPIOA1"/>
 <wire x1="38.1" y1="17.78" x2="33.02" y2="17.78" width="0.1524" layer="91"/>
 <label x="33.02" y="17.78" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="R13" gate="G$1" pin="2"/>
+<wire x1="55.88" y1="15.24" x2="53.34" y2="15.24" width="0.1524" layer="91"/>
+<pinref part="R1" gate="G$1" pin="1"/>
+<wire x1="53.34" y1="15.24" x2="53.34" y2="7.62" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="15.24" x2="50.8" y2="15.24" width="0.1524" layer="91"/>
+<junction x="53.34" y="15.24"/>
+<label x="50.8" y="15.24" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$1" class="0">
@@ -6167,17 +6168,18 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="CUT2" class="0">
 <segment>
-<pinref part="R2" gate="G$1" pin="2"/>
-<wire x1="106.68" y1="15.24" x2="104.14" y2="15.24" width="0.1524" layer="91"/>
-<wire x1="104.14" y1="15.24" x2="99.06" y2="15.24" width="0.1524" layer="91"/>
-<wire x1="104.14" y1="15.24" x2="104.14" y2="7.62" width="0.1524" layer="91"/>
-<junction x="104.14" y="15.24"/>
-<pinref part="R3" gate="G$1" pin="1"/>
-</segment>
-<segment>
 <pinref part="MS1" gate="G$1" pin="GPIOA2"/>
 <wire x1="33.02" y1="20.32" x2="38.1" y2="20.32" width="0.1524" layer="91"/>
 <label x="33.02" y="20.32" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="R2" gate="G$1" pin="2"/>
+<wire x1="106.68" y1="15.24" x2="104.14" y2="15.24" width="0.1524" layer="91"/>
+<pinref part="R3" gate="G$1" pin="1"/>
+<wire x1="104.14" y1="15.24" x2="104.14" y2="7.62" width="0.1524" layer="91"/>
+<wire x1="104.14" y1="15.24" x2="101.6" y2="15.24" width="0.1524" layer="91"/>
+<junction x="104.14" y="15.24"/>
+<label x="101.6" y="15.24" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$3" class="0">
@@ -6208,9 +6210,10 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="149.86" y1="25.4" x2="152.4" y2="25.4" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="R7" gate="G$1" pin="1"/>
-<wire x1="5.08" y1="68.58" x2="-2.54" y2="68.58" width="0.1524" layer="91"/>
+<pinref part="R6" gate="G$1" pin="P$2"/>
+<wire x1="30.48" y1="68.58" x2="33.02" y2="68.58" width="0.1524" layer="91"/>
 <pinref part="SUPPLY2" gate="G$1" pin="3.3V"/>
+<wire x1="33.02" y1="68.58" x2="33.02" y2="71.12" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="BATT_SENSE" class="0">

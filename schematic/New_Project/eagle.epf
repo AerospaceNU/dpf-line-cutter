@@ -301,6 +301,7 @@ UsedLibrary="D:/Documents/EAGLE/libraries/SparkFun-Sensors.lbr"
 UsedLibrary="D:/Documents/EAGLE/libraries/SparkFun-Switches.lbr"
 UsedLibrary="D:/Documents/EAGLE/libraries/User-Submitted.lbr"
 UsedLibrary="D:/Documents/EAGLE/libraries/nxp_60.lbr"
+UsedLibrary="Line Cutter COTS.lbr"
 
 [Win_1]
 Type="Control Panel"
