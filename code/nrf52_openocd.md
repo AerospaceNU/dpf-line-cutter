@@ -72,6 +72,13 @@ program <full/path/to/bootloader.hex> verify
 reset
 ```
 
+To erase all:
+
+```
+nrf52.dap apreg 1 0x04 0x01
+nrf52.dap apreg 1 0x04 // This should be 0x01
+```
+
 Now the nRF52 can be connected over USB and programmed with the Arduino IDE.
 
 <!-- pi@raspberrypi3:~ $ sudo openocd -f interface/raspberrypi2-native.cfg -c "transport select swd" -f target/nrf52.cfg -d2 -c init -c "reset init" -c halt -c "nrf5 mass_erase" -c "program espruino.hex verify" -c reset -c exit -->
