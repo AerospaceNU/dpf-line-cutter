@@ -28,3 +28,8 @@ The following signals are connected to the following pins on the nRF module:
 
 - Resistance between 3v3 and:
   - SCL/SDA (4.7k pullup expected)
+
+# Places to watch out for
+
+- Accelerometer -- Can't see shorts
+- nRF -- can't see solder joints, and reflowing after oven will likely kill it
