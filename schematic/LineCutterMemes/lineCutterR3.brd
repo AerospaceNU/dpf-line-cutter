@@ -22,18 +22,18 @@
 <layer number="12" name="Route12" color="20" fill="1" visible="no" active="no"/>
 <layer number="13" name="Route13" color="21" fill="1" visible="no" active="no"/>
 <layer number="14" name="Route14" color="22" fill="1" visible="no" active="no"/>
-<layer number="15" name="Route15" color="23" fill="1" visible="yes" active="yes"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
+<layer number="15" name="Route15" color="23" fill="1" visible="no" active="yes"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="yes"/>
 <layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
 <layer number="20" name="Dimension" color="24" fill="1" visible="yes" active="yes"/>
-<layer number="21" name="tPlace" color="7" fill="1" visible="no" active="yes"/>
-<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="yes"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="yes"/>
-<layer number="25" name="tNames" color="7" fill="1" visible="no" active="yes"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="no" active="yes"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="yes"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="yes"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="no" active="yes"/>
 <layer number="27" name="tValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="28" name="bValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="yes"/>
@@ -46,10 +46,10 @@
 <layer number="36" name="bGlue" color="7" fill="5" visible="no" active="yes"/>
 <layer number="37" name="tTest" color="7" fill="1" visible="no" active="yes"/>
 <layer number="38" name="bTest" color="7" fill="1" visible="no" active="yes"/>
-<layer number="39" name="tKeepout" color="4" fill="11" visible="no" active="yes"/>
-<layer number="40" name="bKeepout" color="1" fill="11" visible="yes" active="yes"/>
-<layer number="41" name="tRestrict" color="4" fill="10" visible="no" active="yes"/>
-<layer number="42" name="bRestrict" color="1" fill="10" visible="yes" active="yes"/>
+<layer number="39" name="tKeepout" color="4" fill="11" visible="yes" active="yes"/>
+<layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="yes"/>
+<layer number="41" name="tRestrict" color="4" fill="10" visible="yes" active="yes"/>
+<layer number="42" name="bRestrict" color="1" fill="10" visible="no" active="yes"/>
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="yes"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
 <layer number="45" name="Holes" color="7" fill="1" visible="no" active="yes"/>
@@ -58,8 +58,8 @@
 <layer number="48" name="Document" color="7" fill="1" visible="no" active="yes"/>
 <layer number="49" name="Reference" color="7" fill="1" visible="no" active="yes"/>
 <layer number="50" name="dxf" color="7" fill="1" visible="no" active="yes"/>
-<layer number="51" name="tDocu" color="7" fill="1" visible="no" active="yes"/>
-<layer number="52" name="bDocu" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="51" name="tDocu" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="52" name="bDocu" color="7" fill="1" visible="no" active="yes"/>
 <layer number="53" name="tGND_GNDA" color="7" fill="9" visible="no" active="no"/>
 <layer number="54" name="bGND_GNDA" color="1" fill="9" visible="no" active="no"/>
 <layer number="56" name="wert" color="7" fill="1" visible="no" active="no"/>
@@ -3013,7 +3013,6 @@ Please make sure your boards conform to these design rules.
 </signal>
 <signal name="N$1">
 <contactref element="R3" pad="2"/>
-<contactref element="CHG" pad="A"/>
 <wire x1="33.655" y1="5.7785" x2="34.544" y2="4.8895" width="0.1524" layer="1"/>
 <wire x1="34.544" y1="4.8895" x2="34.544" y2="4.86" width="0.1524" layer="1"/>
 <via x="33.655" y="5.7785" extent="1-16" drill="0.3048"/>
@@ -3022,10 +3021,10 @@ Please make sure your boards conform to these design rules.
 <via x="29.21" y="8.89" extent="1-16" drill="0.3048"/>
 <wire x1="29.53" y1="10.795" x2="29.53" y2="9.21" width="0.1524" layer="16"/>
 <wire x1="29.53" y1="9.21" x2="29.21" y2="8.89" width="0.1524" layer="16"/>
+<contactref element="CHG" pad="A"/>
 </signal>
 <signal name="N$5">
 <contactref element="CHG1" pad="1"/>
-<contactref element="CHG" pad="C"/>
 <wire x1="33.7439" y1="3.5941" x2="34.544" y2="2.794" width="0.1524" layer="1"/>
 <wire x1="33.5026" y1="3.5941" x2="33.7439" y2="3.5941" width="0.1524" layer="1"/>
 <wire x1="33.5026" y1="3.5941" x2="33.5026" y2="5.1054" width="0.1524" layer="16"/>
@@ -3046,6 +3045,7 @@ Please make sure your boards conform to these design rules.
 <wire x1="28.5244" y1="8.9406" x2="28.5244" y2="10.16" width="0.1524" layer="1"/>
 <wire x1="28.5244" y1="10.16" x2="28.5244" y2="14.2369" width="0.1524" layer="16"/>
 <wire x1="28.5244" y1="14.2369" x2="28.6385" y2="14.351" width="0.1524" layer="16"/>
+<contactref element="CHG" pad="C"/>
 </signal>
 <signal name="N$4">
 <contactref element="CHG1" pad="5"/>
@@ -3222,6 +3222,7 @@ Please make sure your boards conform to these design rules.
 <wire x1="23.6855" y1="9.8425" x2="23.0122" y2="10.5158" width="0.1524" layer="16"/>
 <wire x1="21.905" y1="13.335" x2="21.905" y2="12.126" width="0.1524" layer="16"/>
 <wire x1="21.905" y1="12.126" x2="21.844" y2="12.065" width="0.1524" layer="16"/>
+<contactref element="JP2" pad="7"/>
 </signal>
 <signal name="N$10">
 <contactref element="R13" pad="1"/>
@@ -3961,9 +3962,6 @@ Please make sure your boards conform to these design rules.
 <wire x1="18.6817" y1="16.4973" x2="18.6817" y2="15.7353" width="0.1524" layer="16"/>
 <wire x1="16.8444" y1="19.765434375" x2="16.8444" y2="18.52358125" width="0.1524" layer="16"/>
 <wire x1="16.8444" y1="18.52358125" x2="18.6817" y2="16.68628125" width="0.1524" layer="16"/>
-</signal>
-<signal name="PHOTO+">
-<contactref element="JP2" pad="7"/>
 </signal>
 <signal name="PHOTO-">
 <contactref element="JP2" pad="9"/>

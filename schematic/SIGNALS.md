@@ -32,3 +32,4 @@ The following signals are connected to the following pins on the nRF module, whi
 
 - Accelerometer -- Can't see shorts
 - nRF -- can't see solder joints, and reflowing after oven will likely kill it
+ 

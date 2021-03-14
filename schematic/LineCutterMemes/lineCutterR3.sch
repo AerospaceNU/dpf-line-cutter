@@ -12958,11 +12958,12 @@ Source: http://www.onsemi.com/pub/Collateral/MC33269-D.PDF</description>
 <part name="Y2" library="adafruit2" deviceset="XTAL" device="-3.2X1.5" value="32.768"/>
 <part name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="22pF"/>
 <part name="C3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="22pF"/>
-<part name="SUPPLY2" library="SparkFun-PowerSymbols" deviceset="3.3V" device=""/>
 <part name="R2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="10k"/>
 <part name="GND20" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="IC2" library="linear" library_urn="urn:adsk.eagle:library:262" deviceset="MC33269ST*" device="" package3d_urn="urn:adsk.eagle:package:28541/2" technology="-3.3T3"/>
 <part name="GND21" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
+<part name="U$8" library="microbuilder" deviceset="3.3V" device=""/>
+<part name="SUPPLY2" library="SparkFun-PowerSymbols" deviceset="3.3V" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -13344,9 +13345,6 @@ the NRF has a 3k</text>
 <attribute name="NAME" x="110.51" y="203.45" size="1.27" layer="95" font="vector" rot="R180" align="center"/>
 <attribute name="VALUE" x="110.51" y="208.04" size="1.27" layer="96" font="vector" rot="R180" align="center"/>
 </instance>
-<instance part="SUPPLY2" gate="G$1" x="187.96" y="139.7" smashed="yes" grouprefs="PHOTORESISTOR">
-<attribute name="VALUE" x="187.96" y="142.494" size="1.778" layer="96" align="bottom-center"/>
-</instance>
 <instance part="R2" gate="G$1" x="187.96" y="127" smashed="yes" rot="R90" grouprefs="PHOTORESISTOR">
 <attribute name="NAME" x="186.4614" y="125.73" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="186.182" y="120.65" size="1.778" layer="96" rot="R90"/>
@@ -13360,6 +13358,12 @@ the NRF has a 3k</text>
 </instance>
 <instance part="GND21" gate="1" x="177.8" y="167.64" smashed="yes" grouprefs="3V3">
 <attribute name="VALUE" x="175.26" y="165.1" size="1.778" layer="96"/>
+</instance>
+<instance part="U$8" gate="G$1" x="187.96" y="139.7" smashed="yes">
+<attribute name="VALUE" x="186.436" y="140.716" size="1.27" layer="96"/>
+</instance>
+<instance part="SUPPLY2" gate="G$1" x="246.38" y="129.54" smashed="yes">
+<attribute name="VALUE" x="246.38" y="132.334" size="1.778" layer="96" align="bottom-center"/>
 </instance>
 </instances>
 <busses>
@@ -13896,6 +13900,17 @@ the NRF has a 3k</text>
 <wire x1="177.8" y1="180.34" x2="177.8" y2="182.88" width="0.1524" layer="91" grouprefs="3V3"/>
 <junction x="177.8" y="182.88" grouprefs="3V3"/>
 </segment>
+<segment>
+<wire x1="187.96" y1="137.16" x2="193.04" y2="137.16" width="0.1524" layer="91" grouprefs="PHOTORESISTOR"/>
+<label x="190.5" y="137.16" size="1.778" layer="95" grouprefs="PHOTORESISTOR"/>
+<pinref part="U$8" gate="G$1" pin="3.3V"/>
+</segment>
+<segment>
+<pinref part="JP2" gate="A" pin="7"/>
+<wire x1="259.08" y1="127" x2="246.38" y2="127" width="0.1524" layer="91"/>
+<wire x1="246.38" y1="127" x2="246.38" y2="129.54" width="0.1524" layer="91"/>
+<pinref part="SUPPLY2" gate="G$1" pin="3.3V"/>
+</segment>
 </net>
 <net name="N$10" class="0">
 <segment>
@@ -14320,19 +14335,6 @@ the NRF has a 3k</text>
 <wire x1="96.52" y1="205.74" x2="96.52" y2="195.58" width="0.1524" layer="91"/>
 <pinref part="U2" gate="G$1" pin="P0.00(XL1)"/>
 <wire x1="96.52" y1="195.58" x2="76.2" y2="195.58" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="PHOTO+" class="0">
-<segment>
-<pinref part="JP2" gate="A" pin="7"/>
-<wire x1="259.08" y1="127" x2="248.92" y2="127" width="0.1524" layer="91" grouprefs="HEADER"/>
-<label x="246.38" y="127" size="1.778" layer="95" grouprefs="HEADER"/>
-</segment>
-<segment>
-<pinref part="SUPPLY2" gate="G$1" pin="3.3V"/>
-<wire x1="187.96" y1="139.7" x2="187.96" y2="137.16" width="0.1524" layer="91" grouprefs="PHOTORESISTOR"/>
-<wire x1="187.96" y1="137.16" x2="193.04" y2="137.16" width="0.1524" layer="91" grouprefs="PHOTORESISTOR"/>
-<label x="190.5" y="137.16" size="1.778" layer="95" grouprefs="PHOTORESISTOR"/>
 </segment>
 </net>
 <net name="PHOTO-" class="0">
