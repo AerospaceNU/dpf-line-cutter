@@ -28,15 +28,21 @@ const double POWER_LEVEL1 = 0.3;  // PWM uses this voltages to turn on nichrome
 const double POWER_LEVEL2 = POWER_LEVEL1;
 const int PWM_DURATION = 2000;  // length of pwm in milliseconds
 
+// Manually interact with HardwarePWM
+// We can only add ONE pin per HardwarePWM; adding more makes them randomly flash
+HardwarePWM& hpwm1 = HwPWM0;
+HardwarePWM& hpwm2 = HwPWM1;
+
 void setup(void)
 {
-  // Turn off pins right away
-  // Except that nrfAnalogWrite doesn't actually turn pins off
-  // kekw
-  pinMode(PIN1, OUTPUT);
-  nrfAnalogWrite(PIN1, 0);
-  pinMode(PIN2, OUTPUT);
-  nrfAnalogWrite(PIN2, 0);
+  // Manually add nichrome pins to HardwarePWMs and set them
+  hpwm1.setResolution(8);  // Write values in range [0, 255]
+  hpwm1.addPin(PIN1);
+  hpwm1.writePin(PIN1, 0);
+  hpwm2.setResolution(8);  // Write values in range [0, 255]
+  hpwm2.addPin(PIN2);
+  hpwm2.writePin(PIN2, 0);
+  analogReadResolution(10);  // Read values in range [0, 1023]
   
   Serial.begin(115200);
   //while ( !Serial ) delay(10);   // for nrf52840 with native usb
@@ -225,62 +231,9 @@ int pwmLevel(double targetVoltage) {
   return ret;
 }
 
-
-/**
- * Generate PWM without pre-configured. this function will
- * configure pin to available HardwarePWM and start it if not started
- * 
- * This version of the method seems to not try to burn lines when initilizing analog pins, which is always a good thing :)
- *
- * @param pin
- * @param value
- */
-void nrfAnalogWrite( uint32_t pin, uint32_t value )
-{
-  // first, handle the case where the pin is already in use by nrfAnalogWrite()
-  for(int i=0; i<HWPWM_MODULE_NUM; i++)
-  {
-    if (HwPWMx[i]->isOwner(0x676f6c41))
-    {
-      int const ch = HwPWMx[i]->pin2channel(pin);
-      if (ch >= 0)
-      {
-        HwPWMx[i]->writeChannel(ch, value);
-        return;
-      }
-    }
-  }
-
-  // Next, handle the case where can add the pin to a PWM instance already owned by nrfAnalogWrite()
-  for(int i=0; i<HWPWM_MODULE_NUM; i++)
-  {
-    if ( HwPWMx[i]->isOwner(0x676f6c41) && HwPWMx[i]->addPin(pin) )
-    {
-      // successfully added the pin, so write the value also
-      HwPWMx[i]->writePin(pin, value);
-      LOG_LV2("Analog", "Added pin %" PRIu32 " to already-owned PWM %d", pin, i);
-      return;
-    }
-  }
-
-  // Attempt to acquire a new HwPWMx instance ... but only where
-  // 1. it's not one already used for analog, and
-  // 2. it currently has no pins in use.
-  for(int i=0; i<HWPWM_MODULE_NUM; i++)
-  {
-    if (HwPWMx[i]->takeOwnership(0x676f6c41))
-    {
-      // apply the cached analog resolution to newly owned instances
-      HwPWMx[i]->setResolution(10);
-      HwPWMx[i]->stop();
-      HwPWMx[i]->addPin(pin);
-      HwPWMx[i]->writePin(pin, value);
-      HwPWMx[i]->begin();
-      LOG_LV2("Analog", "took ownership of, and added pin %" PRIu32 " to, PWM %d", pin, i);
-      return;
-    }
-  }
-
-  LOG_LV1("Analog", "Unable to find a free PWM peripheral");
-  return;
+// Manually interact with HardwarePWM objects
+void nrfAnalogWrite(int pin, int level) {
+  Serial.print("Pin "); Serial.print(pin); Serial.print(" level "); Serial.println(level);
+  if(pin == PIN1) hpwm1.writePin(PIN1, level);
+  if(pin == PIN2) hpwm2.writePin(PIN2, level);
 }
