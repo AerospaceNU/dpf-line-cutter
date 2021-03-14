@@ -5,7 +5,6 @@ The following signals are connected to the following pins on the nRF module, whi
 | Description | Physical pin(s) | Arduino pin(s) | Uses |
 | ----- | ----------- | ------------ | --------- |
 | I2c SCL/SDA | P0.11/P0.12 | 22/23 | [Barometer](https://www.digikey.com/en/products/detail/te-connectivity-measurement-specialties/MS560702BA03-50/4700921), [Accelerometer](https://www.digikey.com/en/products/detail/tdk-invensense/ICM-20602/5872870) |
-
 | SPI MISO/MOSI/SCK/CS0 | P0.15, P0.13, P0.14, P0.16 | 25, 25, 26, 8 | Flash memory |
 | SWDIO/SWDCLK | SWDIO/SWDCLK | | Used to program the chip (initially), debugging |
 | BATT_SENSE | P0.02 | A4 (18) | Battery voltage divider |
