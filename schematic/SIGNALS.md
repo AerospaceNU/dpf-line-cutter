@@ -32,4 +32,13 @@ The following signals are connected to the following pins on the nRF module, whi
 
 - Accelerometer -- Can't see shorts
 - nRF -- can't see solder joints, and reflowing after oven will likely kill it
+
+# Board names
+
+| Board Number | Name | Known Issues |
+| ----- | ----------- | ------------ |
+| 1 | 0Strawberry | |
+| 2 | 0Cherry | |
+| 3 | 0Did you ever hear the trajedy of Darth Plagueis the Wise? I thought not. It's not a story the Jedi would tell you. | |
+| 4 | 0Apple | |
  
