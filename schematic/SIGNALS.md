@@ -39,6 +39,6 @@ The following signals are connected to the following pins on the nRF module, whi
 | ----- | ----------- | ------------ |
 | 1 | 0Strawberry | |
 | 2 | 0Cherry | |
-| 3 | 0Did you ever hear the trajedy of Darth Plagueis the Wise? | |
+| 3 | 0Did you ever hear the tragedy of Darth Plagueis the Wise? | |
 | 4 | 0Apple | |
  
