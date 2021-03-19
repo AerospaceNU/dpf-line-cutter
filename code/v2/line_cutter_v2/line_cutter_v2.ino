@@ -119,15 +119,21 @@ void setup() {
     Serial.println("Could not start file system.");
   }
   // Get identifier info (board version and Bluetooth name)
-  file.open(FILENAME, FILE_O_READ);
-  file.read(boardName, 64);
-  boardVersion = boardName[0] - '0';
+  file.open(ID_FILE, FILE_O_READ);
+  uint32_t readlen;
+  char buffer[64] = { 0 };
+  readlen = file.read(buffer, sizeof(buffer));
+  buffer[readlen] = 0;
   file.close();
+  boardVersion = buffer[0] - '0';
+  boardName = buffer + 1;
+  Serial.print("Board: ");
+  Serial.println(boardName);
   
   // Set up bluetooth
   Bluefruit.begin();
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName("Single Trouble");
+  Bluefruit.setName(boardName);
   // To be consistent OTA DFU should be added first if it exists
   bledfu.begin();
   // Configure and start the BLE Uart service
@@ -272,7 +278,7 @@ void startAdv(void)
 // Average several readings to get "sea level" pressure
 double calibrateSeaLevel(int samples) {
   Serial.println("Reading current pressure...");
-  //digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(PIN_LED2, HIGH);
   int sum = 0;
   for (int i=0; i<samples; i++) {
     baro.Readout();
@@ -280,7 +286,7 @@ double calibrateSeaLevel(int samples) {
     delay(100);
   }
   Serial.println("Done.");
-  //digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(PIN_LED2, LOW);
   return sum / (double) samples;
 }
 
