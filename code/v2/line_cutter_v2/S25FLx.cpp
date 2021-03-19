@@ -31,7 +31,8 @@ http://creativecommons.org/licenses/by-sa/3.0/deed.en_US
 #define RES         0xab    /* Release Power-down, return Device ID */
 #define RDID        0x9F      /* Read Manufacture ID, memory type ID, capacity ID */
 
-#define cs  10   //Chip select pin
+#define cs 8
+
 unsigned long prev;
 
 //A great little tool for printing a byte as binary without it chopping off the leading zeros. 

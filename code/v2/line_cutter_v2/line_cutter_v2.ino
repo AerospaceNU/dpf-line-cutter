@@ -5,7 +5,8 @@
 #include "MovingAvg.h"
 #include "MS5xxx.h"
 
-int boardVersion; // Get these values from the boards ID file
+int boardVersion; // Get these values from the board's ID file
+bool logData;
 char* boardName;
 
 enum states {
@@ -76,6 +77,20 @@ extern uint8_t packetbuffer[];
 HardwarePWM& hpwm1 = HwPWM0;
 HardwarePWM& hpwm2 = HwPWM1;
 
+// For writing data to flash
+struct Data {
+  unsigned long timestamp;
+  int32_t pressure;
+  float temperature;
+  float accelX;
+  float accelY;
+  float accelZ;
+  uint16_t battSense;
+  uint16_t cutSense1;
+  uint16_t cutSense2;
+  uint16_t currentSense;
+  uint16_t photoresistor;
+};
 
 /*****************************
  *        SETUP/LOOP         *
@@ -126,7 +141,8 @@ void setup() {
   buffer[readlen] = 0;
   file.close();
   boardVersion = buffer[0] - '0';
-  boardName = buffer + 1;
+  logData = buffer[1] - '0';
+  boardName = buffer + 2;
   Serial.print("Board: ");
   Serial.println(boardName);
   
@@ -301,15 +317,15 @@ double pressureToAltitude(int32_t pressure) {
 void pwmExecute(int pin, double targetVoltage) {
   Serial.print("Starting PWM on pin ");
   Serial.println(pin);
-  stupidAnalogWrite(pin, pwmLevel(targetVoltage));
+  hardwareAnalogWrite(pin, pwmLevel(targetVoltage));
   delay(PWM_DURATION);
-  stupidAnalogWrite(pin, 0);
+  hardwareAnalogWrite(pin, 0);
   Serial.println("Done.");
   return;
 }
 
 // Manually interact with HardwarePWM objects
-void stupidAnalogWrite(int pin, int level) {
+void hardwareAnalogWrite(int pin, int level) {
   Serial.print("Pin "); Serial.print(pin); Serial.print(" level "); Serial.println(level);
   if(pin == NICHROME_PIN1) hpwm1.writePin(NICHROME_PIN1, level);
   if(pin == NICHROME_PIN2) hpwm2.writePin(NICHROME_PIN2, level);
@@ -323,7 +339,6 @@ int pwmLevel(double targetVoltage) {
   // Find proportion of vbat needed to apply target voltage, then make out of 255 for analog write
   return (targetVoltage / vbat) * 255;
 }
-
 
 void writeStateChangeData(File f, unsigned long timestamp, int state, 
                           int32_t pressure, double altitude, double avgAltitude, 
@@ -360,9 +375,8 @@ void writeStateChangeData(File f, unsigned long timestamp, int state,
 }
 
 uint32_t double_to_uint32_bits(double d) {
-  float f = (float)d;
-  uint32_t result = * ( uint32_t * ) &f;
-  return result;
+  float f = (float) d;
+  return * ( uint32_t * ) &f;
 }
 
 uint8_t* u32_to_u8(const uint32_t u32, uint8_t buff[4]) {
@@ -373,6 +387,11 @@ uint8_t* u32_to_u8(const uint32_t u32, uint8_t buff[4]) {
   return buff;
 }
 
+uint8_t* u16_to_u8(const uint16_t u16, uint8_t buff[2]) {
+  buff[0] = (u16 & 0x0000ff00) >> 8;
+  buff[1] = u16 & 0x000000ff;
+  return buff;
+}
 
 void printData() {
   Serial.print("State: ");

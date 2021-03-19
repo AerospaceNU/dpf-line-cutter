@@ -27,27 +27,27 @@ http://creativecommons.org/licenses/by-sa/3.0/deed.en_US
 #define RES         0xab    /* Release Power-down, return Device ID */
 #define RDID        0x9F      /* Read Manufacture ID, memory type ID, capacity ID */
 
-#define cs  10   //Chip select pin
-
 #include "arduino.h"
 #include <SPI.h>
 
 #ifndef S25FLx_h
 #define S25FLx_h
 
+#define cs 8
+
 class flash
 {
   public:
   
   flash();
-    byte stat();
+  byte stat();
   void waitforit();
-    void write_enable();
+  void write_enable();
 	void erase_4k(unsigned long loc);
 	void erase_64k(unsigned long loc);
 	void erase_all();
 	void read(unsigned long loc, uint8_t* array, unsigned long length);
-    void write(unsigned long loc, uint8_t* array, unsigned long length);
+  void write(unsigned long loc, uint8_t* array, unsigned long length);
 	void write_reg(byte w);
 	void read_info();
 

@@ -3,7 +3,8 @@
 
 const char* FILENAME = "ID.txt";
 const char* VERSION = "0";
-const char* ID = "Did you ever hear the tragedy of Darth Plagueis The Wise?";
+const char* LANDED = "0";
+const char* ID = "Strawberry";
 
 using namespace Adafruit_LittleFS_Namespace;
 File f(InternalFS);
@@ -18,6 +19,8 @@ void setup() {
   } else {
     Serial.println("Could not start file system.");
   }
+
+  InternalFS.remove(FILENAME); // uncomment if you want to reset the ID
 
   f.open(FILENAME, FILE_O_READ);
 
@@ -37,10 +40,12 @@ void setup() {
       Serial.print("Writing data to ");
       Serial.println(FILENAME);
       f.write(VERSION, 1);
+      f.write(LANDED, 1);
       f.write(ID, strlen(ID));
       f.close();
       Serial.print("ID is now ");
       Serial.print(VERSION);
+      Serial.print(LANDED);
       Serial.println(ID);
     } else {
       Serial.print("Failed to write ");
