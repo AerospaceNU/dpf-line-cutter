@@ -5,14 +5,17 @@
 #include "MovingAvg.h"
 #include "MS5xxx.h"
 
+int boardVersion; // Get these values from the boards ID file
+char* boardName;
 
-// States
-int state = 0;
-const int WAITING = 0;  // Anytime before parachute deployment
-const int DEPLOYED = 1;
-const int PARTIAL_DISREEF = 2;  // After first line is cut
-const int FULL_DISREEF = 3;  // After second line is cut
-const int LANDED = 4;
+enum states {
+  WAITING,  // Anytime before parachute deployment
+  DEPLOYED,
+  PARTIAL_DISREEF,  // After first line is cut
+  FULL_DISREEF,  // After second line is cut
+  LANDED
+};
+int state = WAITING;
 
 // Pins
 const int VOLTAGE_DIVIDER = A0;
@@ -41,6 +44,7 @@ MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // Store differences between avgs calc
 // For logging data in internal filesystem
 using namespace Adafruit_LittleFS_Namespace;
 const char* FILENAME = "stateChangeLog.txt";
+const char* ID_FILE = "ID.txt";
 File file(InternalFS);
 
 // Variables used in loop()
@@ -88,13 +92,13 @@ void setup() {
   analogReadResolution(10);  // Read values in range [0, 1023]
   
   Serial.begin(115200);
+  while (!Serial) { delay(10); }
 
   // Connect to barometer
   while ( baro.connect() > 0 ) {
     Serial.println("Error connecting to barometer...");
     delay(500);
   }
-
   // Calibrate barometer and get initial reading
   baro.ReadProm();
   baro.Readout();
@@ -110,10 +114,15 @@ void setup() {
 
   // Initialize Internal File System
   if(InternalFS.begin()) {
-    Serial.println("FS init-ed!");
+    Serial.println("FS initialized.");
   } else {
-    Serial.println("Could not start file system...");
+    Serial.println("Could not start file system.");
   }
+  // Get identifier info (board version and Bluetooth name)
+  file.open(FILENAME, FILE_O_READ);
+  file.read(boardName, 64);
+  boardVersion = boardName[0] - '0';
+  file.close();
   
   // Set up bluetooth
   Bluefruit.begin();
@@ -125,6 +134,7 @@ void setup() {
   bleuart.begin();
   // Set up and start advertising
   startAdv();
+  Serial.println("Started advertising.");
 }
 
 
@@ -262,7 +272,7 @@ void startAdv(void)
 // Average several readings to get "sea level" pressure
 double calibrateSeaLevel(int samples) {
   Serial.println("Reading current pressure...");
-  digitalWrite(LED_BUILTIN, HIGH);
+  //digitalWrite(LED_BUILTIN, HIGH);
   int sum = 0;
   for (int i=0; i<samples; i++) {
     baro.Readout();
@@ -270,7 +280,7 @@ double calibrateSeaLevel(int samples) {
     delay(100);
   }
   Serial.println("Done.");
-  digitalWrite(LED_BUILTIN, LOW);
+  //digitalWrite(LED_BUILTIN, LOW);
   return sum / (double) samples;
 }
 
