@@ -1,0 +1,3 @@
+[submodule "code/tests/board_self_test/src/common_code"]
+	path = code/tests/board_self_test/src/common_code
+	url = git@gitlab.com:aeronu/introduction-to-rocketry-avionics/common_code.git
