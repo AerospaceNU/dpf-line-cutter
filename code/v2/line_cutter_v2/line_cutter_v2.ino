@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include "MovingAvg.h"
 #include "MS5xxx.h"
+#include "S25FLx.h"
 
 int boardVersion; // Get these values from the board's ID file
 bool logData;
@@ -42,11 +43,13 @@ int ARRAY_SIZE = 40; // 2 seconds
 MovingAvg altitudeReadings(ARRAY_SIZE);  // Store recent altitude readings
 MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // Store differences between avgs calculated using ^
 
-// For logging data in internal filesystem
+// For logging data in internal filesystem and flash
 using namespace Adafruit_LittleFS_Namespace;
 const char* FILENAME = "stateChangeLog.txt";
 const char* ID_FILE = "ID.txt";
 File file(InternalFS);
+flash flash;  // Starts Flash class and initializes SPI
+unsigned long location = 0; // Starting memory location to read and write to 
 
 // Variables used in loop()
 const int DELAY = 50;  // milliseconds
@@ -91,6 +94,7 @@ struct Data {
   uint16_t currentSense;
   uint16_t photoresistor;
 };
+Data currentData;
 
 /*****************************
  *        SETUP/LOOP         *
@@ -133,6 +137,11 @@ void setup() {
   } else {
     Serial.println("Could not start file system.");
   }
+  // Set up flash if we're logging data
+  if (logData) {
+    SPI.setClockDivider(SPI_CLOCK_DIV2); // By default the clock divider is set to 8
+  }
+  
   // Get identifier info (board version and Bluetooth name)
   file.open(ID_FILE, FILE_O_READ);
   uint32_t readlen;
@@ -172,24 +181,24 @@ void loop() {
   pressure = baro.GetPres();
   altitude = pressureToAltitude(pressure);
 
-  // Send readings over BLEUart
-  if (millis() - lastBLE > 1000) {
-    bleuart.write(String(pressure).c_str());
-    bleuart.write(',');
-    bleuart.write(String(altitude).c_str());
-    bleuart.print(',');
-    bleuart.print(baro.GetTemp() / 100.0);
-    bleuart.print(',');
-    bleuart.print(2 * analogRead(VOLTAGE_DIVIDER) * 3.6 / 1023.0);
-    bleuart.write('\n');
-    lastBLE = millis();
-  }
-
   // Update moving averages
   previousAltitudeAvg = altitudeReadings.getAvg();
   currentAltitudeAvg = altitudeReadings.reading(altitude);  // Update and return new avg
   delta = (currentAltitudeAvg - previousAltitudeAvg) * (1000.0 / DELAY);
   currentDeltaAvg = altitudeAvgDeltas.reading(delta);  // Update and return new avg
+
+  if (logData) {
+    updateFlash();
+  }
+
+  // Send readings over BLEUart
+  if (millis() - lastBLE > 1000) {
+    bleuart.write(String(pressure).c_str());
+    bleuart.write(',');
+    bleuart.write(String(altitude).c_str());
+    bleuart.write('\n');
+    lastBLE = millis();
+  }
 
   // printData();
   
@@ -393,6 +402,26 @@ uint8_t* u16_to_u8(const uint16_t u16, uint8_t buff[2]) {
   buff[0] = (u16 & 0x0000ff00) >> 8;
   buff[1] = u16 & 0x000000ff;
   return buff;
+}
+
+updateFlash(unsigned long timestamp) {
+  currentData.timestamp = timestamp;
+  currentData.pressure = baro.GetPres();
+  currentData.temperature = baro.GetTemp();
+  currentData.accelX = 0;
+  currentData.accelY = 0;
+  currentData.accelZ = 0;
+  currentData.battSense = analogRead(18);
+  currentData.cutSense1 = analogRead();
+  currentData.cutSense2 = analogRead();
+  currentData.currentSense = analogRead();
+  currentData.photoresistor = analogRead();
+
+  if (flashLocation % (2 ^ 18) == 0) {
+    flash.erase_256k();
+  }
+
+  // write things, increment location
 }
 
 void printData() {

@@ -25,11 +25,11 @@ http://creativecommons.org/licenses/by-sa/3.0/deed.en_US
 #define FAST_READ   0x0b    /* Read Data Bytes at Higher Speed //Not used as as the 328 isn't fast enough  */
 #define PP          0x02    /* Page Program  */
 #define SE          0x20    /* Sector Erase (4k)  */
-#define BE          0x20    /* Block Erase (64k)  */
-#define CE          0xc7    /* Erase entire chip  */
+#define BE          0xd8    /* Block Erase (64k)  */
+#define CE          0x60    /* Erase entire chip  */
 #define DP          0xb9    /* Deep Power-down  */
 #define RES         0xab    /* Release Power-down, return Device ID */
-#define RDID        0x9F      /* Read Manufacture ID, memory type ID, capacity ID */
+#define RDID        0x9F    /* Read Manufacture ID, memory type ID, capacity ID */
 
 #define cs 8
 
@@ -116,13 +116,13 @@ void flash::erase_4k(unsigned long loc){
  // Errase an entire 64_k sector the location is in.
  // For example erase4k(530000) will erase everything from 524543 to 589823. 
 
-void flash::erase_64k(unsigned long loc){
+void flash::erase_256k(unsigned long loc){
 
   waitforit(); 
   write_enable();
 
   digitalWrite(cs,LOW);
-  SPI.transfer(0x20);
+  SPI.transfer(0xd8);
   SPI.transfer(loc>>16);
   SPI.transfer(loc>>8);
   SPI.transfer(loc & 0xFF);
