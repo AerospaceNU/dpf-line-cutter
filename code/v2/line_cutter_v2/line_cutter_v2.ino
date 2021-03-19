@@ -145,6 +145,8 @@ void setup() {
   boardName = buffer + 2;
   Serial.print("Board: ");
   Serial.println(boardName);
+  Serial.print("Recently landed? ");
+  Serial.println(logData);
   
   // Set up bluetooth
   Bluefruit.begin();
