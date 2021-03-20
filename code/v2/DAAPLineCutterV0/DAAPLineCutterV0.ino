@@ -20,7 +20,7 @@ const int buzzer = 8;
 const int voltage = A1;
 const int light = A0;
 
-const int lightThreashold = 450; //Anything above this value is considered to be outside of the tube, anything below it is inside the tube
+const int lightThreashold = 200; //Anything above this value is considered to be outside of the tube, anything below it is inside the tube
 unsigned long lastLightTime = 0; //Last time that it was light
 unsigned long lastDarkTime = 0; //Last time it was dark
 const int darkTriggerTime = 20000; //The continuous time interval for which it much be constantly dark in order for the board to decide it is in the tube.
@@ -30,9 +30,9 @@ const int lightTriggerTime = 2000; //The continuous time interval for which it m
 unsigned long lastBeepTime = 0;
 const int beepDelay = 5000;
 
-const int disreef1Time = 2000; //Delay after ejection is detected before the first line is cut.
-const int disreef2Time = 3000; //Delay after the first line is cut before the second line is cut.
-const int cutDuration = 3000; //Time the nichrome turns on for.
+const int disreef1Time = 12000; //Delay after ejection is detected before the first line is cut.
+const int disreef2Time = 5000; //Delay after the first line is cut before the second line is cut.
+const int cutDuration = 4000; //Time the nichrome turns on for.
 const int nominalPower = 75; //desired pwm value (out of 255) when the battery is at 3.7V
 
 unsigned long lastStateChangeTime = 0;

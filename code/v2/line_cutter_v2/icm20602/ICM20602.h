@@ -53,7 +53,7 @@ public:
   bool begin()
   {
     // Reset the device
-    Serial.println("resetting");
+    //Serial.println("resetting");
     Write8(PWR_MGMT_1, Bit7, address);
     delay(2); // Wait 2ms
 
@@ -68,7 +68,7 @@ public:
   }
 
   void setFullscale(icm20602_accel_g range) {
-    Serial.print("Setting full to "); Serial.println(range << 3, BIN);
+    //Serial.print("Setting full to "); Serial.println(range << 3, BIN);
     Write8(0x1C, 0x00 | range << 3, address);
     accel_g = range;
   }
@@ -88,7 +88,7 @@ public:
     size_t read = ReadBytes<ACCEL_OUT_SIZE>(ACCEL_XOUT_H, buff, address);
 
     float sensitivity = _get_accel_sensitivity(accel_g);
-    Serial.print("sensitivity"); Serial.println(sensitivity);
+    //Serial.print("sensitivity"); Serial.println(sensitivity);
 
     return {
       ((float) combine(buff[0], buff[1])) / sensitivity,

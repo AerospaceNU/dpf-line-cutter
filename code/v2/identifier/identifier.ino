@@ -4,7 +4,7 @@
 const char* FILENAME = "ID.txt";
 const char* VERSION = "1";
 const char* LANDED = "1";
-const char* ID = "Condor";
+const char* ID = "Albatross";
 
 using namespace Adafruit_LittleFS_Namespace;
 File f(InternalFS);

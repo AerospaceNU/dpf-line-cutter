@@ -22,40 +22,47 @@ enum states {
 int state = WAITING;
 char* stateStrings[5] = { "WAITING","DEPLOYED","PARTIAL_DISREEF","FULL_DISREEF","LANDED" };
 
-// Pins. CHANGE FOR PERFBOARD! Perfboard; A0 batt, A1 cut1, A2 cut2, A4 photo
-//const int VOLTAGE_DIVIDER = A4;
-//const int NICHROME_PIN1 = 11;
-//const int NICHROME_PIN2 = 12;
-//const int PHOTO_PIN = A3;
-const int VOLTAGE_DIVIDER = A0;
-const int NICHROME_PIN1 = A1;
-const int NICHROME_PIN2 = A2;
-const int PHOTO_PIN = A4;
+// Pins. CHANGE FOR PERFBOARD VS PCB!
+// PCB; A4 batt, 11 cut1, 12 cut2, A3 photo, PIN_LED2 for calibration
+const int VOLTAGE_DIVIDER = A4;
+const int NICHROME_PIN1 = 11;
+const int NICHROME_PIN2 = 12;
+const int PHOTO_PIN = A3;
+const int CALIBRATION_LED = PIN_LED2;
+// Perfboard; A0 batt, A1 cut1, A2 cut2, A4 photo, LED_BUILTIN for calibration
+//const int VOLTAGE_DIVIDER = A0;
+//const int NICHROME_PIN1 = A1;
+//const int NICHROME_PIN2 = A2;
+//const int PHOTO_PIN = A4;
+//const int CALIBRATION_LED = LED_BUILTIN;
 
 const int CUT_SENSE1 = A5;
 const int CUT_SENSE2 = A0;
 const int CURRENT_SENSE = A1;
 
+// VARIABLES WHICH MUST BE SET
 // Requirements for state transitions
-const double LIMIT_VELOCITY = -0.25;  // meters/second
-const double ALTITUDE1 = 6;  // Disreefing altitudes, in meters (higher one first!!)
-const double ALTITUDE2 = 3;
-const int DISREEF1TIME = 2000; //Delay after ejection is detected before the first line is cut.
-const int DISREEF2TIME = 3000; //Delay after the first line is cut before the second line is cut.
-
+const double LIMIT_VELOCITY = -3.0;  // meters/second
+const double ALTITUDE1 = 243;  // Disreefing altitudes, in meters (higher one first!!)
+const double ALTITUDE2 = 210;
+const int DISREEF1TIME = 12000; // Maximum delay after ejection is detected before the first line is cut.
+const int DISREEF2TIME = 5000; // Maximum delay after the first line is cut before the second line is cut.
 // PWM settings
-const double PWM_VOLTAGE1 = 0.8;  // Voltage applied to nichrome for line cuts
-const double PWM_VOLTAGE2 = 0.8;
-const int PWM_DURATION = 1000;  // Length of PWM, in milliseconds
-
-// Altitude calculation
-double seaLevel;
+const double PWM_VOLTAGE1 = 2.0;  // Voltage applied to nichrome for line cuts
+const double PWM_VOLTAGE2 = 2.0;
+const int PWM_DURATION = 2500;  // Length of PWM, in milliseconds
+// Photoresistor memes
+const int LIGHT_THRESHOLD = 200; // Anything above this value is considered to be outside of the tube
+const int DARK_TRIGGER_TIME = 20000; // Continuous time interval for which it much be dark for board to decide it's in the tube
+const int LIGHT_TRIGGER_TIME = 2000; // Continuous time interval for which it must be light for board to decide it's been ejected
 
 // Barometer and moving averages
 MS5xxx baro(&Wire);
 int ARRAY_SIZE = 40; // 2 seconds
 MovingAvg altitudeReadings(ARRAY_SIZE);  // Store recent altitude readings
 MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // Store differences between avgs calculated using ^
+// Altitude calculation
+double seaLevel;
 
 // For logging data in internal filesystem and flash
 using namespace Adafruit_LittleFS_Namespace;
@@ -65,19 +72,14 @@ File file(InternalFS);
 S25FL flash;  // Starts Flash class and initializes SPI
 unsigned long flashLocation = 0; // Starting memory location to read and write to 
 
-// Photoresistor memes
-const int LIGHT_THRESHOLD = 450; // Anything above this value is considered to be outside of the tube
-const int DARK_TRIGGER_TIME = 20000; // Continuous time interval for which it much be dark for board to decide it's in the tube
-const int LIGHT_TRIGGER_TIME = 2000; // Continuous time interval for which it must be light for board to decide it's been ejected
-unsigned long lastLightTime = 0; // Last time that it was light
-unsigned long lastDarkTime = 0; // Last time it was dark
-
 // Variables used in loop()
 const int DELAY = 50;  // milliseconds
 unsigned long loopStart = 0;
 unsigned long loopEnd = 0;
 unsigned long lastBLE = 0;
 unsigned long lastStateChangeTime = 0;
+unsigned long lastLightTime = 0; // Last time that it was light
+unsigned long lastDarkTime = 0; // Last time it was dark
 uint8_t bleIdx = 0; // Index of data to send
 int32_t pressure;  // pascals
 double altitude;  // meters
@@ -86,6 +88,13 @@ double currentAltitudeAvg;
 double delta;  // meters/second
 double currentDeltaAvg;
 int light;
+// Keeps track of if it's been dark for long enough for us to "be in the tube"
+bool inTube = false;
+
+// Manually interact with HardwarePWM
+// We can only add ONE pin per HardwarePWM; adding more makes them randomly flash
+HardwarePWM& hpwm1 = HwPWM0;
+HardwarePWM& hpwm2 = HwPWM1;
 
 // bluetooth magic
 // OTA DFU service
@@ -98,11 +107,6 @@ float   parsefloat (uint8_t *buffer);
 void    printHex   (const uint8_t * data, const uint32_t numBytes);
 // Packet buffer
 extern uint8_t packetbuffer[];
-
-// Manually interact with HardwarePWM
-// We can only add ONE pin per HardwarePWM; adding more makes them randomly flash
-HardwarePWM& hpwm1 = HwPWM0;
-HardwarePWM& hpwm2 = HwPWM1;
 
 // For writing data to flash
 struct Data {
@@ -121,10 +125,7 @@ struct Data {
 };
 Data currentData;
 
-IMU imu{};
-
-// Keeps track of if it's been dark for long enough for us to "be in the tube"
-bool inTube = false;  
+IMU imu{}; // accelerometer 
 
 /*****************************
  *        SETUP/LOOP         *
@@ -382,7 +383,7 @@ void startAdv(void)
 // Average several readings to get "sea level" pressure
 double calibrateSeaLevel(int samples) {
   Serial.println("Reading current pressure...");
-  digitalWrite(PIN_LED2, HIGH);
+  digitalWrite(CALIBRATION_LED, HIGH);
   int sum = 0;
   for (int i=0; i<samples; i++) {
     baro.Readout();
@@ -390,7 +391,7 @@ double calibrateSeaLevel(int samples) {
     delay(100);
   }
   Serial.println("Done.");
-  digitalWrite(PIN_LED2, LOW);
+  digitalWrite(CALIBRATION_LED, LOW);
   return sum / (double) samples;
 }
 
