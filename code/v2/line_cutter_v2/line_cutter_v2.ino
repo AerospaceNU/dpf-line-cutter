@@ -1,10 +1,11 @@
 #include <Adafruit_LittleFS.h>
 #include <bluefruit.h>
 #include <InternalFileSystem.h>
+#include <SPI.h>
 #include <Wire.h>
 #include "MovingAvg.h"
 #include "MS5xxx.h"
-#include "S25FLx.h"
+#include "S25FL.h"
 
 int boardVersion; // Get these values from the board's ID file
 bool logData;
@@ -48,8 +49,8 @@ using namespace Adafruit_LittleFS_Namespace;
 const char* FILENAME = "stateChangeLog.txt";
 const char* ID_FILE = "ID.txt";
 File file(InternalFS);
-flash flash;  // Starts Flash class and initializes SPI
-unsigned long location = 0; // Starting memory location to read and write to 
+S25FL flash;  // Starts Flash class and initializes SPI
+unsigned long flashLocation = 0; // Starting memory location to read and write to 
 
 // Variables used in loop()
 const int DELAY = 50;  // milliseconds
@@ -82,8 +83,8 @@ HardwarePWM& hpwm2 = HwPWM1;
 
 // For writing data to flash
 struct Data {
-  unsigned long timestamp;
-  int32_t pressure;
+  uint32_t timestamp;
+  uint32_t pressure;
   float temperature;
   float accelX;
   float accelY;
@@ -137,10 +138,6 @@ void setup() {
   } else {
     Serial.println("Could not start file system.");
   }
-  // Set up flash if we're logging data
-  if (logData) {
-    SPI.setClockDivider(SPI_CLOCK_DIV2); // By default the clock divider is set to 8
-  }
   
   // Get identifier info (board version and Bluetooth name)
   file.open(ID_FILE, FILE_O_READ);
@@ -150,12 +147,22 @@ void setup() {
   buffer[readlen] = 0;
   file.close();
   boardVersion = buffer[0] - '0';
-  logData = buffer[1] - '0';
+  logData = !(buffer[1] - '0');
   boardName = buffer + 2;
   Serial.print("Board: ");
   Serial.println(boardName);
   Serial.print("Recently landed? ");
-  Serial.println(logData);
+  Serial.println(buffer[1] - '0');
+
+  // Set up flash if we're logging data
+  if (logData) {
+    SPI.begin();
+    SPI.setBitOrder(MSBFIRST);
+    SPI.setClockDivider(SPI_CLOCK_DIV8); //Divide the clock by 8
+    SPI.setDataMode(SPI_MODE0);
+    pinMode(8, OUTPUT);
+    digitalWrite(8, HIGH);
+  }
   
   // Set up bluetooth
   Bluefruit.begin();
@@ -187,8 +194,8 @@ void loop() {
   delta = (currentAltitudeAvg - previousAltitudeAvg) * (1000.0 / DELAY);
   currentDeltaAvg = altitudeAvgDeltas.reading(delta);  // Update and return new avg
 
-  if (logData) {
-    updateFlash();
+  if (logData && boardVersion == 0 && flashLocation < 0x8000000) {
+    updateFlash(loopStart);
   }
 
   // Send readings over BLEUart
@@ -200,8 +207,6 @@ void loop() {
     lastBLE = millis();
   }
 
-  // printData();
-  
   switch(state) {
     case WAITING:
       if (currentAltitudeAvg > ALTITUDE1 && currentDeltaAvg < LIMIT_VELOCITY) {
@@ -214,7 +219,6 @@ void loop() {
         
         Serial.print("Parachute deployed at time ");
         Serial.println(loopStart);
-        printData();
       }
       break;
     case DEPLOYED:
@@ -228,7 +232,6 @@ void loop() {
         
         Serial.print("First line cut at time ");
         Serial.println(loopStart);
-        printData();
       }
       break;
     case PARTIAL_DISREEF:
@@ -242,7 +245,6 @@ void loop() {
         
         Serial.print("Second line cut at time ");
         Serial.println(loopStart);
-        printData();
       }
       break;
     case FULL_DISREEF:
@@ -252,10 +254,11 @@ void loop() {
         writeStateChangeData(file, loopStart, state, 
                              pressure, altitude, currentAltitudeAvg, 
                              delta, currentDeltaAvg);
+
+        writeLandedData(file);
         
         Serial.print("Landed at time ");
         Serial.println(loopStart);
-        printData();  
       }
       break;
     case LANDED:
@@ -385,9 +388,31 @@ void writeStateChangeData(File f, unsigned long timestamp, int state,
   }
 }
 
+void writeLandedData(File f) {
+  InternalFS.remove(ID_FILE);
+  if ( f.open(ID_FILE, FILE_O_WRITE) ) {
+    
+    Serial.println("Writing data to file.");
+    f.write('0' + boardVersion);
+    f.write("1");
+    f.write(boardName);
+    uint8_t landingBuff[4];
+    f.write(u32_to_u8(flashLocation, landingBuff), 4);  // So we can figure out when it landed
+    f.close();
+  } else {
+    Serial.print("Failed to write ");
+    Serial.println(ID_FILE);
+  }
+}
+
 uint32_t double_to_uint32_bits(double d) {
   float f = (float) d;
   return * ( uint32_t * ) &f;
+}
+
+uint8_t* float_to_u8(float f, uint8_t buff[4]) {
+  uint32_t u = * ( uint32_t * ) &f;
+  return u32_to_u8(u, buff);
 }
 
 uint8_t* u32_to_u8(const uint32_t u32, uint8_t buff[4]) {
@@ -404,39 +429,52 @@ uint8_t* u16_to_u8(const uint16_t u16, uint8_t buff[2]) {
   return buff;
 }
 
-updateFlash(unsigned long timestamp) {
+void updateFlash(unsigned long timestamp) {
   currentData.timestamp = timestamp;
   currentData.pressure = baro.GetPres();
   currentData.temperature = baro.GetTemp();
   currentData.accelX = 0;
   currentData.accelY = 0;
   currentData.accelZ = 0;
-  currentData.battSense = analogRead(18);
-  currentData.cutSense1 = analogRead();
-  currentData.cutSense2 = analogRead();
-  currentData.currentSense = analogRead();
-  currentData.photoresistor = analogRead();
+  currentData.battSense = analogRead(A4);
+  currentData.cutSense1 = analogRead(A5);
+  currentData.cutSense2 = analogRead(A0);
+  currentData.currentSense = analogRead(A1);
+  currentData.photoresistor = analogRead(A3);
 
-  if (flashLocation % (2 ^ 18) == 0) {
-    flash.erase_256k();
+  if (flashLocation % 0x40000 == 0) {
+    Serial.print("Erased sector at location ");
+    Serial.println(flashLocation);
+    flash.erase_sector_start(flashLocation / 0x40000);
+    while(flash.is_write_in_progress()) { delay(1); }
   }
 
-  // write things, increment location
-}
+  // Write things, increment location
+  Serial.print("Writing at location ");
+  Serial.println(flashLocation);
+  uint8_t buff2[2];
+  uint8_t buff4[4];
+  uint8_t emptyBuff[1] = {0};
+  flash.write(flashLocation, u32_to_u8(currentData.timestamp, buff4), 4);
+  flash.write(flashLocation + 4, u32_to_u8(currentData.pressure, buff4), 4);
+  flash.write(flashLocation + 8, float_to_u8(currentData.temperature, buff4), 4);
+  flash.write(flashLocation + 12, float_to_u8(currentData.accelX, buff4), 4);
+  flash.write(flashLocation + 16, float_to_u8(currentData.accelY, buff4), 4);
+  flash.write(flashLocation + 20, float_to_u8(currentData.accelZ, buff4), 4);
+  flash.write(flashLocation + 24, u16_to_u8(currentData.battSense, buff2), 2);
+  flash.write(flashLocation + 26, u16_to_u8(currentData.cutSense1, buff2), 2);
+  flash.write(flashLocation + 28, u16_to_u8(currentData.cutSense2, buff2), 2);
+  flash.write(flashLocation + 30, u16_to_u8(currentData.currentSense, buff2), 2);
+  flash.write(flashLocation + 32, u16_to_u8(currentData.photoresistor, buff2), 2);
+  flash.write(flashLocation + 34, emptyBuff, 1);
 
-void printData() {
-  Serial.print("State: ");
-  Serial.println(state);
-  Serial.print("Pressure [Pa]: ");
-  Serial.println(pressure);
-  Serial.print("Altitude [m]: ");
-  Serial.println(altitude);
-  Serial.print("Averaged altitude [m]: ");
-  Serial.println(currentAltitudeAvg);
-  Serial.print("Change in altitude [m/s]: ");
-  Serial.println(delta);
-  Serial.print("Averaged change in altitude [m/s]: ");
-  Serial.println(currentDeltaAvg);
-  Serial.println("------------");
-  return;
+  uint8_t readBuff[64] = {};
+  flash.read_start(flashLocation, readBuff, 64);
+  for (int i=0; i<64; i++) {
+    Serial.print(readBuff[i], BIN);
+    Serial.print(" ");
+  }
+  Serial.println();
+
+  flashLocation += 64;
 }
