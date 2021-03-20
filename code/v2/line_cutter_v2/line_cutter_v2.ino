@@ -22,19 +22,19 @@ int state = WAITING;
 char* stateStrings[5] = { "WAITING","DEPLOYED","PARTIAL_DISREEF","FULL_DISREEF","LANDED" };
 
 // Pins
-const int VOLTAGE_DIVIDER = A0;
-const int NICHROME_PIN1 = A1;
-const int NICHROME_PIN2 = A2;
+const int VOLTAGE_DIVIDER = A4;
+const int NICHROME_PIN1 = 11;
+const int NICHROME_PIN2 = 12;
 
 // Requirements for state transitions
-const double LIMIT_VELOCITY = -3.0;  // meters/second
-const double ALTITUDE1 = 400;  // Disreefing altitudes, in meters (higher one first!!)
-const double ALTITUDE2 = 100;
+const double LIMIT_VELOCITY = -0.25;  // meters/second
+const double ALTITUDE1 = 6;  // Disreefing altitudes, in meters (higher one first!!)
+const double ALTITUDE2 = 3;
 
 // PWM settings
 const double PWM_VOLTAGE1 = 0.8;  // Voltage applied to nichrome for line cuts
 const double PWM_VOLTAGE2 = 0.8;
-const int PWM_DURATION = 2500;  // Length of PWM, in milliseconds
+const int PWM_DURATION = 1000;  // Length of PWM, in milliseconds
 
 // Altitude calculation
 double seaLevel;
@@ -52,6 +52,13 @@ const char* ID_FILE = "ID.txt";
 File file(InternalFS);
 S25FL flash;  // Starts Flash class and initializes SPI
 unsigned long flashLocation = 0; // Starting memory location to read and write to 
+
+// Photoresistor memes
+const int LIGHT_THRESHOLD = 450; // Anything above this value is considered to be outside of the tube
+const int DARK_TRIGGER_TIME = 20000; // Continuous time interval for which it much be dark for board to decide it's in the tube
+const int LIGHT_TRIGGER_TIME = 2000; // Continuous time interval for which it must be light for board to decide it's been ejected
+unsigned long lastLightTime = 0; // Last time that it was light
+unsigned long lastDarkTime = 0; // Last time it was dark
 
 // Variables used in loop()
 const int DELAY = 50;  // milliseconds
@@ -114,7 +121,7 @@ void setup() {
   analogReadResolution(10);  // Read values in range [0, 1023]
   
   Serial.begin(115200);
-  while (!Serial) { delay(10); }
+  //while (!Serial) { delay(10); }
 
   // Connect to barometer
   while ( baro.connect() > 0 ) {
@@ -204,7 +211,7 @@ void loop() {
   if (millis() - lastBLE > 400) {
     if(bleIdx == 0) bleuart.printf("State [%s]\n", stateStrings[state]);
     if(bleIdx == 1) bleuart.printf("Time [%li] ", currentData.timestamp);
-    
+
     if(bleIdx == 2) bleuart.printf("Press [%f] ", currentData.pressure);
     if(bleIdx == 3) bleuart.printf("Temp [%f]\n", currentData.temperature);
     if(bleIdx == 4) bleuart.printf("Ax [%f] ", currentData.accelX);
@@ -217,10 +224,10 @@ void loop() {
     if(bleIdx == 10) bleuart.printf("CurrSens [%li] ", currentData.currentSense);
     if(bleIdx == 11) bleuart.printf("Photores [%li]\n", currentData.photoresistor);
     if(bleIdx == 11) bleuart.println("===================");
-    
+
     bleIdx++;
     if(bleIdx >= 12) { bleIdx = 0; }
-    lastBLE = millis(); 
+    lastBLE = millis();
   }
 
   switch(state) {

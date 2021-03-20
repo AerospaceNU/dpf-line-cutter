@@ -8,6 +8,7 @@ File file(InternalFS);
 
 void setup() {
   Serial.begin(115200);
+  while (!Serial) { delay(10); }
     Serial.println("opening 1...");
   InternalFS.begin();  
   
