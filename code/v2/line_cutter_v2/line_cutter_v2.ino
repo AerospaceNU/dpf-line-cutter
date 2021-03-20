@@ -18,6 +18,7 @@ enum states {
   LANDED
 };
 int state = WAITING;
+char* stateStrings[5] = { "WAITING","DEPLOYED","PARTIAL_DISREEF","FULL_DISREEF","LANDED" };
 
 // Pins
 const int VOLTAGE_DIVIDER = A0;
@@ -56,6 +57,7 @@ const int DELAY = 50;  // milliseconds
 unsigned long loopStart = 0;
 unsigned long loopEnd = 0;
 unsigned long lastBLE = 0;
+uint8_t bleIdx = 0; // Index of data to send
 int32_t pressure;  // pascals
 double altitude;  // meters
 double previousAltitudeAvg;
@@ -192,12 +194,26 @@ void loop() {
   }
 
   // Send readings over BLEUart
-  if (millis() - lastBLE > 1000) {
-    bleuart.write(String(pressure).c_str());
-    bleuart.write(',');
-    bleuart.write(String(altitude).c_str());
-    bleuart.write('\n');
-    lastBLE = millis();
+  if (millis() - lastBLE > 400) {
+    if(bleIdx == 0) bleuart.printf("State [%s]\n", stateStrings[state]);
+    if(bleIdx == 1) bleuart.printf("Time [%li] ", currentData.timestamp);
+    
+    if(bleIdx == 2) bleuart.printf("Press [%f] ", currentData.pressure);
+    if(bleIdx == 3) bleuart.printf("Temp [%f]\n", currentData.temperature);
+    if(bleIdx == 4) bleuart.printf("Ax [%f] ", currentData.accelX);
+    if(bleIdx == 5) bleuart.printf("Ay [%f] ", currentData.accelY);
+    if(bleIdx == 6) bleuart.printf("Az [%f]\n", currentData.accelZ);
+
+    if(bleIdx == 7) bleuart.printf("Batt [%f] ", currentData.battSense * 2.0 * 3.6 / 1023.0);
+    if(bleIdx == 8) bleuart.printf("CutSens1 [%li] ", currentData.cutSense1);
+    if(bleIdx == 9) bleuart.printf("CutSens2 [%li]\n", currentData.cutSense2);
+    if(bleIdx == 10) bleuart.printf("CurrSens [%li] ", currentData.currentSense);
+    if(bleIdx == 11) bleuart.printf("Photores [%li]\n", currentData.photoresistor);
+    if(bleIdx == 11) bleuart.println("===================");
+    
+    bleIdx++;
+    if(bleIdx >= 12) { bleIdx = 0; }
+    lastBLE = millis(); 
   }
 
   // printData();
