@@ -2,9 +2,9 @@
 #include <InternalFileSystem.h>
 
 const char* FILENAME = "ID.txt";
-const char* VERSION = "0";
-const char* LANDED = "0";
-const char* ID = "Apple";
+const char* VERSION = "1";
+const char* LANDED = "1";
+const char* ID = "Condor";
 
 using namespace Adafruit_LittleFS_Namespace;
 File f(InternalFS);

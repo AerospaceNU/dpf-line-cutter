@@ -17,6 +17,7 @@ struct Data {
   uint16_t cutSense2;
   uint16_t currentSense;
   uint16_t photoresistor;
+  uint8_t state;
 };
 Data currentData;
 
@@ -33,7 +34,7 @@ void setup() {
 }
 
 void loop() {
-  if (buff[34] == 0) {
+  if (buff[35] == 0) {
     read_flash_packet();
     delay(20);
   }
@@ -53,9 +54,10 @@ void read_flash_packet() {
   currentData.cutSense2 = u8_to_u16(&buff[28]);
   currentData.currentSense = u8_to_u16(&buff[30]);
   currentData.photoresistor = u8_to_u16(&buff[32]);
+  currentData.state = buff[34];
 
-  Serial.printf("%u, %u, %f, %f, %f, %f, %u, %u, %u, %u, %u\n", 
-                currentData.timestamp, currentData.pressure, currentData.temperature,
+  Serial.printf("%u, %u, %u, %f, %f, %f, %f, %u, %u, %u, %u, %u\n", 
+                currentData.state, currentData.timestamp, currentData.pressure, currentData.temperature,
                 currentData.accelX, currentData.accelY, currentData.accelZ,
                 currentData.battSense, currentData.cutSense1, currentData.cutSense2,
                 currentData.currentSense, currentData.photoresistor);

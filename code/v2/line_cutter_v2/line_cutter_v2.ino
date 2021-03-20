@@ -6,6 +6,7 @@
 #include "MovingAvg.h"
 #include "MS5xxx.h"
 #include "S25FL.h"
+#include "icm20602/ICM20602.h"
 
 int boardVersion; // Get these values from the board's ID file
 bool logData;
@@ -21,15 +22,26 @@ enum states {
 int state = WAITING;
 char* stateStrings[5] = { "WAITING","DEPLOYED","PARTIAL_DISREEF","FULL_DISREEF","LANDED" };
 
-// Pins
-const int VOLTAGE_DIVIDER = A4;
-const int NICHROME_PIN1 = 11;
-const int NICHROME_PIN2 = 12;
+// Pins. CHANGE FOR PERFBOARD! Perfboard; A0 batt, A1 cut1, A2 cut2, A4 photo
+//const int VOLTAGE_DIVIDER = A4;
+//const int NICHROME_PIN1 = 11;
+//const int NICHROME_PIN2 = 12;
+//const int PHOTO_PIN = A3;
+const int VOLTAGE_DIVIDER = A0;
+const int NICHROME_PIN1 = A1;
+const int NICHROME_PIN2 = A2;
+const int PHOTO_PIN = A4;
+
+const int CUT_SENSE1 = A5;
+const int CUT_SENSE2 = A0;
+const int CURRENT_SENSE = A1;
 
 // Requirements for state transitions
 const double LIMIT_VELOCITY = -0.25;  // meters/second
 const double ALTITUDE1 = 6;  // Disreefing altitudes, in meters (higher one first!!)
 const double ALTITUDE2 = 3;
+const int DISREEF1TIME = 2000; //Delay after ejection is detected before the first line is cut.
+const int DISREEF2TIME = 3000; //Delay after the first line is cut before the second line is cut.
 
 // PWM settings
 const double PWM_VOLTAGE1 = 0.8;  // Voltage applied to nichrome for line cuts
@@ -65,6 +77,7 @@ const int DELAY = 50;  // milliseconds
 unsigned long loopStart = 0;
 unsigned long loopEnd = 0;
 unsigned long lastBLE = 0;
+unsigned long lastStateChangeTime = 0;
 uint8_t bleIdx = 0; // Index of data to send
 int32_t pressure;  // pascals
 double altitude;  // meters
@@ -72,6 +85,7 @@ double previousAltitudeAvg;
 double currentAltitudeAvg;
 double delta;  // meters/second
 double currentDeltaAvg;
+int light;
 
 // bluetooth magic
 // OTA DFU service
@@ -92,6 +106,7 @@ HardwarePWM& hpwm2 = HwPWM1;
 
 // For writing data to flash
 struct Data {
+  uint8_t state;
   uint32_t timestamp;
   uint32_t pressure;
   float temperature;
@@ -105,6 +120,11 @@ struct Data {
   uint16_t photoresistor;
 };
 Data currentData;
+
+IMU imu{};
+
+// Keeps track of if it's been dark for long enough for us to "be in the tube"
+bool inTube = false;  
 
 /*****************************
  *        SETUP/LOOP         *
@@ -124,7 +144,7 @@ void setup() {
   //while (!Serial) { delay(10); }
 
   // Connect to barometer
-  while ( baro.connect() > 0 ) {
+  while ( baro.connect() > 0 ) { // This calls Wire.begin() internally :scrunge:
     Serial.println("Error connecting to barometer...");
     delay(500);
   }
@@ -172,6 +192,12 @@ void setup() {
     pinMode(8, OUTPUT);
     digitalWrite(8, HIGH);
   }
+
+  if(boardVersion == 0) {
+    while (!imu.begin()) {
+      Serial.println("Could not connect to accelerometer!");
+    }
+  }
   
   // Set up bluetooth
   Bluefruit.begin();
@@ -184,6 +210,9 @@ void setup() {
   // Set up and start advertising
   startAdv();
   Serial.println("Started advertising.");
+
+  lastLightTime = millis();
+  lastStateChangeTime = millis();
 }
 
 
@@ -202,17 +231,31 @@ void loop() {
   currentAltitudeAvg = altitudeReadings.reading(altitude);  // Update and return new avg
   delta = (currentAltitudeAvg - previousAltitudeAvg) * (1000.0 / DELAY);
   currentDeltaAvg = altitudeAvgDeltas.reading(delta);  // Update and return new avg
-
+  
+  updateData(loopStart);
   if (logData && boardVersion == 0 && flashLocation < 0x8000000) {
-    updateFlash(loopStart);
+    updateFlash();
+  }
+
+  // Photoresistor stuff
+  light = analogRead(PHOTO_PIN);
+  //Keep track of whether it is dark or light and for how long
+  if(light > LIGHT_THRESHOLD)
+    lastLightTime = loopStart;
+  if(light < LIGHT_THRESHOLD)
+    lastDarkTime = loopStart;
+
+  if(loopStart - lastLightTime > DARK_TRIGGER_TIME) {
+    inTube = true;
+    lastStateChangeTime = millis();
   }
 
   // Send readings over BLEUart
   if (millis() - lastBLE > 400) {
-    if(bleIdx == 0) bleuart.printf("State [%s]\n", stateStrings[state]);
-    if(bleIdx == 1) bleuart.printf("Time [%li] ", currentData.timestamp);
+    if(bleIdx == 0) bleuart.printf("State [%s]\n", stateStrings[currentData.state]);
+    if(bleIdx == 1) bleuart.printf("Time [%i] ", currentData.timestamp);
 
-    if(bleIdx == 2) bleuart.printf("Press [%f] ", currentData.pressure);
+    if(bleIdx == 2) bleuart.printf("Press [%u] ", currentData.pressure);
     if(bleIdx == 3) bleuart.printf("Temp [%f]\n", currentData.temperature);
     if(bleIdx == 4) bleuart.printf("Ax [%f] ", currentData.accelX);
     if(bleIdx == 5) bleuart.printf("Ay [%f] ", currentData.accelY);
@@ -232,8 +275,11 @@ void loop() {
 
   switch(state) {
     case WAITING:
-      if (currentAltitudeAvg > ALTITUDE1 && currentDeltaAvg < LIMIT_VELOCITY) {
+      if ((currentAltitudeAvg > ALTITUDE1 && currentDeltaAvg < LIMIT_VELOCITY)
+          || (inTube && loopStart - lastDarkTime > LIGHT_TRIGGER_TIME)) {
+        inTube = false;
         state = DEPLOYED;
+        lastStateChangeTime = loopStart;
         
         InternalFS.remove(FILENAME);
         writeStateChangeData(file, loopStart, state, 
@@ -245,9 +291,11 @@ void loop() {
       }
       break;
     case DEPLOYED:
-      if (currentAltitudeAvg < ALTITUDE1) {
+      if ((currentAltitudeAvg < ALTITUDE1)
+          || (loopStart - (lastStateChangeTime) > DISREEF1TIME)) {
         pwmExecute(NICHROME_PIN1, PWM_VOLTAGE1);
         state = PARTIAL_DISREEF;
+        lastStateChangeTime = loopStart;
 
         writeStateChangeData(file, loopStart, state, 
                              pressure, altitude, currentAltitudeAvg, 
@@ -258,9 +306,11 @@ void loop() {
       }
       break;
     case PARTIAL_DISREEF:
-      if (currentAltitudeAvg < ALTITUDE2) {
+      if ((currentAltitudeAvg < ALTITUDE2)
+          || (loopStart - (lastStateChangeTime) > DISREEF2TIME)) {
         pwmExecute(NICHROME_PIN2, PWM_VOLTAGE2);
         state = FULL_DISREEF;
+        lastStateChangeTime = loopStart;
 
         writeStateChangeData(file, loopStart, state, 
                              pressure, altitude, currentAltitudeAvg, 
@@ -273,6 +323,7 @@ void loop() {
     case FULL_DISREEF:
       if (abs(currentDeltaAvg) < 0.05) {
         state = LANDED;
+        lastStateChangeTime = loopStart;
 
         writeStateChangeData(file, loopStart, state, 
                              pressure, altitude, currentAltitudeAvg, 
@@ -452,32 +503,37 @@ uint8_t* u16_to_u8(const uint16_t u16, uint8_t buff[2]) {
   return buff;
 }
 
-void updateFlash(unsigned long timestamp) {
+void updateData(unsigned long timestamp) {
+  if(boardVersion == 0) {
+    const auto t = imu.readout();
+    currentData.accelX = t.accel_xout;
+    currentData.accelY = t.accel_yout;
+    currentData.accelZ = t.accel_zout;
+    currentData.cutSense1 = analogRead(CUT_SENSE1);
+    currentData.cutSense2 = analogRead(CUT_SENSE2);
+    currentData.currentSense = analogRead(CURRENT_SENSE);
+  }
+
+  currentData.state = state;
   currentData.timestamp = timestamp;
   currentData.pressure = baro.GetPres();
   currentData.temperature = baro.GetTemp();
-  currentData.accelX = 0;
-  currentData.accelY = 0;
-  currentData.accelZ = 0;
-  currentData.battSense = analogRead(A4);
-  currentData.cutSense1 = analogRead(A5);
-  currentData.cutSense2 = analogRead(A0);
-  currentData.currentSense = analogRead(A1);
-  currentData.photoresistor = analogRead(A3);
+  currentData.battSense = analogRead(VOLTAGE_DIVIDER);
+  currentData.photoresistor = analogRead(PHOTO_PIN);
+}
+
+void updateFlash() {
 
   if (flashLocation % 0x40000 == 0) {
-    Serial.print("Erased sector at location ");
-    Serial.println(flashLocation);
     flash.erase_sector_start(flashLocation / 0x40000);
     while(flash.is_write_in_progress()) { delay(1); }
   }
 
   // Write things, increment location
-  Serial.print("Writing at location ");
-  Serial.println(flashLocation);
   uint8_t buff2[2];
   uint8_t buff4[4];
   uint8_t emptyBuff[1] = {0};
+  uint8_t state_ = state;
   flash.write(flashLocation, u32_to_u8(currentData.timestamp, buff4), 4);
   flash.write(flashLocation + 4, u32_to_u8(currentData.pressure, buff4), 4);
   flash.write(flashLocation + 8, float_to_u8(currentData.temperature, buff4), 4);
@@ -489,15 +545,8 @@ void updateFlash(unsigned long timestamp) {
   flash.write(flashLocation + 28, u16_to_u8(currentData.cutSense2, buff2), 2);
   flash.write(flashLocation + 30, u16_to_u8(currentData.currentSense, buff2), 2);
   flash.write(flashLocation + 32, u16_to_u8(currentData.photoresistor, buff2), 2);
-  flash.write(flashLocation + 34, emptyBuff, 1);
-
-  uint8_t readBuff[64] = {};
-  flash.read_start(flashLocation, readBuff, 64);
-  for (int i=0; i<64; i++) {
-    Serial.print(readBuff[i], BIN);
-    Serial.print(" ");
-  }
-  Serial.println();
+  flash.write(flashLocation + 34, &state_, 1);
+  flash.write(flashLocation + 35, emptyBuff, 1);
 
   flashLocation += 64;
 }
