@@ -24,6 +24,8 @@ Data currentData;
 void setup() {
   Serial.begin(115200);
   while (!Serial) { delay(10); }
+
+  delay(5000);
   
   SPI.begin();
   SPI.setBitOrder(MSBFIRST);
