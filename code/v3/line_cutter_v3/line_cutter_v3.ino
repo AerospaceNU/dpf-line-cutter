@@ -1,7 +1,6 @@
 #include <Adafruit_LittleFS.h>
 #include <bluefruit.h>
 #include <InternalFileSystem.h>
-#include <SPI.h>
 #include <Wire.h>
 #include "MovingAvg.h"
 #include "MS5xxx.h"
