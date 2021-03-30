@@ -1,6 +1,7 @@
 /*
  * S25FL
  */
+#pragma once
 
 #include <string.h>
 #include <Arduino.h>
@@ -24,14 +25,13 @@
 #define SECTOR_SIZE_BYTES 262144
 #define FLASH_SIZE_BYTES 0x8000000
 
-int CS0 = 8;
-
-#define CHIP_SELECT digitalWrite(CS0, LOW);
-#define CHIP_DESELECT digitalWrite(CS0, HIGH);
+#define CHIP_SELECT digitalWrite(csPin, LOW);
+#define CHIP_DESELECT digitalWrite(csPin, HIGH);
 
 class S25FL
 {
  public:
+  S25FL(uint8_t csPin);
   bool write_disable();
   bool write_enable();
   bool is_write_in_progress();
@@ -43,4 +43,6 @@ class S25FL
   bool is_write_completed();
   bool is_erase_complete();
   bool check_connected();
+ private:
+  uint8_t csPin;
 };
