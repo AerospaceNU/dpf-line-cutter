@@ -23,33 +23,33 @@ char* stateStrings[6] = { "WAITING","ARMED","DEPLOYED","PARTIAL_DISREEF","FULL_D
 
 // Pins
 const int VOLTAGE_DIVIDER = A4;
-const int NICHROME_PIN1 = 11;
-const int NICHROME_PIN2 = 12;
-const int PHOTO_PIN = A3;
+const int NICHROME_PIN1 =   11;
+const int NICHROME_PIN2 =   12;
+const int PHOTO_PIN =       A3;
 const int CALIBRATION_LED = PIN_LED2;
-const int CUT_SENSE1 = A5;
-const int CUT_SENSE2 = A0;
-const int CURRENT_SENSE = A1;
+const int CUT_SENSE1 =      A5;
+const int CUT_SENSE2 =      A0;
+const int CURRENT_SENSE =   A1;
 const int CHIP_SELECT_PIN = 8;
 
 // VARIABLES WHICH MUST BE SET
 // Requirements for state transitions
-const double LIMIT_VELOCITY = -3.0;  // meters/second
-const double ALTITUDE1 = 243;  // Disreefing altitudes, in meters (higher one first!!)
-const double ALTITUDE2 = 210;
-const int DISREEF1TIME = 12000;  // Maximum delay after ejection is detected before the first line is cut.
-const int DISREEF2TIME = 5000;  // Maximum delay after the first line is cut before the second line is cut.
+const double LIMIT_VELOCITY =   -3.0;  // meters/second
+const double ALTITUDE1 =        243;  // Disreefing altitudes, in meters (higher one first!!)
+const double ALTITUDE2 =        210;
+const int DISREEF1TIME =        12000;  // Max delay after ejection before first disreef, in milliseconds
+const int DISREEF2TIME =        5000;  // Max delay after first disreef before second disreef, in milliseconds
 // PWM settings
-const double PWM_VOLTAGE1 = 2.0;  // Voltage applied to nichrome for line cuts
-const double PWM_VOLTAGE2 = 2.0;
-const int PWM_DURATION = 2500;  // Length of PWM, in milliseconds
+const double PWM_VOLTAGE1 =     2.0;  // Voltage applied to nichrome for line cuts
+const double PWM_VOLTAGE2 =     2.0;
+const int PWM_DURATION =        2500;  // Length of PWM, in milliseconds
 // Photoresistor memes
-const int LIGHT_THRESHOLD = 200;  // Anything above this value is considered to be outside of the tube
-const int LIGHT_TRIGGER_TIME = 2000;  // Continuous time interval for which it must be light for board to decide it's been ejected
+const int LIGHT_THRESHOLD =     400;  // Anything above this value is considered to be outside of tube
+const int LIGHT_TRIGGER_TIME =  2000;  // Continuous time that it must be light for board to detect deployment, in milliseconds
 
 // Barometer and moving averages
 MS5xxx baro(&Wire);
-int ARRAY_SIZE = 40;  // 2 seconds
+int ARRAY_SIZE = 40;  // 2 seconds at 20Hz
 MovingAvg altitudeReadings(ARRAY_SIZE);  // Store recent altitude readings
 MovingAvg altitudeAvgDeltas(ARRAY_SIZE);  // Store differences between avgs calculated using ^
 // Altitude calculation
@@ -101,6 +101,10 @@ struct Data {
   uint8_t state;
   uint32_t timestamp;
   uint32_t pressure;
+  float altitude;
+  float avgAltitude;
+  float deltaAltitude;
+  float avgDeltaAltitude;
   float temperature;
   float accelX;
   float accelY;
@@ -192,8 +196,6 @@ void setup() {
   // Set up and start advertising
   startAdv();
   Serial.println("Started advertising.");
-
-  lastStateChange = millis();
 }
 
 

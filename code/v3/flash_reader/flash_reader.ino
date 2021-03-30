@@ -31,6 +31,8 @@ void setup() {
   SPI.setDataMode(SPI_MODE0);
   pinMode(8, OUTPUT);
   digitalWrite(8, HIGH);
+
+  delay(10000);  // Give time to connect with CoolTerm or similar
 }
 
 void loop() {
