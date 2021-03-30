@@ -1,0 +1,6 @@
+{
+    "configuration": "softdevice=s140v6,debug=l0",
+    "board": "adafruit:nrf52:feather52840",
+    "port": "COM30",
+    "sketch": "flash_reader.ino"
+}
