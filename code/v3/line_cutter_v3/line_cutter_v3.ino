@@ -62,7 +62,7 @@ using namespace Adafruit_LittleFS_Namespace;
 const char* STATE_FILE = "stateChangeLog.txt";
 const char* ID_FILE = "ID.txt";
 File file(InternalFS);
-S25FL flash(8);  // Starts Flash class and initializes SPI
+S25FL flash(CHIP_SELECT_PIN);  // Starts Flash class and initializes SPI
 unsigned long flashLocation;  // Starting location to write to
 unsigned long flashLocationLocation;  // Keeps track of how much of flash has been written
 
