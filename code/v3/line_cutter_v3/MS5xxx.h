@@ -45,29 +45,29 @@
 class MS5xxx
 {
   protected:
-	unsigned int C[8];
-	double P;
-	double TEMP;
-	char i2caddr;
-	TwoWire *_Wire;
-	
-	unsigned char send_cmd(unsigned char aCMD);
-	unsigned long read_adc(unsigned char aCMD);
-	
+    unsigned int C[8];
+    double P;
+    double TEMP;
+    char i2caddr;
+    TwoWire *_Wire;
+
+    unsigned char send_cmd(unsigned char aCMD);
+    unsigned long read_adc(unsigned char aCMD);
+
   public:
     MS5xxx(TwoWire *aWire);
     void setI2Caddr(char aAddr);
     byte connect();
-    
+
     void ReadProm();
     void Readout();
 
-    unsigned int Calc_CRC4(unsigned char poly=0x30);
+    unsigned int Calc_CRC4(unsigned char poly = 0x30);
     unsigned int Read_CRC4();
     unsigned char CRCcodeTest();
 
     unsigned int Read_C(unsigned int index);
-    
+
     double GetTemp();// Get the temp in deg C. Must call ReadProm once to calibrate, and Readout at least once, before calling this.
     double GetPres(); // Get the pressure in pA. Must call ReadProm once to calibrate, and Readout at least once, before calling this.
 };

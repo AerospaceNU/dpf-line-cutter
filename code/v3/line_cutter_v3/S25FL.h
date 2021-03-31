@@ -1,6 +1,6 @@
 /*
- * S25FL
- */
+   S25FL
+*/
 #pragma once
 
 #include <string.h>
@@ -30,19 +30,19 @@
 
 class S25FL
 {
- public:
-  S25FL(uint8_t csPin);
-  bool write_disable();
-  bool write_enable();
-  bool is_write_in_progress();
-  void init();
-  bool read_start(uint32_t startLoc, uint8_t *pData, uint32_t numBytes);
-  bool write(uint32_t startLoc, uint8_t *data, uint32_t numBytes);
-  bool erase_sector_start(uint32_t sectorNum);
-  bool erase_chip_start();
-  bool is_write_completed();
-  bool is_erase_complete();
-  bool check_connected();
- private:
-  uint8_t csPin;
+  public:
+    S25FL(uint8_t csPin);
+    bool write_disable();
+    bool write_enable();
+    bool is_write_in_progress();
+    void init();
+    bool read_start(uint32_t startLoc, uint8_t *pData, uint32_t numBytes);
+    bool write(uint32_t startLoc, uint8_t *data, uint32_t numBytes);
+    bool erase_sector_start(uint32_t sectorNum);
+    bool erase_chip_start();
+    bool is_write_completed();
+    bool is_erase_complete();
+    bool check_connected();
+  private:
+    uint8_t csPin;
 };
