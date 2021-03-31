@@ -69,13 +69,11 @@ unsigned long flashLocationLocation;  // Keeps track of how much of flash has be
 // Variables used in loop()
 const int DELAY = 50;  // milliseconds
 unsigned long loopStart = 0;
-unsigned long loopEnd = 0;
 unsigned long lastBLE = 0;
 unsigned long lastStateChange = 0;
 unsigned long lastDark = 0; // Last time it was below LIGHT_THRESHHOLD
 unsigned long cutStart1 = 0;
 unsigned long cutStart2 = 0;
-uint8_t bleIdx = 0; // Index of data to send
 int32_t pressure;  // pascals
 double altitude;  // meters
 double previousAltitudeAvg;
@@ -96,7 +94,7 @@ void    printHex   (const uint8_t * data, const uint32_t numBytes);
 // Packet buffer
 extern uint8_t packetbuffer[];
 
-// For writing data to flash
+// For writing data to flash & state transition log
 struct Data {
   uint8_t state;
   uint32_t timestamp;
@@ -198,6 +196,9 @@ void setup() {
   // Set up and start advertising
   startAdv();
   Serial.println("Started advertising.");
+
+  setFlashLocation();
+  // TODO: record flight variables/metadata
 }
 
 
@@ -229,9 +230,7 @@ void loop() {
   // Update data, send to BLE centrals and flash
   updateDataStruct();
   sendBluetoothData();
-  if (flashLocation < 0x8000000) {
-    updateFlash();
-  }
+  updateFlash();
 
   if (cutStart1 > 0 && loopStart - cutStart1 > PWM_DURATION) {
     hardwarePWM1.writePin(NICHROME_PIN1, 0);
@@ -281,8 +280,6 @@ void loop() {
     default:
       Serial.println("Something has gone horribly wrong if none of the states match.");
   }
-  
-  loopEnd = millis();
 }
 
 
@@ -316,6 +313,21 @@ void startAdv(void)
   Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
   Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds  
+}
+
+// TODO: search linearly through last non-empty sector; don't just skip to empty one
+void setFlashLocation() {
+  uint8_t* sector1;
+  flash.read_start(0, sector1, 64);
+  flashLocationLocation = 1;
+  if (sector1[0] == 0) {  // If it wasn't bulk erased recently
+    while (flashLocationLocation < 64 && sector1[flashLocationLocation] == 0) {
+      flashLocationLocation++;
+    }
+  } else {
+    flash.write(0, 0, 1);
+  }
+  flashLocation = flashLocationLocation * 0x40000;
 }
 
 // Average several readings to get "sea level" pressure
@@ -362,6 +374,16 @@ int pwmLevel(double targetVoltage) {
   double vbat =  3.6 * (vbatAnalog / 1023.0);
   // Find proportion of vbat needed to apply target voltage, then make out of 255 for analog write
   return (targetVoltage / vbat) * 255;
+}
+
+void progressState() {
+  Serial.print(state);
+  Serial.print(" -> ");
+  Serial.println(state+1);
+  Serial.println(loopStart);
+  writeStateChangeData();
+  lastStateChange = loopStart;
+  state++;
 }
 
 void writeStateChangeData() {
@@ -421,24 +443,16 @@ void sendBluetoothData() {
 }
 
 void updateFlash() {
-  // If flashLocation moves into a new sector, update meta location
-  if (flashLocation % 0x40000 == 0) {
-    flash.write(flashLocationLocation, 0, 1);
-    flashLocationLocation++;
+  if (flashLocation < 0x8000000) {
+    // If flashLocation moves into a new sector, update meta location
+    if (flashLocation % 0x40000 == 0) {
+      flash.write(flashLocationLocation, 0, 1);
+      flashLocationLocation++;
+    }
+    
+    // Write things, increment location
+    uint8_t* buffer = ( uint8_t* ) &currentData;
+    flash.write(flashLocation, buffer, DATA_SIZE);
+    flashLocation += 64;
   }
-  
-  // Write things, increment location
-  uint8_t* buffer = ( uint8_t* ) &currentData;
-  flash.write(flashLocation, buffer, DATA_SIZE);
-  flashLocation += 64;
-}
-
-void progressState() {
-  Serial.print(state);
-  Serial.print(" -> ");
-  Serial.println(state+1);
-  Serial.println(loopStart);
-  writeStateChangeData();
-  lastStateChange = loopStart;
-  state++;
 }
