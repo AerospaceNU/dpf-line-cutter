@@ -6,8 +6,8 @@ Wire the nRF52 to a Pi 2+ with the following:
 
 ```
 GND -> GND
-SWDIO/TMS -> Physical pin 18 (BCM 22)
-SWCLK/TCK -> Physical pin 24 (BCM 25)
+SWDIO/TMS -> Physical pin 18 (BCM 24)
+SWCLK/TCK -> Physical pin 22 (BCM 25)
 nRESET -> Phsyical pin 12
 ```
 
