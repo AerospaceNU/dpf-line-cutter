@@ -38,7 +38,6 @@ byte MS5xxx::send_cmd(byte aCMD)
 }
 
 uint8_t MS5xxx::connect() {
-  _Wire->begin();
   _Wire->beginTransmission(i2caddr);
   uint8_t ret = _Wire->endTransmission(true);
   return ret;

@@ -69,7 +69,6 @@ unsigned long flashLocationLocation;  // Keeps track of how much of flash has be
 // Variables used in loop()
 const int DELAY = 50;  // milliseconds
 unsigned long loopStart = 0;
-unsigned long lastBLE = 0;
 unsigned long lastStateChange = 0;
 unsigned long lastDark = 0; // Last time it was below LIGHT_THRESHHOLD
 unsigned long cutStart1 = 0;
@@ -135,15 +134,16 @@ void setup() {
   analogReadResolution(10);  // Read values in range [0, 1023]
 
   Serial.begin(115200);
-  //while (!Serial) { delay(10); }
+  while (!Serial) { delay(10); }
 
+  Wire.begin(); // pain
   // Connect to accelerometer
   while (!imu.begin()) {
     Serial.println("Error connecting to accelerometer...");
   }
 
   // Connect to barometer
-  while ( baro.connect() > 0 ) { // This calls Wire.begin() internally :scrunge:
+  while ( baro.connect() > 0 ) {
     Serial.println("Error connecting to barometer...");
     delay(500);
   }
@@ -198,7 +198,7 @@ void setup() {
   startAdv();
   Serial.println("Started advertising.");
 
-  setFlashLocation();
+  //setFlashLocation();
   // TODO: record flight variables/metadata
 }
 
@@ -230,7 +230,7 @@ void loop() {
 
   // Update data, send to BLE centrals and flash
   updateDataStruct();
-  updateFlash();
+  //updateFlash();
 
   while (bleuart.available()) {
     uint8_t ch;
