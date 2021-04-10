@@ -262,10 +262,10 @@ void loop() {
       if (armed == false) {
         state = WAITING;
       }
-      if (loopStart - lastDark > LIGHT_TRIGGER_TIME) {
-        InternalFS.remove(STATE_FILE);
-        progressState();
-      }
+//      if (loopStart - lastDark > LIGHT_TRIGGER_TIME) {
+//        InternalFS.remove(STATE_FILE);
+//        progressState();
+//      }
       break;
     case DEPLOYED:
       if (currentAltitudeAvg < ALTITUDE1
@@ -316,23 +316,26 @@ void parse_command() {
 
   // if user typed '!cut', execute line-cutting
   if (command.substring(0, 4).equals("help")) {
-    bleuart.write("Valid commands:\n");
-    bleuart.write("!arm, !disarm, !vars, !data");
+    bleuart.print("Valid commands:\n");
+    bleuart.print("!arm\n");
+    bleuart.print("!disarm\n");
+    bleuart.print("!vars\n");
+    bleuart.print("!data\n");
   }
   else if (command.substring(0, 3).equals("arm")) {
     if (state == WAITING) {
       armed = true;
-      bleuart.write("Armed.");
+      bleuart.print("Armed.\n");
     } else {
-      bleuart.write("Not in waiting state.");
+      bleuart.print("Not in waiting state.\n");
     }
   }
   else if (command.substring(0, 6).equals("disarm")) {
-    if (state = ARMED) {
+    if (state == ARMED) {
       armed = false;
-      bleuart.write("Disarmed.");
+      bleuart.print("Disarmed.\n");
     } else {
-      bleuart.write("Not in armed state.");
+      bleuart.print("Not in armed state.\n");
     }
   }
   else if (command.substring(0, 4).equals("vars")) {
@@ -342,7 +345,7 @@ void parse_command() {
     sendSensorData();
   }
   else {
-    bleuart.write("Not a valid command.\n");
+    bleuart.print("Not a valid command.\n");
     return;
   }
 }
@@ -483,27 +486,29 @@ void updateDataStruct() {
 
 void sendSensorData() {
   bleuart.printf("State [%s]\n", stateStrings[currentData.state]);
-  bleuart.printf("Time [%i] ", currentData.timestamp);
-
-  bleuart.printf("Press [%u Pa] ", currentData.pressure);
+  bleuart.printf("Time [%i]\n", currentData.timestamp);
+  bleuart.printf("Press [%u Pa]\n", currentData.pressure);
   bleuart.printf("Temp [%f C]\n", currentData.temperature);
-  bleuart.printf("Ax [%f] ", currentData.accelX);
-  bleuart.printf("Ay [%f] ", currentData.accelY);
+  bleuart.printf("Ax [%f]\n", currentData.accelX);
+  bleuart.printf("Ay [%f]\n", currentData.accelY);
   bleuart.printf("Az [%f]\n", currentData.accelZ);
-
-  bleuart.printf("Batt [%f] ", currentData.battSense * 2.0 * 3.6 / 1023.0);
-  bleuart.printf("CutSens1 [%li] ", currentData.cutSense1);
+  bleuart.printf("Batt [%f]\n", currentData.battSense * 2.0 * 3.6 / 1023.0);
+  bleuart.printf("CutSens1 [%li]\n", currentData.cutSense1);
   bleuart.printf("CutSens2 [%li]\n", currentData.cutSense2);
-  bleuart.printf("CurrSens [%li] ", currentData.currentSense);
+  bleuart.printf("CurrSens [%li]\n", currentData.currentSense);
   bleuart.printf("Photores [%li]\n", currentData.photoresistor);
 }
 
 void sendFlightVariables() {
-  bleuart.printf("Cut1Alt [%f m] Cut2Alt [%f m]\n", ALTITUDE1, ALTITUDE2);
-  bleuart.printf("Cut1Time [%u ms] Cut2Time [%u ms]\n", DISREEF1TIME, DISREEF2TIME);
-  bleuart.printf("VoltPWM1 [%f V] VoltPWM2 [%u V]\n", PWM_VOLTAGE1, PWM_VOLTAGE2);
+  bleuart.printf("Cut1Alt [%f m]\n", ALTITUDE1);
+  bleuart.printf("Cut2Alt [%f m]\n", ALTITUDE2);
+  bleuart.printf("Cut1Time [%u ms]\n", DISREEF1TIME);
+  bleuart.printf("Cut2Time [%u ms]\n", DISREEF2TIME);
+  bleuart.printf("VoltPWM1 [%f V]\n", PWM_VOLTAGE1);
+  bleuart.printf("VoltPWM2 [%u V]\n", PWM_VOLTAGE2);
   bleuart.printf("TimePWM [%u ms]\n", PWM_DURATION);
-  bleuart.printf("LightThreshold [%u] LightTime [%u ms]\n", LIGHT_THRESHOLD, LIGHT_TRIGGER_TIME);
+  bleuart.printf("LightThreshold [%u]\n", LIGHT_THRESHOLD);
+  bleuart.printf("LightTime [%u ms]\n", LIGHT_TRIGGER_TIME);
 }
 
 void updateFlash() {
