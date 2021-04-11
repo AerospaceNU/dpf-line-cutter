@@ -10,9 +10,9 @@ Code and schematics for the line cutter.
   * `v2`: Code for mixed perfboard and PCB line cutters.
   * `v3`: Code for current PCB line cutters.
 * `docs`: More detailed documentation, see below for list.
-* `schematic`
+* `schematic`:
 
 ## Documentation
 Code documentation applies to the latest version (v1/v2 are not compatible with current line cutters).
-* `nrf52_openocd`
-* `SIGNALS`
+* `nrf52_openocd`: Instructions for programming NRF52 chips with OpenOCD.
+* `SIGNALS`: Description of current board.
