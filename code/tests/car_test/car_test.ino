@@ -19,14 +19,14 @@ void    printHex   (const uint8_t * data, const uint32_t numBytes);
 extern uint8_t packetbuffer[];
 
 // pins for nichrome
-const int VOLTAGE_DIVIDER = A0;
-const int PIN1 = A1;
-const int PIN2 = A2;
+const int VOLTAGE_DIVIDER = A4;
+const int PIN1 = 11;
+const int PIN2 = 12;
 
 // INCREASE THESE IF IT DOESN'T CUT FOR SOME REASON
-const double POWER_LEVEL1 = 0.3;  // PWM uses this voltages to turn on nichrome
-const double POWER_LEVEL2 = POWER_LEVEL1;
-const int PWM_DURATION = 2000;  // length of pwm in milliseconds
+const double POWER_LEVEL1 = 0.8;  // PWM uses this voltages to turn on nichrome
+const double POWER_LEVEL2 = 0.8;
+const int PWM_DURATION = 3000;  // length of pwm in milliseconds
 
 // Manually interact with HardwarePWM
 // We can only add ONE pin per HardwarePWM; adding more makes them randomly flash
@@ -49,7 +49,7 @@ void setup(void)
   
   Bluefruit.begin();
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName("Condor");
+  Bluefruit.setName("Line Cutter");
 
   // To be consistent OTA DFU should be added first if it exists
   bledfu.begin();

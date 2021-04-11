@@ -63,8 +63,8 @@ const char* STATE_FILE = "stateChangeLog.txt";
 const char* ID_FILE = "ID.txt";
 File file(InternalFS);
 S25FL flash(CHIP_SELECT_PIN);  // Starts Flash class and initializes SPI
-unsigned long flashLocation;  // Starting location to write to
-unsigned long flashLocationLocation;  // Keeps track of how much of flash has been written
+unsigned long flashLocation;  // Next location to write data to
+unsigned long flashLocationLocation;  // Next location to write flash location to
 
 // Variables used in loop()
 const int DELAY = 50;  // milliseconds
@@ -94,6 +94,9 @@ void    printHex   (const uint8_t * data, const uint32_t numBytes);
 // Packet buffer
 extern uint8_t packetbuffer[];
 
+IMU imu{}; // accelerometer
+imu_out_t accelData;
+
 // For writing data to flash & state transition log
 struct Data {
   uint8_t state;
@@ -116,9 +119,6 @@ struct Data {
 Data currentData;
 const int DATA_SIZE = 51;
 
-IMU imu{}; // accelerometer
-imu_out_t accelData;
-
 /*****************************
           SETUP/LOOP
  ****************************/
@@ -136,12 +136,11 @@ void setup() {
   Serial.begin(115200);
   while (!Serial) { delay(10); }
 
-  Wire.begin(); // pain
+  Wire.begin();
   // Connect to accelerometer
   while (!imu.begin()) {
     Serial.println("Error connecting to accelerometer...");
   }
-
   // Connect to barometer
   while ( baro.connect() > 0 ) {
     Serial.println("Error connecting to barometer...");
@@ -198,7 +197,7 @@ void setup() {
   startAdv();
   Serial.println("Started advertising.");
 
-  //setFlashLocation();
+  setFlashLocation();
   // TODO: record flight variables/metadata
 }
 
@@ -228,7 +227,7 @@ void loop() {
   // Update accelerometer
   accelData = imu.readout();
 
-  // Update data, send to BLE centrals and flash
+  // Update data struct, send to BLE central and flash
   updateDataStruct();
   //updateFlash();
 
@@ -305,7 +304,7 @@ void parse_command() {
   uint8_t char_array[8];
   int current_num = 0;
 
-  // read all text after '!' which started command
+  // read text after '!' which started command
   while ( bleuart.available() && current_num < 8 )
   {
     char_array[current_num] = (uint8_t) bleuart.read();
@@ -378,24 +377,45 @@ void startAdv(void)
   Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds
 }
 
-// TODO: search linearly through last non-empty sector; don't just skip to next empty one
 void setFlashLocation() {
-  uint8_t* sector1;
+  Serial.println("Setting flash location... ");
+  uint8_t sector1[64];
   flash.read_start(0, sector1, 64);
   flashLocationLocation = 1;
   if (sector1[0] == 0) {  // If it wasn't bulk erased recently
     while (flashLocationLocation < 64 && sector1[flashLocationLocation] == 0) {
       flashLocationLocation++;
     }
+    Serial.print("Flash is not empty, ");
+    Serial.print(flashLocationLocation - 2);
+    Serial.print(" data sectors full.");
   } else {
-    flash.write(0, 0, 1);
+    Serial.println("Flash is empty, writing metadata.");
+    flash.write(0, 0, 1); // Indicate that there is data in the metadata sector
   }
-  flashLocation = flashLocationLocation * 0x40000;
+  
+  flashLocation = (flashLocationLocation - 1) * 0x40000;  // Go to start of last non-empty sector
+  // Linear search
+  bool foundLocation = false;
+  uint8_t sectorPortion[0x4000];
+  int i = 0;
+  while (!foundLocation && i < 0x40000) {
+    if (i % 0x4000 == 0) {  // Read large blocks at a time
+      flash.read_start(flashLocation+i, sectorPortion, 0x4000);
+    }
+    foundLocation = (sectorPortion[i % 0x4000] == 0xff);  // Access the state part of the data struct
+    i += 64;
+  }
+  flashLocation = flashLocation + i;
+  Serial.print("Empty flash location found in sector ");
+  Serial.print(flashLocation / 0x40000);
+  Serial.print(" at position ");
+  Serial.println(flashLocation % 0x40000);
 }
 
 // Average several readings to get "sea level" pressure
 double calibrateSeaLevel(int samples) {
-  Serial.println("Reading current pressure...");
+  Serial.print("Reading current pressure... ");
   digitalWrite(CALIBRATION_LED, HIGH);
   int sum = 0;
   for (int i = 0; i < samples; i++) {
@@ -406,6 +426,7 @@ double calibrateSeaLevel(int samples) {
   Serial.println("Done.");
   digitalWrite(CALIBRATION_LED, LOW);
   return sum / (double) samples;
+  Serial.println("Done");
 }
 
 // Convert pressure (in pascals) to altitude (in meters) using sea level pressure
@@ -453,12 +474,13 @@ void writeStateChangeData() {
   if ( file.open(STATE_FILE, FILE_O_WRITE) ) {
     uint8_t* buffer = ( uint8_t* ) &currentData;
 
-    Serial.println("Writing data to file.");
+    Serial.print("Writing data to file... ");
     file.write(state);
     file.write(" -> ");
     file.write(state + 1);
     file.write(buffer, DATA_SIZE);
     file.close();
+    Serial.println("Done");
   } else {
     Serial.print("Failed to write ");
     Serial.println(STATE_FILE);
