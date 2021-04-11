@@ -134,7 +134,9 @@ void setup() {
   analogReadResolution(10);  // Read values in range [0, 1023]
 
   Serial.begin(115200);
-  while (!Serial) { delay(10); }
+  while (!Serial) {
+    delay(10);
+  }
 
   Wire.begin();
   // Connect to accelerometer
@@ -229,7 +231,7 @@ void loop() {
 
   // Update data struct, send to BLE central and flash
   updateDataStruct();
-  //updateFlash();
+  updateFlash();
 
   while (bleuart.available()) {
     uint8_t ch;
@@ -261,10 +263,10 @@ void loop() {
       if (armed == false) {
         state = WAITING;
       }
-//      if (loopStart - lastDark > LIGHT_TRIGGER_TIME) {
-//        InternalFS.remove(STATE_FILE);
-//        progressState();
-//      }
+      //      if (loopStart - lastDark > LIGHT_TRIGGER_TIME) {
+      //        InternalFS.remove(STATE_FILE);
+      //        progressState();
+      //      }
       break;
     case DEPLOYED:
       if (currentAltitudeAvg < ALTITUDE1
@@ -389,25 +391,26 @@ void setFlashLocation() {
     Serial.print("Flash is not empty, ");
     Serial.print(flashLocationLocation - 2);
     Serial.print(" data sectors full.");
+
+    flashLocation = (flashLocationLocation - 1) * 0x40000;  // Go to start of last non-empty sector
+    // Linear search
+    bool foundLocation = false;
+    uint8_t sectorPortion[4096];
+    int i = 0;
+    while (!foundLocation && i < 0x40000) {
+      if (i % 4096 == 0) {  // Read large blocks at a time
+        flash.read_start(flashLocation + i, sectorPortion, 4096);
+      }
+      foundLocation = (sectorPortion[i % 4096] == 0xff);  // Access the state part of the data struct
+      i += 64;
+    }
+    flashLocation = flashLocation + i;
   } else {
     Serial.println("Flash is empty, writing metadata.");
     flash.write(0, 0, 1); // Indicate that there is data in the metadata sector
+    flashLocation = 0x40000;
   }
-  
-  flashLocation = (flashLocationLocation - 1) * 0x40000;  // Go to start of last non-empty sector
-  // Linear search
-  bool foundLocation = false;
-  uint8_t sectorPortion[0x4000];
-  int i = 0;
-  while (!foundLocation && i < 0x40000) {
-    if (i % 0x4000 == 0) {  // Read large blocks at a time
-      flash.read_start(flashLocation+i, sectorPortion, 0x4000);
-    }
-    foundLocation = (sectorPortion[i % 0x4000] == 0xff);  // Access the state part of the data struct
-    i += 64;
-  }
-  flashLocation = flashLocation + i;
-  Serial.print("Empty flash location found in sector ");
+  Serial.print("Next flash write in sector ");
   Serial.print(flashLocation / 0x40000);
   Serial.print(" at position ");
   Serial.println(flashLocation % 0x40000);
@@ -507,7 +510,7 @@ void updateDataStruct() {
 }
 
 void sendSensorData() {
-  bleuart.printf("State [%s]\n", stateStrings[currentData.state]);
+  bleuart.printf("State [%s]\n", currentData.state);
   bleuart.printf("Time [%i]\n", currentData.timestamp);
   bleuart.printf("Press [%u Pa]\n", currentData.pressure);
   bleuart.printf("Temp [%f C]\n", currentData.temperature);

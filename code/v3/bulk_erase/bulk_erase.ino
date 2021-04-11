@@ -5,6 +5,9 @@ S25FL flash(CHIP_SELECT_PIN);  // Starts Flash class and initializes SPI
 bool completed = false;
 
 void setup() {
+  Serial.begin(115200);
+  while (!Serial) { delay(10); }
+  
   SPI.begin();
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV8);  // Divide the clock by 8
