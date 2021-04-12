@@ -10,7 +10,7 @@ The line cutter is a system for deploying a single parachute as both drogue and 
   * `v2`: Code for mixed perfboard and PCB line cutters.
   * `v3`: Code for current PCB line cutters.
 * `docs`: More detailed documentation, see below for list.
-* `schematic`:
+* `schematic`: ECAD files for the line cutter hardware. Contains schematics for all line cutter hardware. Folder structure is described in the [readme](schematic/README.md)
 
 ## Documentation
 Code documentation applies to the latest version (v1/v2 are not compatible with current line cutters).
