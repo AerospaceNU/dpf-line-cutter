@@ -389,8 +389,8 @@ void setFlashLocation() {
       flashLocationLocation++;
     }
     Serial.print("Flash is not empty, ");
-    Serial.print(flashLocationLocation - 2);
-    Serial.print(" data sectors full.");
+    Serial.print(flashLocationLocation - 2);  // Subtract extra 1 because 1 sector is metadata
+    Serial.print("/63 flight data sectors full.");
 
     flashLocation = (flashLocationLocation - 1) * 0x40000;  // Go to start of last non-empty sector
     // Linear search
@@ -404,7 +404,7 @@ void setFlashLocation() {
       foundLocation = (sectorPortion[i % 4096] == 0xff);  // Access the state part of the data struct
       i += 64;
     }
-    flashLocation = flashLocation + i;
+    flashLocation = flashLocation + i - 64;  // It overshoots by one position
   } else {
     Serial.println("Flash is empty, writing metadata.");
     flash.write(0, 0, 1); // Indicate that there is data in the metadata sector
@@ -537,7 +537,7 @@ void sendFlightVariables() {
 }
 
 void updateFlash() {
-  if (flashLocation < 0x8000000) {
+  if (flashLocation < 0x1000000) {
     // If flashLocation moves into a new sector, update meta location
     if (flashLocation % 0x40000 == 0) {
       flash.write(flashLocationLocation, 0, 1);
