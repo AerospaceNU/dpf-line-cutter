@@ -14,7 +14,7 @@ The line cutter is a system for deploying a single parachute as both drogue and 
 
 ## Documentation
 Code documentation applies to the latest version (v1/v2 are not compatible with current line cutters).
-* `FLASH`: Procedure for logging data to flash on line cutters.
-* `SIGNALS`: Description of current board.
-* `STATES`: Description of state machine.
-* `nrf52_openocd`: Instructions for programming NRF52 chips with OpenOCD.
+* [`FLASH`](docs/FLASH.md): Procedure for logging data to flash on line cutters.
+* [`SIGNALS`](docs/SIGNALS.md): Description of current board.
+* [`STATES`](docs/STATES.md): Description of state machine.
+* [`nrf52_openocd`](docs/nrf52_openocd.md): Instructions for programming NRF52 chips with OpenOCD.
