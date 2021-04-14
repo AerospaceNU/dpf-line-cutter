@@ -5,6 +5,7 @@ The line cutter is a system for deploying a single parachute as both drogue and 
 * `code`: Line cutter code and flight data analyses.
   * `launch archive`: Raw flight data and summaries of successes/failures from past line cutter flights. Subfolders should be named with ISO date and launch site.
   * `libraries and drivers`: Should be obsolete soon (drivers etc. will be published as Arduino libraries).
+    * `openocd_windows.zip`: Windows build of openOCD with nrf52940 bootloader and cheap st-link config packaged.
   * `tests`: Code that is useful for testing various line cutter features across hardware versions.
   * `v1`: Code for v1 perfboard line cutters.
   * `v2`: Code for mixed perfboard and PCB line cutters.
