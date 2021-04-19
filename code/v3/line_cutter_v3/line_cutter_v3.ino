@@ -65,6 +65,8 @@ File file(InternalFS);
 S25FL flash(CHIP_SELECT_PIN);  // Starts Flash class and initializes SPI
 unsigned long flashLocation;  // Next location to write data to
 unsigned long flashLocationLocation;  // Next location to write flash location to
+uint8_t metadata[64];
+uint8_t sectorPortion[4096];
 
 // Variables used in loop()
 const int DELAY = 50;  // milliseconds
@@ -381,21 +383,19 @@ void startAdv(void)
 
 void setFlashLocation() {
   Serial.println("Setting flash location... ");
-  uint8_t sector1[64];
-  flash.read_start(0, sector1, 64);
+  flash.read_start(0, metadata, 64);
   flashLocationLocation = 1;
-  if (sector1[0] == 0) {  // If it wasn't bulk erased recently
-    while (flashLocationLocation < 64 && sector1[flashLocationLocation] == 0) {
+  if (metadata[0] == 0) {  // If it wasn't bulk erased recently
+    while (flashLocationLocation < 64 && metadata[flashLocationLocation] == 0) {
       flashLocationLocation++;
     }
     Serial.print("Flash is not empty, ");
     Serial.print(flashLocationLocation - 2);  // Subtract extra 1 because 1 sector is metadata
-    Serial.print("/63 flight data sectors full.");
+    Serial.println("/63 flight data sectors full.");
 
     flashLocation = (flashLocationLocation - 1) * 0x40000;  // Go to start of last non-empty sector
     // Linear search
     bool foundLocation = false;
-    uint8_t sectorPortion[4096];
     int i = 0;
     while (!foundLocation && i < 0x40000) {
       if (i % 4096 == 0) {  // Read large blocks at a time
@@ -407,13 +407,15 @@ void setFlashLocation() {
     flashLocation = flashLocation + i - 64;  // It overshoots by one position
   } else {
     Serial.println("Flash is empty, writing metadata.");
-    flash.write(0, 0, 1); // Indicate that there is data in the metadata sector
+    uint8_t temp = 0;
+    flash.write(0, &temp, 1); // Indicate that there is data in the metadata sector
     flashLocation = 0x40000;
   }
   Serial.print("Next flash write in sector ");
   Serial.print(flashLocation / 0x40000);
   Serial.print(" at position ");
-  Serial.println(flashLocation % 0x40000);
+  Serial.print(flashLocation % 0x40000);
+  Serial.println(".");
 }
 
 // Average several readings to get "sea level" pressure
@@ -510,7 +512,7 @@ void updateDataStruct() {
 }
 
 void sendSensorData() {
-  bleuart.printf("State [%s]\n", currentData.state);
+  bleuart.printf("State [%i]\n", currentData.state);
   bleuart.printf("Time [%i]\n", currentData.timestamp);
   bleuart.printf("Press [%u Pa]\n", currentData.pressure);
   bleuart.printf("Temp [%f C]\n", currentData.temperature);
@@ -540,7 +542,8 @@ void updateFlash() {
   if (flashLocation < 0x1000000) {
     // If flashLocation moves into a new sector, update meta location
     if (flashLocation % 0x40000 == 0) {
-      flash.write(flashLocationLocation, 0, 1);
+      uint8_t temp = 0;
+      flash.write(flashLocationLocation, &temp, 1);
       flashLocationLocation++;
     }
 
