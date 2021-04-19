@@ -1,16 +1,15 @@
 #include "S25FL.h"
 
 const int CHIP_SELECT_PIN = 8;
-S25FL flash(CHIP_SELECT_PIN);  // Starts Flash class and initializes SPI
+S25FL flash(CHIP_SELECT_PIN);  // Starts Flash class
 bool completed = false;
 
-unsigned long start;
-unsigned long end;
+unsigned long startTime;
+unsigned long endTime;
 
 void setup() {
   Serial.begin(115200);
   while (!Serial) { delay(10); }
-  
   SPI.begin();
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV8);  // Divide the clock by 8
@@ -20,7 +19,7 @@ void setup() {
 
   Serial.print("Erasing chip... ");
   flash.erase_chip_start();
-  start = millis();
+  startTime = millis();
 }
 
 void loop() {
@@ -28,10 +27,10 @@ void loop() {
     completed = flash.is_erase_complete();
     if (completed) { 
       Serial.println("Done");
-      end = millis();
+      endTime = millis();
       Serial.print("Erase took ");
-      Serial.print(end-start);
-      Serial.println("ms.");
+      Serial.print(endTime-startTime);
+      Serial.println("ms");
     }
   }
   delay(10);

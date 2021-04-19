@@ -6,7 +6,6 @@
 #include <string.h>
 #include <Arduino.h>
 #include <SPI.h>
-//#include <S25FLx.h>
 
 // Commands
 #define WRITE_ENABLE_CMD 0x06
