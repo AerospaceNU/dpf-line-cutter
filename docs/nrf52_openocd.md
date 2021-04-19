@@ -1,5 +1,11 @@
 # Programming NRF52 chips with OpenOCD
 
+## With ST-Link
+
+St-link V2s can be had for as little as $5, and work on Windows or Linux. A Windows build of OpenOCD, along with config file for the nrf52, is in `code/libraries and drivers/openocd_windows.zip`.
+
+## With a Pi 3ish
+
 Diagrams taken from [here](https://iosoft.blog/2019/01/28/raspberry-pi-openocd/) -- the Medium article went poof but we have the [Internet Archive](https://web.archive.org/web/20191204234928/https://medium.com/@ly.lee/coding-nrf52-with-rust-and-apache-mynewt-on-visual-studio-code-9521bcba6004) for that.
 
 Wire the nRF52 to a Pi 2+ with the following:
@@ -60,9 +66,11 @@ Info : Listening on port 3333 for gdb connections
 
 If you see something that starts with `Error:`, check your connections and try again.
 
-Connect with `telnet localhost 4444`. You may need to `sudo apt install telnet` first.
+## Flashing Bootloader
 
-We will use the Adafruit bootloader from [here](https://github.com/adafruit/Adafruit_nRF52_Arduino/tree/master/bootloader). Transfer it to the Pi and run the following command in OpenOCD:
+Connect with `telnet localhost 4444`. You may need to `sudo apt install telnet` (Linux) or enable the telnet clilent (Windows) first.
+
+We will use the Adafruit bootloader from [here](https://github.com/adafruit/Adafruit_nRF52_Arduino/tree/master/bootloader). A copy is in `code/libraries and drivers/nrf52840_express.hex`. Transfer it to the Pi and run the following command in OpenOCD.
 
 ```
 reset init
@@ -72,7 +80,7 @@ program <full/path/to/bootloader.hex> verify
 reset
 ```
 
-To erase all:
+Note that you must call `reset` for the board to enumerate. To erase all:
 
 ```
 nrf52.dap apreg 1 0x04 0x01
