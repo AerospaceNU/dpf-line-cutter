@@ -2,12 +2,18 @@
 #include "S25FL.h"
 
 S25FL flash;  // Starts Flash class and initializes SPI
-unsigned long flashLocation = 0;
+unsigned long flashLocation = 0x40000;
 uint8_t buff[64] = {0};
+bool done = false;
 
 struct Data {
+  uint8_t state;
   uint32_t timestamp;
   uint32_t pressure;
+  float altitude;
+  float avgAltitude;
+  float deltaAltitude;
+  float avgDeltaAltitude;
   float temperature;
   float accelX;
   float accelY;
@@ -17,7 +23,6 @@ struct Data {
   uint16_t cutSense2;
   uint16_t currentSense;
   uint16_t photoresistor;
-  uint8_t state;
 };
 Data currentData;
 
@@ -31,54 +36,35 @@ void setup() {
   SPI.setDataMode(SPI_MODE0);
   pinMode(8, OUTPUT);
   digitalWrite(8, HIGH);
-
-  delay(10000);  // Give time to connect with CoolTerm or similar
+  
+//  Serial.println("Metadata: ");
+//  flash.read_start(0, buff, 64);
+//  Serial.print("[");
+//  for (int i=0; i<64; i++) {
+//    if (i % 8 == 0 && i > 0) { Serial.println(); }
+//    Serial.print(buff[i], HEX);
+//    if (i < 63) { Serial.print(",\t"); }
+//  }
+//  Serial.println("]");
+//  Serial.println();
+  delay(5000);  // Give time to connect with CoolTerm or similar
 }
 
 void loop() {
-  if (buff[35] == 0) {
-    read_flash_packet();
-    delay(20);
-  }
+  flash.read_start(flashLocation, buff, 64);
+  currentData = *( Data* ) &buff;
+  flashLocation += 64;
+  
+  if (buff[0] == 0xff) { done = true; }
+  if (!done) { print_flash_packet(); }
+  delay(5);
 }
 
-void read_flash_packet() {
-  flash.read_start(flashLocation, buff, 64);
-  
-  currentData.timestamp = u8_to_u32(&buff[0]);
-  currentData.pressure = u8_to_u32(&buff[4]);
-  currentData.temperature = u8_to_float(&buff[8]);
-  currentData.accelX = u8_to_float(&buff[12]);
-  currentData.accelY = u8_to_float(&buff[16]);
-  currentData.accelZ = u8_to_float(&buff[20]);
-  currentData.battSense = u8_to_u16(&buff[24]);
-  currentData.cutSense1 = u8_to_u16(&buff[26]);
-  currentData.cutSense2 = u8_to_u16(&buff[28]);
-  currentData.currentSense = u8_to_u16(&buff[30]);
-  currentData.photoresistor = u8_to_u16(&buff[32]);
-  currentData.state = buff[34];
-
-  Serial.printf("%u, %u, %u, %f, %f, %f, %f, %u, %u, %u, %u, %u\n", 
-                currentData.state, currentData.timestamp, currentData.pressure, currentData.temperature,
-                currentData.accelX, currentData.accelY, currentData.accelZ,
+void print_flash_packet() {
+  Serial.printf("%u,%u,%u,%f,%f,%f,%f,%f,%f,%f,%f,%u,%u,%u,%u,%u\n", 
+                currentData.state, currentData.timestamp, currentData.pressure,
+                currentData.altitude,currentData.avgAltitude,currentData.deltaAltitude,currentData.avgDeltaAltitude,
+                currentData.temperature, currentData.accelX, currentData.accelY, currentData.accelZ,
                 currentData.battSense, currentData.cutSense1, currentData.cutSense2,
                 currentData.currentSense, currentData.photoresistor);
-
-  flashLocation += 64;
-}
-
-float u8_to_float(const uint8_t* bytes) {
-  uint32_t u32 = u8_to_u32(bytes);
-  float f = * ( float * ) &u32;
-  return f;
-}
-
-uint32_t u8_to_u32(const uint8_t* bytes) {
-  uint32_t u32 = (bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3];
-  return u32;
-}
-
-uint32_t u8_to_u16(const uint8_t* bytes) {
-  uint16_t u16 = (bytes[0] << 8) + bytes[1];
-  return u16;
 }
