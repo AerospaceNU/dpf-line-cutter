@@ -10,6 +10,13 @@ The line cutter is a system for deploying a single parachute as both drogue and 
   * `v1`: Code for v1 perfboard line cutters.
   * `v2`: Code for mixed perfboard and PCB line cutters.
   * `v3`: Code for current PCB line cutters.
+    * `bulk_erase`: Erases all data on flash chip.
+    * `flash_reader`: Reads all data on flash chip.
+    * `flight_variable_upload`: Sets parameters for flight.
+    * `identifier`: Names PCB for Bluetooth advertising.
+    * `InternalFS_format`: Erases files on NRF52840 and formats filesystem.
+    * `line_cutter_v3`: Main program that runs on flights.
+    * `memory_reader`: Reads state transition log.
 * `docs`: More detailed documentation, see below for list.
 * `schematic`: ECAD files for the line cutter hardware. Contains schematics for all line cutter hardware. Folder structure is described in the [readme](schematic/README.md)
 
