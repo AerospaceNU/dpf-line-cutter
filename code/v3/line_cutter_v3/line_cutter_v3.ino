@@ -34,21 +34,6 @@ const int CHIP_SELECT_PIN = 8;
 HardwarePWM& hardwarePWM1 = HwPWM0;
 HardwarePWM& hardwarePWM2 = HwPWM1;
 
-// VARIABLES WHICH MUST BE SET
-// Requirements for state transitions
-//const double LIMIT_VELOCITY =   -3.0;  // meters/second
-const double ALTITUDE1 =        243;  // Disreefing altitudes, in meters (higher one first!!)
-const double ALTITUDE2 =        210;
-const int DISREEF1TIME =        12000;  // Max delay after ejection before first disreef, in milliseconds
-const int DISREEF2TIME =        5000;  // Max delay after first disreef before second disreef, in milliseconds
-// PWM settings
-const double PWM_VOLTAGE1 =     2.0;  // Voltage applied to nichrome for line cuts
-const double PWM_VOLTAGE2 =     2.0;
-const int PWM_DURATION =        2500;  // Length of PWM, in milliseconds
-// Photoresistor memes
-const int LIGHT_THRESHOLD =     400;  // Anything above this value is considered to be outside of tube
-const int LIGHT_TRIGGER_TIME =  2000;  // Continuous time that it must be light for board to detect deployment, in milliseconds
-
 // Barometer and moving averages
 MS5xxx baro(&Wire);
 int ARRAY_SIZE = 40;  // 2 seconds at 20Hz
@@ -61,6 +46,7 @@ double seaLevel;
 using namespace Adafruit_LittleFS_Namespace;
 const char* STATE_FILE = "stateChangeLog.txt";
 const char* ID_FILE = "ID.txt";
+const char* FLIGHT_VARIABLE_FILE = "flightVariables.txt";
 File file(InternalFS);
 S25FL flash(CHIP_SELECT_PIN);  // Starts Flash class and initializes SPI
 unsigned long flashLocation;  // Next location to write data to
@@ -101,6 +87,7 @@ imu_out_t accelData;
 
 // For writing data to flash & state transition log
 struct Data {
+  uint8_t structType = 0;  // data struct
   uint8_t state;
   uint32_t timestamp;
   uint32_t pressure;
@@ -119,7 +106,25 @@ struct Data {
   uint16_t photoresistor;
 };
 Data currentData;
-const int DATA_SIZE = 51;
+const int DATA_SIZE = 52;
+
+// For writing data to flash & flight variable log
+struct FlightVariables {
+  uint8_t structType = 1;  // flight variable struct
+  float limitVel;
+  uint16_t altitude1;
+  uint16_t altitude2;
+  uint32_t disreefDelay1;
+  uint32_t disreefDelay2;
+  float pwmVoltage1;
+  float pwmVoltage2;
+  uint16_t pwmDuration;
+  uint16_t lightThreshold;
+  uint32_t lightTriggerTime;
+  uint32_t seaLevelPressure;
+};
+FlightVariables currentFlightVars;
+const int FLIGHT_VARIABLE_SIZE = 37;
 
 /*****************************
           SETUP/LOOP
@@ -202,7 +207,8 @@ void setup() {
   Serial.println("Started advertising.");
 
   setFlashLocation();
-  // TODO: record flight variables/metadata
+  readFlightVariables();
+  updateFlash(( uint8_t* ) &currentFlightVars, FLIGHT_VARIABLE_SIZE);
 }
 
 
@@ -225,7 +231,7 @@ void loop() {
   // Update photoresistor
   light = analogRead(PHOTO_PIN);
   // Keep track of whether it is dark or light and for how long
-  if (light < LIGHT_THRESHOLD)
+  if (light < currentFlightVars.lightThreshold)
     lastDark = loopStart;
 
   // Update accelerometer
@@ -233,7 +239,7 @@ void loop() {
 
   // Update data struct, send to BLE central and flash
   updateDataStruct();
-  updateFlash();
+  updateFlash(( uint8_t* ) &currentData, DATA_SIZE);
 
   while (bleuart.available()) {
     uint8_t ch;
@@ -244,12 +250,12 @@ void loop() {
     }
   }
 
-  if (cutStart1 > 0 && loopStart - cutStart1 > PWM_DURATION) {
+  if (cutStart1 > 0 && loopStart - cutStart1 > currentFlightVars.pwmDuration) {
     hardwarePWM1.writePin(NICHROME_PIN1, 0);
     Serial.print("Ended PWM on pin ");
     Serial.println(NICHROME_PIN1);
   }
-  if (cutStart2 > 0 && loopStart - cutStart2 > PWM_DURATION) {
+  if (cutStart2 > 0 && loopStart - cutStart2 > currentFlightVars.pwmDuration) {
     hardwarePWM2.writePin(NICHROME_PIN2, 0);
     Serial.print("Ended PWM on pin ");
     Serial.println(NICHROME_PIN2);
@@ -265,22 +271,22 @@ void loop() {
       if (armed == false) {
         state = WAITING;
       }
-      //      if (loopStart - lastDark > LIGHT_TRIGGER_TIME) {
-      //        InternalFS.remove(STATE_FILE);
-      //        progressState();
-      //      }
+      if (loopStart - lastDark > currentFlightVars.lightTriggerTime) {
+        InternalFS.remove(STATE_FILE);
+        progressState();
+      }
       break;
     case DEPLOYED:
-      if (currentAltitudeAvg < ALTITUDE1
-          || loopStart - lastStateChange > DISREEF1TIME) {
+      if (currentAltitudeAvg < currentFlightVars.altitude1
+          || loopStart - lastStateChange > currentFlightVars.disreefDelay1) {
         pwmStart();
         cutStart1 = loopStart;
         progressState();
       }
       break;
     case PARTIAL_DISREEF:
-      if (currentAltitudeAvg < ALTITUDE2
-          || loopStart - lastStateChange > DISREEF2TIME) {
+      if (currentAltitudeAvg < currentFlightVars.altitude2
+          || loopStart - lastStateChange > currentFlightVars.disreefDelay2) {
         pwmStart();
         cutStart2 = loopStart;
         progressState();
@@ -401,7 +407,7 @@ void setFlashLocation() {
       if (i % 4096 == 0) {  // Read large blocks at a time
         flash.read_start(flashLocation + i, sectorPortion, 4096);
       }
-      foundLocation = (sectorPortion[i % 4096] == 0xff);  // Access the state part of the data struct
+      foundLocation = (sectorPortion[i % 4096] == 0xff);  // Access the first byte of the struct
       i += 64;
     }
     flashLocation = flashLocation + i - 64;  // It overshoots by one position
@@ -416,6 +422,19 @@ void setFlashLocation() {
   Serial.print(" at position ");
   Serial.print(flashLocation % 0x40000);
   Serial.println(".");
+}
+
+// Get variables for this flight from InternalFS
+void readFlightVariables() {
+  if (file.open(FLIGHT_VARIABLE_FILE, FILE_O_READ)) {
+    uint8_t buff[64] = {0};
+    file.read(buff, FLIGHT_VARIABLE_SIZE);
+    currentFlightVars = *( FlightVariables* ) &buff;
+    currentFlightVars.seaLevelPressure = seaLevel;
+    Serial.println("Finished reading flight variables.");
+  } else {
+    Serial.println("Failed to read flight variables.");
+  }
 }
 
 // Average several readings to get "sea level" pressure
@@ -445,11 +464,11 @@ void pwmStart() {
   Serial.print("Starting PWM on pin ");
   if (state == DEPLOYED) {
     Serial.print(NICHROME_PIN1);
-    level = pwmLevel(PWM_VOLTAGE1);
+    level = pwmLevel(currentFlightVars.pwmVoltage1);
     hardwarePWM1.writePin(NICHROME_PIN1, level);
   } else if (state == PARTIAL_DISREEF) {
     Serial.print(NICHROME_PIN2);
-    level = pwmLevel(PWM_VOLTAGE2);
+    level = pwmLevel(currentFlightVars.pwmVoltage2);
     hardwarePWM2.writePin(NICHROME_PIN2, level);
   }
   Serial.print(" with level ");
@@ -527,18 +546,19 @@ void sendSensorData() {
 }
 
 void sendFlightVariables() {
-  bleuart.printf("Cut1Alt [%f m]\n", ALTITUDE1);
-  bleuart.printf("Cut2Alt [%f m]\n", ALTITUDE2);
-  bleuart.printf("Cut1Time [%u ms]\n", DISREEF1TIME);
-  bleuart.printf("Cut2Time [%u ms]\n", DISREEF2TIME);
-  bleuart.printf("VoltPWM1 [%f V]\n", PWM_VOLTAGE1);
-  bleuart.printf("VoltPWM2 [%u V]\n", PWM_VOLTAGE2);
-  bleuart.printf("TimePWM [%u ms]\n", PWM_DURATION);
-  bleuart.printf("LightThreshold [%u]\n", LIGHT_THRESHOLD);
-  bleuart.printf("LightTime [%u ms]\n", LIGHT_TRIGGER_TIME);
+  bleuart.printf("Cut1Alt [%u m]\n", currentFlightVars.altitude1);
+  bleuart.printf("Cut2Alt [%u m]\n", currentFlightVars.altitude2);
+  bleuart.printf("Cut1Time [%u ms]\n", currentFlightVars.disreefDelay1);
+  bleuart.printf("Cut2Time [%u ms]\n", currentFlightVars.disreefDelay2);
+  bleuart.printf("VoltPWM1 [%f V]\n", currentFlightVars.pwmVoltage1);
+  bleuart.printf("VoltPWM2 [%f V]\n", currentFlightVars.pwmVoltage2);
+  bleuart.printf("TimePWM [%u ms]\n", currentFlightVars.pwmDuration);
+  bleuart.printf("LightThreshold [%u]\n", currentFlightVars.lightThreshold);
+  bleuart.printf("LightTime [%u ms]\n", currentFlightVars.lightTriggerTime);
+  bleuart.printf("SeaLevel [%u Pa]\n", currentFlightVars.seaLevelPressure);
 }
 
-void updateFlash() {
+void updateFlash(uint8_t* data, int sizeOfData) {
   if (flashLocation < 0x1000000) {
     // If flashLocation moves into a new sector, update meta location
     if (flashLocation % 0x40000 == 0) {
@@ -548,8 +568,7 @@ void updateFlash() {
     }
 
     // Write things, increment location
-    uint8_t* buffer = ( uint8_t* ) &currentData;
-    flash.write(flashLocation, buffer, DATA_SIZE);
+    flash.write(flashLocation, data, sizeOfData);
     flashLocation += 64;
   }
 }
