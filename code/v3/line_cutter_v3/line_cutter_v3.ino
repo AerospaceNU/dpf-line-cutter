@@ -106,7 +106,7 @@ struct Data {
   uint16_t photoresistor;
 };
 Data currentData;
-const int DATA_SIZE = 52;
+const int DATA_SIZE = sizeof(Data);
 
 // For writing data to flash & flight variable log
 struct FlightVariables {
@@ -124,7 +124,7 @@ struct FlightVariables {
   uint32_t seaLevelPressure;
 };
 FlightVariables currentFlightVars;
-const int FLIGHT_VARIABLE_SIZE = 37;
+const int FLIGHT_VARIABLE_SIZE = sizeof(FlightVariables);
 
 /*****************************
           SETUP/LOOP
@@ -527,7 +527,7 @@ void updateDataStruct() {
   currentData.cutSense1 = analogRead(CUT_SENSE1);
   currentData.cutSense2 = analogRead(CUT_SENSE2);
   currentData.currentSense = analogRead(CURRENT_SENSE);
-  currentData.photoresistor = analogRead(PHOTO_PIN);
+  currentData.photoresistor = light;
 }
 
 void sendSensorData() {
