@@ -30,10 +30,10 @@ void setup()
   while ( !Serial ) delay(10);   // for nrf52840 with native usb
 
   // Requirements for state transitions
-  flightVars.limitVel         = -3.0;  // meters/second
-  flightVars.altitude1        = 243;  // Disreefing altitudes, in meters (higher one first!!)
-  flightVars.altitude2        = 210;
-  flightVars.disreefDelay1    = 12000;  // Max delay after ejection before first disreef, in milliseconds
+  flightVars.limitVel         = -0.5;  // meters/second
+  flightVars.altitude1        = 15;  // Disreefing altitudes, in meters (higher one first!!)
+  flightVars.altitude2        = 7;
+  flightVars.disreefDelay1    = 360000;  // Max delay after ejection before first disreef, in milliseconds
   flightVars.disreefDelay2    = 5000;  // Max delay after first disreef before second disreef, in milliseconds
   // PWM settings
   flightVars.pwmVoltage1      = 2.0;  // Voltage applied to nichrome for line cuts
