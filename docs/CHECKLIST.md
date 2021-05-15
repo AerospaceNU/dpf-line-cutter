@@ -1,4 +1,3 @@
-
 This is the pre-flight checklist that should be followed for every line cutter launch. Detailed instructions for setting up the line cutters are elsewhere; read those first. Consider any time limits mentioned to be a lower bound---completing items *earlier* than the listed time is encouraged, *on-time* is acceptable, and *after* will result in a rushed (read: risky) process. Keep in mind that although the checklist only covers line cutter prep, it implicitly requires that the rest of your rocket is also prepared in a timely manner.
 
 14 days before launch:
@@ -23,6 +22,7 @@ This is the pre-flight checklist that should be followed for every line cutter l
 On launch day:
 - [ ] Plug in the batteries once you have a reasonable expectation that the PCBs won't run out of memory (< 3 hours before launch)
 - [ ] Immediately use `!vars` and `!data` to check for expected values from both line cutters
+- [ ] Put (preferably black) etape over LEDs
 - [ ] Burrito your parachute and put in your rocket, but don't screw things together yet
 - [ ] Use `!data` to check that the photoresistors are reading below ~200 on both line cutters
 - [ ] Finish assembling rocket
