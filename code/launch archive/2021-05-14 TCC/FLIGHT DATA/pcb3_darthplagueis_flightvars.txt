@@ -1,0 +1,10 @@
+limitVel		-0.5
+altitude1		167
+altitude2		100
+disreefDelay1		15000
+disreefDelay2		10000
+pwmVoltage1		2.0
+pwmVoltage2		2.0
+pwmDuration		3000
+lightThreshold		400
+lightTriggerTime	2000
