@@ -141,9 +141,9 @@ void setup() {
   analogReadResolution(10);  // Read values in range [0, 1023]
 
   Serial.begin(115200);
-  while (!Serial) {
+  /*while (!Serial) {
     delay(10);
-  }
+  }*/
 
   Wire.begin();
   // Connect to accelerometer

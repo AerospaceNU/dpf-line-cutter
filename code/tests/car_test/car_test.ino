@@ -24,8 +24,8 @@ const int PIN1 = 11;
 const int PIN2 = 12;
 
 // INCREASE THESE IF IT DOESN'T CUT FOR SOME REASON
-const double POWER_LEVEL1 = 0.8;  // PWM uses this voltages to turn on nichrome
-const double POWER_LEVEL2 = 0.8;
+const double POWER_LEVEL1 = 1.5;  // PWM uses this voltages to turn on nichrome
+const double POWER_LEVEL2 = 1.5;
 const int PWM_DURATION = 3000;  // length of pwm in milliseconds
 
 // Manually interact with HardwarePWM

@@ -31,13 +31,13 @@ void setup()
 
   // Requirements for state transitions
   flightVars.limitVel         = -0.5;  // meters/second
-  flightVars.altitude1        = 15;  // Disreefing altitudes, in meters (higher one first!!)
-  flightVars.altitude2        = 7;
-  flightVars.disreefDelay1    = 360000;  // Max delay after ejection before first disreef, in milliseconds
-  flightVars.disreefDelay2    = 5000;  // Max delay after first disreef before second disreef, in milliseconds
+  flightVars.altitude1        = 457;  // Disreefing altitudes, in meters (higher one first!!)
+  flightVars.altitude2        = 366;
+  flightVars.disreefDelay1    = 48000;  // Max delay after ejection before first disreef, in milliseconds
+  flightVars.disreefDelay2    = 12500;  // Max delay after first disreef before second disreef, in milliseconds
   // PWM settings
-  flightVars.pwmVoltage1      = 2.0;  // Voltage applied to nichrome for line cuts
-  flightVars.pwmVoltage2      = 2.0;
+  flightVars.pwmVoltage1      = 1.7;  // Voltage applied to nichrome for line cuts
+  flightVars.pwmVoltage2      = 1.7;
   flightVars.pwmDuration      = 3000;  // Length of PWM, in milliseconds
   // Photoresistor variables
   flightVars.lightThreshold   = 400;  // Anything above this value is considered to be outside of tube
