@@ -30,6 +30,7 @@ blah blah
 - GoPro if you want style points
 
 ## Sew cases and loops
+- ![image](https://octodex.github.com/images/bannekat.png)
 ## Assemble cases (with nichrome and PCBs)
 ## Choose reefing diameters and flight variables
 ## Upload code
