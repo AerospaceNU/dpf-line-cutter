@@ -30,18 +30,18 @@ void setup()
   while ( !Serial ) delay(10);   // for nrf52840 with native usb
 
   // Requirements for state transitions
-  flightVars.limitVel         = -0.5;  // meters/second
-  flightVars.altitude1        = 457;  // Disreefing altitudes, in meters (higher one first!!)
-  flightVars.altitude2        = 366;
-  flightVars.disreefDelay1    = 48000;  // Max delay after ejection before first disreef, in milliseconds
-  flightVars.disreefDelay2    = 12500;  // Max delay after first disreef before second disreef, in milliseconds
+  flightVars.limitVel         = -0.5;     // NOT USED
+  flightVars.altitude1        = 457;  // Arming altitude, meters
+  flightVars.altitude2        = 366;      // NOT USED
+  flightVars.disreefDelay1    = 48000;    // NOT USED
+  flightVars.disreefDelay2    = 12500;    // NOT USED
   // PWM settings
   flightVars.pwmVoltage1      = 1.7;  // Voltage applied to nichrome for line cuts
   flightVars.pwmVoltage2      = 1.7;
   flightVars.pwmDuration      = 3000;  // Length of PWM, in milliseconds
   // Photoresistor variables
-  flightVars.lightThreshold   = 400;  // Anything above this value is considered to be outside of tube
-  flightVars.lightTriggerTime = 2000;  // Continuous time that it must be light for board to detect deployment, in milliseconds
+  flightVars.lightThreshold   = 400;      // NOT USED
+  flightVars.lightTriggerTime = 2000;     // NOT USED
 
   // Initialize Internal File System
   InternalFS.begin();
