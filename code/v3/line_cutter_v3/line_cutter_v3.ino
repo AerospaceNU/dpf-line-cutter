@@ -496,7 +496,7 @@ void updateDataStruct() {
   currentData.pressure = pressure;
   currentData.altitude = altitude;
   currentData.avgAltitude = currentAltitudeAvg;
-  currentData.deltaAltitude = altitude;
+  currentData.deltaAltitude = delta;
   currentData.avgDeltaAltitude = currentDeltaAvg;
   currentData.temperature = baro.GetTemp();
   currentData.accelX = accelData.accel_xout;
