@@ -10,9 +10,9 @@
 char* boardName; // Get this from the board's ID file
 
 enum states {
-  WAITING,  // Before BLE arming
-  ARMED,  // Should only be armed once on rail
-  DEPLOYED,
+  WAITING,  // Before arming
+  ARMED,  // Will be armed once above altitude specified in flight variables
+  DEPLOYED,  // Apogee
   PARTIAL_DISREEF,  // After first line is cut
   FULL_DISREEF,  // After second line is cut
   LANDED
@@ -58,15 +58,14 @@ uint8_t sectorPortion[4096];
 const int DELAY = 50;  // milliseconds
 unsigned long loopStart = 0;
 unsigned long lastStateChange = 0;
-unsigned long lastDark = 0; // Last time it was below LIGHT_THRESHHOLD
 unsigned long cutStart1 = 0;
 unsigned long cutStart2 = 0;
-bool armed = false;
 int32_t pressure;  // pascals
 double altitude;  // meters
 double previousAltitudeAvg;
 double currentAltitudeAvg;
 double delta;  // meters/second
+double previousDeltaAvg;
 double currentDeltaAvg;
 int light;
 
@@ -110,9 +109,9 @@ const int DATA_SIZE = sizeof(Data);
 
 // For writing data to flash & flight variable log
 struct FlightVariables {
-  uint8_t structType = 1;  // flight variable struct
+  uint8_t structType = 1; // Flight variable struct. Only altitude1, pwm vars, and seaLevel are used
   float limitVel;
-  uint16_t altitude1;
+  uint16_t altitude1;     // Used as arming altitude
   uint16_t altitude2;
   uint32_t disreefDelay1;
   uint32_t disreefDelay2;
@@ -141,9 +140,9 @@ void setup() {
   analogReadResolution(10);  // Read values in range [0, 1023]
 
   Serial.begin(115200);
-  /*while (!Serial) {
-    delay(10);
-  }*/
+//  while (!Serial) {
+//    delay(10);
+//  }
 
   Wire.begin();
   // Connect to accelerometer
@@ -224,15 +223,17 @@ void loop() {
 
   // Update moving averages
   previousAltitudeAvg = altitudeReadings.getAvg();
+  previousDeltaAvg = altitudeAvgDeltas.getAvg();
+  // filter outlier readings
+  if (abs(altitude - previousAltitudeAvg) > 50) {
+    altitude = previousAltitudeAvg + (DELAY / 1000.0) * previousDeltaAvg;
+  }
   currentAltitudeAvg = altitudeReadings.reading(altitude);  // Update and return new avg
   delta = (currentAltitudeAvg - previousAltitudeAvg) * (1000.0 / DELAY);
   currentDeltaAvg = altitudeAvgDeltas.reading(delta);  // Update and return new avg
 
   // Update photoresistor
   light = analogRead(PHOTO_PIN);
-  // Keep track of whether it is dark or light and for how long
-  if (light < currentFlightVars.lightThreshold)
-    lastDark = loopStart;
 
   // Update accelerometer
   accelData = imu.readout();
@@ -254,39 +255,36 @@ void loop() {
     hardwarePWM1.writePin(NICHROME_PIN1, 0);
     Serial.print("Ended PWM on pin ");
     Serial.println(NICHROME_PIN1);
+    cutStart1 = 0;
   }
   if (cutStart2 > 0 && loopStart - cutStart2 > currentFlightVars.pwmDuration) {
     hardwarePWM2.writePin(NICHROME_PIN2, 0);
     Serial.print("Ended PWM on pin ");
     Serial.println(NICHROME_PIN2);
+    cutStart2 = 0;
   }
 
   switch (state) {
     case WAITING:
-      if (armed == true) {
-        state = ARMED;
-      }
-      break;
-    case ARMED:
-      if (armed == false) {
-        state = WAITING;
-      }
-      if (loopStart - lastDark > currentFlightVars.lightTriggerTime) {
+      if (currentAltitudeAvg > currentFlightVars.altitude1) {
         InternalFS.remove(STATE_FILE);
         progressState();
       }
       break;
+    case ARMED:
+      if (previousDeltaAvg >= 0 && currentDeltaAvg <= 0) {
+        progressState();
+      }
+      break;
     case DEPLOYED:
-      if (currentAltitudeAvg < currentFlightVars.altitude1
-          || loopStart - lastStateChange > currentFlightVars.disreefDelay1) {
+      if (true) {
         pwmStart();
         cutStart1 = loopStart;
         progressState();
       }
       break;
     case PARTIAL_DISREEF:
-      if (currentAltitudeAvg < currentFlightVars.altitude2
-          || loopStart - lastStateChange > currentFlightVars.disreefDelay2) {
+      if (loopStart - lastStateChange > currentFlightVars.pwmDuration) {
         pwmStart();
         cutStart2 = loopStart;
         progressState();
@@ -323,29 +321,10 @@ void parse_command() {
 
   String command = (char*) char_array;
 
-  // if user typed '!cut', execute line-cutting
   if (command.substring(0, 4).equals("help")) {
     bleuart.print("Valid commands:\n");
-    bleuart.print("!arm\n");
-    bleuart.print("!disarm\n");
     bleuart.print("!vars\n");
     bleuart.print("!data\n");
-  }
-  else if (command.substring(0, 3).equals("arm")) {
-    if (state == WAITING) {
-      armed = true;
-      bleuart.print("Armed.\n");
-    } else {
-      bleuart.print("Not in waiting state.\n");
-    }
-  }
-  else if (command.substring(0, 6).equals("disarm")) {
-    if (state == ARMED) {
-      armed = false;
-      bleuart.print("Disarmed.\n");
-    } else {
-      bleuart.print("Not in armed state.\n");
-    }
   }
   else if (command.substring(0, 4).equals("vars")) {
     sendFlightVariables();
