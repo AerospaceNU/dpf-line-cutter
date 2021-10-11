@@ -1,43 +1,26 @@
-This is the pre-flight checklist that should be followed for every line cutter launch. Detailed instructions for setting up the line cutters are elsewhere; read those first. Consider any time limits mentioned to be a lower bound---completing items *earlier* than the listed time is encouraged, *on-time* is acceptable, and *after* will result in a rushed (read: risky) process. Keep in mind that although the checklist only covers line cutter prep, it implicitly requires that the rest of your rocket is also prepared in a timely manner.
+This is the pre-flight checklist that should be followed for the marman clamp line cutter launch. It mostly covers software-side preparations, unlike the normal line cutter checklist which also goes through the physical setup necessary for a line cutter launch. Read the checklist once before carrying out any of it to ensure you have an overall picture of the process.
 
-14 days before launch:
-- [ ] Ensure that you have all materials needed for setup (if you need to ship more stuff, it's important to know this early)
-
-6 days before launch:
-- [ ] Sew outer cases and loops onto your parachute
-- [ ] Make a local copy of the `dpf-line-cutter` repository
-
-3 days before launch:
-- [ ] Assemble the cases (including nichrome)
-- [ ] Decide on reefing amounts and reef the parachute
-- [ ] Ejection test with the assembled cases
+5 days before launch:
+- [ ] Make a local copy of the `dpf-line-cutter` repository, then switch to the `marmot` branch. Use `git log` to check the commit history; the most recent ones should be by trholdridge if you're on the right branch
+- [ ] Check that you can upload code to all of the line cutters that will be used (the [flash reader](https://gitlab.com/aeronu/dollar-per-foot/dpf-line-cutter/-/tree/marmot/code/v3/flash_reader) is a good test)
+- [ ] Download the Bluefruit Connect app for confirming data and flight variables day-of over bluetooth
 
 1 day before launch:
 - [ ] Charge all batteries (and spares)
-- [ ] Put your PCBs in the cases
-- [ ] Erase the flash memory on the PCBs
-- [ ] Decide on and upload flight variables
-- [ ] Upload flight code
+- [ ] Erase the flash memory on the PCBs using the [bulk erase](https://gitlab.com/aeronu/dollar-per-foot/dpf-line-cutter/-/tree/marmot/code/v3/bulk_erase) code (note: it will take about 30 seconds and then print a confirmation message)
+- [ ] Decide on and upload [flight variables](https://gitlab.com/aeronu/dollar-per-foot/dpf-line-cutter/-/tree/marmot/code/v3/flight_variable_upload). The comments explain what each one is used for in this version of the code
+- [ ] Upload the [flight code](https://gitlab.com/aeronu/dollar-per-foot/dpf-line-cutter/-/tree/marmot/code/v3/line_cutter_v3), then quickly open the serial monitor to see confirmation messages. Disconnect the line cutter shortly after to avoid using up the flash memory (it can store about 2.5 hours of data)
 
 On launch day:
-- [ ] Plug in the batteries once you have a reasonable expectation that the PCBs won't run out of memory (< 3 hours before launch)
-- [ ] Immediately use `!vars` and `!data` to check for expected values from both line cutters
-- [ ] Put (preferably black) etape over LEDs
-- [ ] Burrito your parachute and put in your rocket, but don't screw things together yet
-- [ ] Use `!data` to check that the photoresistors are reading below ~200 on both line cutters
-- [ ] Finish assembling rocket
+- [ ] Plug in the batteries once you have a reasonable expectation that the flash memory won't run out (< 2.5 hours before launch)
+- [ ] While the line cutters are still accessible, connect to them with Bluefruit Connect; use `!vars` and `!data` over UART to check for expected values from both line cutters
 
 On the rail:
-- [ ] Use `!data` for final confirmation that photoresistors are reading below ~200 and state is `WAITING` on both line cutters
-- [ ] Arm both line cutters with `!arm`
-- [ ] Use `!data` to confirm that both line cutters are in the `ARMED` state
-- [ ] *Optional: if the rocket needs to be taken off the rail for any reason, you should `!disarm` both line cutters and confirm using `!data`*
+- [ ] Use `!data` for final confirmation that the state is `WAITING` on both line cutters
 - [ ] Launch!
 
 After landing:
-- [ ] Take photos of both line cutters when you recover your rocket
-- [ ] Visually confirm that both lines have disreefed
-- [ ] Once you're back at the lab, follow the flash offload instructions to get flight data
-- [ ] Send data to the line cutter team
+- [ ] Take photos of both line cutters and visually confirm that both PWMs have occurred
+- [ ] Unplug from batteries when convenient to cut down on the amount of irrelevant data at the end of the flash memory
+- [ ] Once you're back at the lab, follow the [flash offload](https://gitlab.com/aeronu/dollar-per-foot/dpf-line-cutter/-/blob/marmot/docs/OFFLOAD.md) instructions to read and graph flight data
 - [ ] Report any potential issues with or damage to the individual line cutters
-- [ ] Disassemble and return components
