@@ -219,15 +219,14 @@ void loop() {
   // Read pressure, calculate altitude
   baro.Readout();
   pressure = baro.GetPres();
-  altitude = pressureToAltitude(pressure);
+  // filter outlier readings
+  if (abs(altitude - pressureToAltitude(pressure)) < 50) {  // Only accept new altitude if it's within 50m
+    altitude = pressureToAltitude(pressure);
+  }
 
   // Update moving averages
   previousAltitudeAvg = altitudeReadings.getAvg();
   previousDeltaAvg = altitudeAvgDeltas.getAvg();
-  // filter outlier readings
-  if (abs(altitude - previousAltitudeAvg) > 50) {
-    altitude = previousAltitudeAvg + (DELAY / 1000.0) * previousDeltaAvg;
-  }
   currentAltitudeAvg = altitudeReadings.reading(altitude);  // Update and return new avg
   delta = (currentAltitudeAvg - previousAltitudeAvg) * (1000.0 / DELAY);
   currentDeltaAvg = altitudeAvgDeltas.reading(delta);  // Update and return new avg
