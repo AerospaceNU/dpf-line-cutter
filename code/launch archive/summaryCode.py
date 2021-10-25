@@ -23,7 +23,7 @@ def stateTransitionRows(array):
         rows.append(np.where(array[:,0] == i)[0][0])
     return rows
 
-def plotData(array, headers, lineColor):
+def plotData(array, headers, lineColor, disreef1, disreef2):
     timeCol = 1
     numPlots = array.shape[1]
     plotColumns = 1
@@ -40,10 +40,12 @@ def plotData(array, headers, lineColor):
         for row in stateChangeRows:
             currentAx.axvline(array[row,timeCol], color='black', linestyle='dotted', linewidth=0.5)
         if (headers[i] == 'Smooth altitude (m)'):
-            currentAx.axhline(167, color='black', linestyle='dotted', linewidth=0.5)
-            currentAx.axhline(100, color='black', linestyle='dotted', linewidth=0.5)
+            if (disreef1 > 0):
+                currentAx.axhline(disreef1, color='black', linestyle='dotted', linewidth=0.5)
+            if (disreef2 > 0):
+                currentAx.axhline(disreef2, color='black', linestyle='dotted', linewidth=0.5)
     fig.tight_layout(pad=3.0)
-            
+
 '''
 Plots line cutter data in a series of vertically arranged numpy subplots.
 
@@ -52,23 +54,27 @@ Parameters
 filepath : str
            Specifies the relative path to the data csv
 lineColor : str
-            One of the numpy supported colors, as seen at https://matplotlib.org/stable/gallery/color/named_colors.html. 
+            One of the numpy supported colors, as seen at https://matplotlib.org/stable/gallery/color/named_colors.html.
             Default is 'r' (red).
 before: int
         Number of data points before deployment detection to include in graph
 after: int
        Number of data points after landing detection to include in graph
+disreef1: int
+        Altitude of first disreef in meters (to plot a horizontal line on the graph), should be >0
+disreef2: int
+       Altitude of second disreef in meters (to plot a horizontal line on the graph), should be >0
 headers : list
           The list of strings to use as subplot headings for the data, in column order.
-          Default is ['State', 'Time (ms)', 'Pressure [Pa]',  'Altitude (m)', 
+          Default is ['State', 'Time (ms)', 'Pressure [Pa]',  'Altitude (m)',
                       'Smooth altitude (m)', 'Delta altitude (m/s)', 'Smooth delta altitude (m/s)',
-                       'Temperature (C)', 'Accel X', 'Accel Y', 'Accel Z', 'Batt Sense', 
+                       'Temperature (C)', 'Accel X', 'Accel Y', 'Accel Z', 'Batt Sense',
                        'Cut Sense 1', 'Cut Sense 2', 'Current Sense', 'Photoresistor']
 '''
-def blackMagic(filepath, lineColor='r', before=1200, after=500,
-               headers=['State', 'Time (ms)', 'Pressure [Pa]', 
+def blackMagic(filepath, lineColor='r', before=1200, after=500, disreef1=-1, disreef2=-1,
+               headers=['State', 'Time (ms)', 'Pressure [Pa]',
                       'Altitude (m)', 'Smooth altitude (m)', 'Delta altitude (m/s)', 'Smooth delta altitude (m/s)',
                        'Temperature (C)', 'Accel X', 'Accel Y', 'Accel Z',
                        'Batt Sense', 'Cut Sense 1', 'Cut Sense 2', 'Current Sense', 'Photoresistor']):
     array = csvRead(filepath)
-    plotData(filterData(array, before, after), headers, lineColor)
+    plotData(filterData(array, before, after), headers, lineColor, disreef1, disreef2)
