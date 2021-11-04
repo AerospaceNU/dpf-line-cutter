@@ -265,18 +265,21 @@ void loop() {
 
   switch (state) {
     case WAITING:
+      if (armed == true) {
+        state = ARMED;
+      }
+      break;
+    case ARMED:
+      if (armed == false) {
+        state = WAITING;
+      }
       if (currentAltitudeAvg > currentFlightVars.altitude1) {
         InternalFS.remove(STATE_FILE);
         progressState();
       }
       break;
-    case ARMED:
-      if (previousDeltaAvg >= 0 && currentDeltaAvg <= 0) {
-        progressState();
-      }
-      break;
     case DEPLOYED:
-      if (true) {
+      if (previousDeltaAvg >= 0 && currentDeltaAvg <= 0) {
         pwmStart();
         cutStart1 = loopStart;
         progressState();
@@ -322,8 +325,26 @@ void parse_command() {
 
   if (command.substring(0, 4).equals("help")) {
     bleuart.print("Valid commands:\n");
+    bleuart.print("!arm\n");
+    bleuart.print("!disarm\n");
     bleuart.print("!vars\n");
     bleuart.print("!data\n");
+  }
+  else if (command.substring(0, 3).equals("arm")) {
+    if (state == WAITING) {
+      armed = true;
+      bleuart.print("Armed.\n");
+    } else {
+      bleuart.print("Not in waiting state.\n");
+    }
+  }
+  else if (command.substring(0, 6).equals("disarm")) {
+    if (state == ARMED) {
+      armed = false;
+      bleuart.print("Disarmed.\n");
+    } else {
+      bleuart.print("Not in armed state.\n");
+    }
   }
   else if (command.substring(0, 4).equals("vars")) {
     sendFlightVariables();
