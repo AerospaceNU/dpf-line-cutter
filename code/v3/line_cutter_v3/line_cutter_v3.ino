@@ -220,7 +220,7 @@ void loop() {
   baro.Readout();
   pressure = baro.GetPres();
   // filter outlier readings
-  if (abs(altitude - pressureToAltitude(pressure)) < 50) {  // Only accept new altitude if it's within 50m
+  if (abs(altitude - pressureToAltitude(pressure)) < 50 || state < ARMED) {  // Only accept new altitude during flight if it's within 50m
     altitude = pressureToAltitude(pressure);
   }
 
