@@ -17,6 +17,9 @@ On launch day:
 
 On the rail:
 - [ ] Use `!data` for final confirmation that the state is `WAITING` on both line cutters
+- [ ] Arm both line cutters with !arm
+- [ ] Use `!data` to confirm that both line cutters are in the `ARMED` state and show reasonable data
+- [ ] *Optional: if the rocket needs to be taken off the rail for any reason, you should `!disarm` both line cutters and confirm using `!data`*
 - [ ] Launch!
 
 After landing:
