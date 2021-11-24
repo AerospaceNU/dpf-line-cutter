@@ -2,7 +2,20 @@
 
 ## With ST-Link
 
-St-link V2s can be had for as little as $5, and work on Windows or Linux. A Windows build of OpenOCD, along with config file for the nrf52, is in `code/libraries and drivers/openocd_windows.zip`.
+St-link V2s can be had for as little as $5, and work on Windows or Linux. A Windows build of OpenOCD, along with config file for the nrf52, is in `code/libraries and drivers/openocd_windows.zip`. To use this:
+
+- Download and extract the zip
+- Open a new command prompt window
+- run `cd Downloads/openocd_windows/OpenOCD-20210407-0.10.0/bin`
+- run `.\openocd.exe` 
+- You should see something like this: 
+
+```
+Info : starting gdb server for nrf52.cpu on 3333
+Info : Listening on port 3333 for gdb connections
+```
+
+- Proceed to [flash the bootloader](#Flasing-Bootloader)
 
 ## With a Pi 3ish
 
@@ -80,13 +93,15 @@ program <full/path/to/bootloader.hex> verify
 reset
 ```
 
-Note that you must call `reset` for the board to enumerate. To erase all:
+Note that you must call `reset` for the board to enumerate!! If you say `targets` and it reports `halted`, the chip is "frozen" and won't show up.
+
+To erase all (in case it complains at you)
 
 ```
 nrf52.dap apreg 1 0x04 0x01
 nrf52.dap apreg 1 0x04 // This should be 0x01
 ```
 
-Now the nRF52 can be connected over USB and programmed with the Arduino IDE.
+Now the nRF52 can be connected over USB and programmed with the Arduino IDE. We put the adafruit bootloader on, so let's follow their instructions and [install their BSP](https://github.com/adafruit/Adafruit_nRF52_Arduino)
 
 <!-- pi@raspberrypi3:~ $ sudo openocd -f interface/raspberrypi2-native.cfg -c "transport select swd" -f target/nrf52.cfg -d2 -c init -c "reset init" -c halt -c "nrf5 mass_erase" -c "program espruino.hex verify" -c reset -c exit -->
