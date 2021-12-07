@@ -10,14 +10,14 @@
 
 enum states {
   WAITING,  // Before arming
-  ARMED,  // Will be armed once above altitude specified in flight variables
-  DEPLOYED,  // Apogee
-  PARTIAL_DISREEF,  // After first line is cut
-  FULL_DISREEF,  // After second line is cut
+  ARMED_PREFLIGHT,  // Will be armed once above altitude specified in flight variables
+  BOOST_COAST,  // Apogee
+  DROGUE_DESCENT,  // After first line is cut
+  POST_MAIN,  // After second line is cut
   LANDED
 };
 int state = WAITING;
-char* stateStrings[6] = { "WAITING", "ARMED", "DEPLOYED", "PARTIAL_DISREEF", "FULL_DISREEF", "LANDED" };
+char* stateStrings[6] = { "WAITING", "ARMED", "BOOST_COAST", "DROGUE_DESCENT", "POST_MAIN", "LANDED" };
 
 // Barometer and moving averages
 MS5xxx baro(&Wire);
@@ -139,7 +139,7 @@ void loop() {
 
   // Update Kalman filter
   kalman.Correct(altitude, DEFAULT_KALMAN_GAIN);
-  if(state < PARTIAL_DISREEF) {
+  if(state < DROGUE_DESCENT) {
     kalman.Predict(sqrtf(
       pow(accelData.accel_xout, 2) + 
       pow(accelData.accel_yout, 2) + 
@@ -179,10 +179,10 @@ void loop() {
   switch (state) {
     case WAITING:
       if (armed == true) {
-        state = ARMED;
+        state = ARMED_PREFLIGHT;
       }
       break;
-    case ARMED:
+    case ARMED_PREFLIGHT:
       if (armed == false) {
         state = WAITING;
       }
@@ -191,7 +191,7 @@ void loop() {
         progressState();
       }
       break;
-    case DEPLOYED:
+    case BOOST_COAST:
       // If we started falling, deploy the drogue
       if (xhat.estimatedVelocity <= 0 && xhat.estimatedAltitude < previousAltitude) {
         pwmStart();
@@ -200,7 +200,7 @@ void loop() {
       }
       break;
     // 
-    case PARTIAL_DISREEF:
+    case DROGUE_DESCENT:
       // If we're below the main altitude, deploy the main
       if (xhat.estimatedAltitude < currentFlightVars.altitude2) {
         pwmStart();
@@ -208,7 +208,7 @@ void loop() {
         progressState();
       }
       break;
-    case FULL_DISREEF:
+    case POST_MAIN:
       // If we aren't really moving, we've landed
       if (abs(xhat.estimatedVelocity) < 0.05) {
         progressState();
@@ -256,7 +256,7 @@ void parse_command() {
     }
   }
   else if (command.substring(0, 6).equals("disarm")) {
-    if (state == ARMED) {
+    if (state == ARMED_PREFLIGHT) {
       armed = false;
       Serial.print("Disarmed.\n");
     } else {
@@ -344,10 +344,10 @@ double pressureToAltitude(int32_t pressure) {
 // PWM pin to heat nichrome and cut parachute line
 void pwmStart() {
   Serial.print("Starting PWM on pin ");
-  if (state == DEPLOYED) {
+  if (state == BOOST_COAST) {
     Serial.print(PYRO_CUT1);
     analogWrite(PYRO_CUT1, PYRO_POWER);
-  } else if (state == PARTIAL_DISREEF) {
+  } else if (state == DROGUE_DESCENT) {
     Serial.print(PYRO_CUT2);
     analogWrite(PYRO_CUT2, PYRO_POWER);
   }
