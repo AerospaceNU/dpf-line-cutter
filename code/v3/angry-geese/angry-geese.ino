@@ -33,7 +33,8 @@ unsigned long flashLocationLocation;  // Next location to write flash location t
 uint8_t metadata[64];
 
 // Variables used in loop()
-const int DELAY = 1000 / 50;  // milliseconds
+const int DELAY_PAD = 1000 / 10;  // milliseconds
+const int DELAY_FLIGHT = 1000 / 50;  // milliseconds
 unsigned long loopStart = 0;
 unsigned long lastStateChange = 0;
 unsigned long cutStart1 = 0;
@@ -43,7 +44,7 @@ int32_t pressure;  // pascals
 double altitude;  // meters
 bool armed;
 
-AltitudeKalman kalman {DELAY / 1000.0};
+AltitudeKalman kalman {DELAY_FLIGHT / 1000.0};
 
 IMU imu{}; // accelerometer
 imu_out_t accelData;
@@ -73,7 +74,8 @@ const int DATA_SIZE = sizeof(Data);
 // For writing data to flash & flight variable log
 struct FlightVariables {
   uint8_t structType = 1; // Flight variable struct. Only altitude1, pwm vars, and seaLevel are used
-  uint16_t altitude1 = 50;     // Used as arming altitude
+  uint16_t altitude1 = 30;     // Used as arming altitude
+  uint16_t velocity1 = 10;     // Used as arming altitude
   uint16_t altitude2 = 250; // Main deploy
   uint32_t seaLevelPressure;
 };
@@ -123,9 +125,9 @@ void setup() {
   updateFlash(( uint8_t* ) &currentFlightVars, FLIGHT_VARIABLE_SIZE);
 }
 
-
 void loop() {
-  while (millis() < loopStart + DELAY) {}
+  static auto delayTimeMs = (state < BOOST_COAST ? DELAY_PAD : DELAY_FLIGHT);
+  while (millis() < loopStart + delayTimeMs) {}
 
   loopStart = millis();  // Used for timestamps in data log
 
@@ -152,6 +154,8 @@ void loop() {
 
   // Update data struct, send to BLE central and flash
   updateDataStruct();
+
+  // Only update the flash sometimes
   updateFlash(( uint8_t* ) &currentData, DATA_SIZE);
 
   while (Serial.available()) {
@@ -178,14 +182,9 @@ void loop() {
 
   switch (state) {
     case WAITING:
-      if (armed == true) {
-        state = ARMED_PREFLIGHT;
-      }
+      state = ARMED_PREFLIGHT;
       break;
     case ARMED_PREFLIGHT:
-      if (armed == false) {
-        state = WAITING;
-      }
       // Check if we're high enough
       if (xhat.estimatedAltitude > currentFlightVars.altitude1) {
         progressState();
