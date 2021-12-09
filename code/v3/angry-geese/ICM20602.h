@@ -101,9 +101,9 @@ public:
       ((float) combine(buff[2], buff[3])) / sensitivity,
       ((float) combine(buff[4], buff[5])) / sensitivity,
       ((float) combine(buff[6], buff[7]) / 326.8) + 25.0,
-      combine(buff[8], buff[9]) / gyroSense,
-      combine(buff[10], buff[11]) / gyroSense,
-      combine(buff[12], buff[13]) / gyroSense,
+      ((float) combine(buff[8], buff[9])) / gyroSense,
+      ((float) combine(buff[10], buff[11])) / gyroSense,
+      ((float) combine(buff[12], buff[13])) / gyroSense,
     };
   }
 
