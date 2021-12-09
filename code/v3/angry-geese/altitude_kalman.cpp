@@ -3,7 +3,7 @@
 
 AltitudeKalman::AltitudeKalman() {}
 
-#define DEBUG 1
+//#define DEBUG 1
 
 void AltitudeKalman::Predict(const double az, const double dt) {
     // x_k+1 = A x_k + B u_k
