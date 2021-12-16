@@ -7,6 +7,8 @@
 // For angry geese defs
 #include "AngryGoose_pins.h"
 
+//#define DEBUG 1
+
 enum states {
   WAITING = 0,  // Before arming
   ARMED_PREFLIGHT,  // Will be armed once above altitude specified in flight variables
@@ -69,9 +71,10 @@ const uint8_t DATA_SIZE = sizeof(Data);
 
 // For writing data to flash & flight variable log
 struct FlightVariables {
-  uint8_t structType = 1; // Flight variable struct. Only altitude1, pwm vars, and seaLevel are used
+  uint8_t structType = 1; // Flight variable struct.
+  
   uint16_t altitude1 = 4;     // Used as arming altitude
-  uint16_t altitude2 = 3; // Main deploy
+  uint16_t altitude2 = 3; // Main deploy. UNUSED FOR BJORN!
   uint32_t seaLevelPressure;
 };
 FlightVariables currentFlightVars = {};
@@ -88,6 +91,7 @@ void setup() {
   // Connect to accelerometer
   while (!imu.begin()) {
     Serial.println("Error connecting to accelerometer...");
+    delay(500);
   }
   // Connect to barometer
   while ( baro.connect() > 0 ) {
@@ -204,8 +208,11 @@ void loop() {
     // 
     case DROGUE_DESCENT:
       buzzer_play_periodic(4500, 30, 2000);
-      // If we're below the main altitude, deploy the main
-      if (xhat.estimatedAltitude < currentFlightVars.altitude2) {
+//      // If we're below the main altitude, deploy the main
+//      if (xhat.estimatedAltitude < currentFlightVars.altitude2) {
+
+      // If we've tried the main charge, try the backup too
+      if(loopStart - lastStateChange > PYRO_FIRE_DURATION) {
         pwmStart();
         cutStart2 = loopStart;
         progressState();
@@ -478,7 +485,8 @@ void offloadData() {
   Serial.println("]");
   Serial.println();
   
-  delay(3000);  // Give time to connect with CoolTerm or similar
+  delay(6000);  // Give time to connect with CoolTerm or similar
+  Serial.println("Location,state,time,pressure,alt,avgAltitude,velocity,temp,ax,ay,az,wx,wy,wz,cutSense1,cutSense2");
 
   auto done = false;
   while (!done) {

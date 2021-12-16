@@ -149,8 +149,8 @@ void MS5xxx::Readout() {
   double OFF;
   double SENS;
 
-  D2 = read_adc(MS5xxx_CMD_ADC_D2 + MS5xxx_CMD_ADC_4096);
-  D1 = read_adc(MS5xxx_CMD_ADC_D1 + MS5xxx_CMD_ADC_4096);
+  D2 = read_adc(MS5xxx_CMD_ADC_D2 + MS5xxx_CMD_ADC_2048);
+  D1 = read_adc(MS5xxx_CMD_ADC_D1 + MS5xxx_CMD_ADC_2048);
 
   // calculate 1st order pressure and temperature (MS5607 1st order algorithm)
   dT = D2 - C[5] * pow(2, 8);
