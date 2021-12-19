@@ -73,7 +73,7 @@ const uint8_t DATA_SIZE = sizeof(Data);
 struct FlightVariables {
   uint8_t structType = 1; // Flight variable struct.
   
-  uint16_t altitude1 = 4;     // Used as arming altitude
+  uint16_t altitude1 = 100;     // Used as arming altitude
   uint16_t altitude2 = 3; // Main deploy. UNUSED FOR BJORN!
   uint32_t seaLevelPressure;
 };
