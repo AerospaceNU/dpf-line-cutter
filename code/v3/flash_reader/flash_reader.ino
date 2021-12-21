@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include "S25FL.h"
 
-int readMode = 1;  // set to 0 to read flight data entries, 1 to read flight variable entries
+int readMode = 0;  // set to 0 to read flight data entries, 1 to read flight variable entries
 S25FL flash;  // Starts Flash class and initializes SPI
 unsigned long flashLocation = 0x40000;
 uint8_t metadata[64];
