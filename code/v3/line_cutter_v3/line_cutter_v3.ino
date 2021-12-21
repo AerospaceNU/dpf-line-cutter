@@ -60,6 +60,7 @@ unsigned long loopStart = 0;
 unsigned long lastStateChange = 0;
 unsigned long cutStart1 = 0;
 unsigned long cutStart2 = 0;
+bool armed = false;
 int32_t pressure;  // pascals
 bool armed = false;
 double altitude;  // meters
