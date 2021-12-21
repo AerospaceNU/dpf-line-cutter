@@ -2,7 +2,7 @@
 #include <InternalFileSystem.h>
 
 const char* FILENAME = "ID.txt";
-const char* ID = "Apple";
+const char* ID = "Darth";
 
 using namespace Adafruit_LittleFS_Namespace;
 File f(InternalFS);
@@ -17,7 +17,7 @@ void setup() {
   } else {
     Serial.println("Could not start file system.");
   }
-  //InternalFS.remove(FILENAME); // uncomment if you want to reset the ID
+  InternalFS.remove(FILENAME); // uncomment if you want to reset the ID
   
   f.open(FILENAME, FILE_O_READ);
   if (f) {

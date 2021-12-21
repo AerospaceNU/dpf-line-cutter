@@ -61,6 +61,7 @@ unsigned long lastStateChange = 0;
 unsigned long cutStart1 = 0;
 unsigned long cutStart2 = 0;
 int32_t pressure;  // pascals
+bool armed = false;
 double altitude;  // meters
 double previousAltitudeAvg;
 double currentAltitudeAvg;
@@ -212,6 +213,7 @@ void setup() {
 
 
 void loop() {
+  Serial.print("In loop");
   while (millis() < loopStart + DELAY) {}
 
   loopStart = millis();  // Used for timestamps in data log

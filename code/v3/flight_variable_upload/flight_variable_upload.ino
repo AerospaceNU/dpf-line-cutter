@@ -31,14 +31,14 @@ void setup()
 
   // Requirements for state transitions
   flightVars.limitVel         = -0.5;     // NOT USED
-  flightVars.altitude1        = 457;  // Arming altitude, meters
+  flightVars.altitude1        = 305;  // Arming altitude, meters
   flightVars.altitude2        = 366;      // NOT USED
   flightVars.disreefDelay1    = 48000;    // NOT USED
   flightVars.disreefDelay2    = 12500;    // NOT USED
   // PWM settings
-  flightVars.pwmVoltage1      = 1.7;  // Voltage applied to nichrome for line cuts
-  flightVars.pwmVoltage2      = 1.7;
-  flightVars.pwmDuration      = 3000;  // Length of PWM, in milliseconds
+  flightVars.pwmVoltage1      = 4.2;  // Voltage applied to nichrome for line cuts
+  flightVars.pwmVoltage2      = 4.2;
+  flightVars.pwmDuration      = 8000;  // Length of PWM, in milliseconds
   // Photoresistor variables
   flightVars.lightThreshold   = 400;      // NOT USED
   flightVars.lightTriggerTime = 2000;     // NOT USED
