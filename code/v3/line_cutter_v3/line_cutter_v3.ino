@@ -68,6 +68,7 @@ double delta;  // meters/second
 double previousDeltaAvg;
 double currentDeltaAvg;
 int light;
+bool armed = false;
 
 // bluetooth magic
 // OTA DFU service
