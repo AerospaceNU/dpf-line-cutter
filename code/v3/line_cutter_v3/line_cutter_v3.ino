@@ -18,7 +18,6 @@ enum states {
   LANDED
 };
 int state = WAITING;
-char* stateStrings[6] = { "WAITING", "ARMED", "DEPLOYED", "PARTIAL_DISREEF", "FULL_DISREEF", "LANDED" };
 
 // Pins
 const int VOLTAGE_DIVIDER = A4;
@@ -108,6 +107,22 @@ struct Data {
 Data currentData;
 const int DATA_SIZE = sizeof(Data);
 
+struct __attribute__((packed)) FcbData {
+  uint8_t lineCutterNumber = 0;  // ID programmed into the line cutter. Maybe CRC of name?
+  uint8_t state;
+  uint32_t timestamp;
+  uint32_t pressure;
+  float altitude;
+  float deltaAltitude;
+  float temperature;
+  float accelNorm;
+  float battery;
+  uint16_t cutSense1;
+  uint16_t cutSense2;
+  uint16_t currentSense;
+  uint16_t photoresistor;
+};
+
 // For writing data to flash & flight variable log
 struct FlightVariables {
   uint8_t structType = 1;  // flight variable struct
@@ -123,12 +138,31 @@ struct FlightVariables {
   uint32_t lightTriggerTime;
   uint32_t seaLevelPressure;
 };
+
+// For writing data to flash & flight variable log
+struct __attribute__((packed)) FcbFlightVars {
+  uint8_t lineCutterNumber = 0;  // See above
+  float limitVel;
+  uint16_t altitude1;
+  uint16_t altitude2;
+  uint32_t disreefDelay1;
+  uint32_t disreefDelay2;
+  float pwmVoltage1;
+  float pwmVoltage2;
+  uint16_t pwmDuration;
+  uint16_t lightThreshold;
+  uint32_t lightTriggerTime;
+  uint32_t seaLevelPressure;
+};
+
 FlightVariables currentFlightVars;
 const int FLIGHT_VARIABLE_SIZE = sizeof(FlightVariables);
 
 /*****************************
           SETUP/LOOP
  ****************************/
+
+#define FEATHER
 
 void setup() {
   // Manually add nichrome pins to HardwarePWMs and set them
@@ -139,12 +173,13 @@ void setup() {
   hardwarePWM2.addPin(NICHROME_PIN2);
   hardwarePWM2.writePin(NICHROME_PIN2, 0);
   analogReadResolution(10);  // Read values in range [0, 1023]
-
+  
   Serial.begin(115200);
-  /*while (!Serial) {
-    delay(10);
-  }*/
+  // while (!Serial) {
+  //   delay(10);
+  // }
 
+#ifndef FEATHER
   Wire.begin();
   // Connect to accelerometer
   while (!imu.begin()) {
@@ -193,11 +228,13 @@ void setup() {
   SPI.setDataMode(SPI_MODE0);
   pinMode(CHIP_SELECT_PIN, OUTPUT);
   digitalWrite(CHIP_SELECT_PIN, HIGH);
+#endif // 0
 
   // Set up BLE
+  Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
   Bluefruit.begin(2, 0);
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName(boardName);
+  Bluefruit.setName("Line Cutter nRF");
   // To be consistent OTA DFU should be added first if it exists
   bledfu.begin();
   // Configure and start the BLE Uart service
@@ -206,17 +243,22 @@ void setup() {
   startAdv();
   Serial.println("Started advertising.");
 
+#ifndef FEATHER
   setFlashLocation();
   readFlightVariables();
   updateFlash(( uint8_t* ) &currentFlightVars, FLIGHT_VARIABLE_SIZE);
+#endif // 0
 }
 
 
 void loop() {
-  while (millis() < loopStart + DELAY) {}
+  while (millis() < loopStart + 50) {}
+
+  // sendFcbData();
 
   loopStart = millis();  // Used for timestamps in data log
 
+#ifndef FEATHER
   // Read pressure, calculate altitude
   baro.Readout();
   pressure = baro.GetPres();
@@ -240,6 +282,7 @@ void loop() {
   // Update data struct, send to BLE central and flash
   updateDataStruct();
   updateFlash(( uint8_t* ) &currentData, DATA_SIZE);
+#endif // 0
 
   while (bleuart.available()) {
     uint8_t ch;
@@ -250,6 +293,7 @@ void loop() {
     }
   }
 
+#ifndef FEATHER
   if (cutStart1 > 0 && loopStart - cutStart1 > currentFlightVars.pwmDuration) {
     hardwarePWM1.writePin(NICHROME_PIN1, 0);
     Serial.print("Ended PWM on pin ");
@@ -303,6 +347,7 @@ void loop() {
     default:
       Serial.println("Something has gone horribly wrong if none of the states match.");
   }
+#endif // 0
 }
 
 
@@ -322,6 +367,7 @@ void parse_command() {
   }
 
   String command = (char*) char_array;
+  Serial.println(command);
 
   // if user typed '!cut', execute line-cutting
   if (command.substring(0, 4).equals("help")) {
@@ -352,6 +398,18 @@ void parse_command() {
   }
   else if (command.substring(0, 4).equals("data")) {
     sendSensorData();
+  }
+  else if (command.substring(0, 7).equals("fcbdata")) {
+    sendFcbData();
+  }
+  else if (command.substring(0, 6).equals("fcbcfg")) {
+    sendFcbCfg();
+  }
+  else if (command.substring(0, 3).equals("cut")) {
+    int channel = command.substring(4, command.length()).toInt();
+
+    // TODO actually copy this code in
+    Serial.printf("Starting cut on channel %i\n", channel);
   }
   else {
     bleuart.print("Not a valid command.\n");
@@ -530,6 +588,10 @@ void updateDataStruct() {
   currentData.photoresistor = light;
 }
 
+float getBatteryVoltage(int ticks) {
+  return ticks * 2.0 * 3.6 / 1023.0;
+}
+
 void sendSensorData() {
   bleuart.printf("State [%i]\n", currentData.state);
   bleuart.printf("Time [%i]\n", currentData.timestamp);
@@ -538,7 +600,7 @@ void sendSensorData() {
   bleuart.printf("Ax [%f]\n", currentData.accelX);
   bleuart.printf("Ay [%f]\n", currentData.accelY);
   bleuart.printf("Az [%f]\n", currentData.accelZ);
-  bleuart.printf("Batt [%f]\n", currentData.battSense * 2.0 * 3.6 / 1023.0);
+  bleuart.printf("Batt [%f]\n", getBatteryVoltage(currentData.battSense));
   bleuart.printf("CutSens1 [%li]\n", currentData.cutSense1);
   bleuart.printf("CutSens2 [%li]\n", currentData.cutSense2);
   bleuart.printf("CurrSens [%li]\n", currentData.currentSense);
@@ -556,6 +618,47 @@ void sendFlightVariables() {
   bleuart.printf("LightThreshold [%u]\n", currentFlightVars.lightThreshold);
   bleuart.printf("LightTime [%u ms]\n", currentFlightVars.lightTriggerTime);
   bleuart.printf("SeaLevel [%u Pa]\n", currentFlightVars.seaLevelPressure);
+}
+
+void sendFcbData() {
+  static FcbData fcbData;
+  fcbData.lineCutterNumber = 1; // TODO
+  fcbData.state = 2;//currentData.state;
+  fcbData.timestamp = millis();// currentData.timestamp;
+  fcbData.pressure = currentData.pressure;
+  fcbData.altitude = currentData.altitude;
+  fcbData.avgAltitude = 100;// currentData.avgAltitude;
+  fcbData.deltaAltitude = currentData.deltaAltitude;
+  fcbData.avgDeltaAltitude = currentData.avgDeltaAltitude;
+  fcbData.temperature = currentData.temperature;
+  fcbData.accelX = 2;// currentData.accelX;
+  fcbData.accelY = currentData.accelY;
+  fcbData.accelZ = 4;// currentData.accelZ;
+  fcbData.battSense = currentData.battSense;
+  fcbData.cutSense1 = currentData.cutSense1;
+  fcbData.cutSense2 = currentData.cutSense2;
+  fcbData.currentSense = currentData.currentSense;
+  fcbData.photoresistor = currentData.photoresistor;
+
+  bleuart.write((uint8_t *) &fcbData, sizeof(fcbData));
+}
+
+void sendFcbCfg() {
+  static FcbFlightVars tempVars;
+  tempVars.lineCutterNumber = 0; // TODO
+  tempVars.limitVel = currentFlightVars.limitVel;
+  tempVars.altitude1 = currentFlightVars.altitude1;
+  tempVars.altitude2 = currentFlightVars.altitude2;
+  tempVars.disreefDelay1 = currentFlightVars.disreefDelay1;
+  tempVars.disreefDelay2 = currentFlightVars.disreefDelay2;
+  tempVars.pwmVoltage1 = currentFlightVars.pwmVoltage1;
+  tempVars.pwmVoltage2 = currentFlightVars.pwmVoltage2;
+  tempVars.pwmDuration = currentFlightVars.pwmDuration;
+  tempVars.lightThreshold = currentFlightVars.lightThreshold;
+  tempVars.lightTriggerTime = currentFlightVars.lightTriggerTime;
+  tempVars.seaLevelPressure = currentFlightVars.seaLevelPressure;
+
+  bleuart.write((uint8_t *)&tempVars, sizeof(tempVars));
 }
 
 void updateFlash(uint8_t* data, int sizeOfData) {
