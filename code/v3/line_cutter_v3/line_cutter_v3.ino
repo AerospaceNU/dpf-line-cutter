@@ -68,6 +68,7 @@ double delta;  // meters/second
 double previousDeltaAvg;
 double currentDeltaAvg;
 int light;
+bool wantsCut1 = false, wantsCut2 = false;
 
 // bluetooth magic
 // OTA DFU service
@@ -298,6 +299,7 @@ void loop() {
   }
 
 #ifndef FEATHER
+  // Stop PWM after long enough
   if (cutStart1 > 0 && loopStart - cutStart1 > currentFlightVars.pwmDuration) {
     hardwarePWM1.writePin(NICHROME_PIN1, 0);
     Serial.print("Ended PWM on pin ");
@@ -309,6 +311,20 @@ void loop() {
     Serial.print("Ended PWM on pin ");
     Serial.println(NICHROME_PIN2);
     cutStart2 = 0;
+  }
+
+  // Check if start requested over Bluetooth
+  if (wantsCut1 && state >= ARMED) {
+    int level = pwmLevel(currentFlightVars.pwmVoltage1);
+    hardwarePWM1.writePin(NICHROME_PIN1, level);
+    cutStart1 = loopStart;
+    bleuart.println("Starting BLE-commanded cut on channel 1");
+  }
+  if (wantsCut2 && state >= ARMED) {
+    int level = pwmLevel(currentFlightVars.pwmVoltage2);
+    hardwarePWM1.writePin(NICHROME_PIN2, level);
+    cutStart2 = loopStart;
+    bleuart.println("Starting BLE-commanded cut on channel 2");
   }
 
   switch (state) {
@@ -414,8 +430,10 @@ void parse_command() {
   else if (command.substring(0, 3).equals("cut")) {
     int channel = command.substring(4, command.length()).toInt();
 
-    // TODO actually copy this code in
-    Serial.printf("Starting cut on channel %i\n", channel);
+
+    // TODO make less ugly
+    if(channel == 1) wantsCut1 = true;
+    if(channel == 2) wantsCut2 = true;
   }
   else {
     bleuart.print("Not a valid command.\n");
@@ -646,7 +664,7 @@ void sendFcbData() {
   fcbData.currentSense = currentData.currentSense;
   fcbData.photoresistor = currentData.photoresistor;
 
-  bleuart.write((uint8_t *) &fcbData, sizeof(fcbData));
+  sendStruct<>(fcbData);
 }
 
 void sendFcbCfg() {
@@ -664,7 +682,17 @@ void sendFcbCfg() {
   tempVars.lightTriggerTime = currentFlightVars.lightTriggerTime;
   tempVars.seaLevelPressure = currentFlightVars.seaLevelPressure;
 
-  bleuart.write((uint8_t *)&tempVars, sizeof(tempVars));
+  sendStruct<>(tempVars);
+}
+
+template <typename T>
+void sendStruct(const T& t) {
+  uint8_t arr[sizeof(T) + 1];
+  arr[0] = 128; // Invalid ASCII code, to indicate it's data not text
+  memcpy(arr + 1, &t, sizeof(T));
+  
+  // for(int i = 0; i < sizeof(arr); i++) printf("%u\n", arr[i]);
+  bleuart.write(arr, size + 1);
 }
 
 void updateFlash(uint8_t* data, int sizeOfData) {
