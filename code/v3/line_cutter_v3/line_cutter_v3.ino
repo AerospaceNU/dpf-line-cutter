@@ -6,7 +6,7 @@
 #include "MS5xxx.h"
 #include "S25FL.h"
 #include "icm20602/ICM20602.h"
-
+  
 char* boardName; // Get this from the board's ID file
 
 enum states {
@@ -163,7 +163,7 @@ const int FLIGHT_VARIABLE_SIZE = sizeof(FlightVariables);
           SETUP/LOOP
  ****************************/
 
-#define FEATHER
+//#define FEATHER
 
 void setup() {
   // Manually add nichrome pins to HardwarePWMs and set them
@@ -300,25 +300,29 @@ void loop() {
     hardwarePWM1.writePin(NICHROME_PIN1, 0);
     Serial.print("Ended PWM on pin ");
     Serial.println(NICHROME_PIN1);
+    cutStart1 = 0;
   }
   if (cutStart2 > 0 && loopStart - cutStart2 > currentFlightVars.pwmDuration) {
     hardwarePWM2.writePin(NICHROME_PIN2, 0);
     Serial.print("Ended PWM on pin ");
     Serial.println(NICHROME_PIN2);
+    cutStart2 = 0;
   }
 
   // Check if start requested over Bluetooth
-  if (wantsCut1 && state >= ARMED) {
+  if (wantsCut1) {
     int level = pwmLevel(currentFlightVars.pwmVoltage1);
     hardwarePWM1.writePin(NICHROME_PIN1, level);
     cutStart1 = loopStart;
     bleuart.println("Starting BLE-commanded cut on channel 1");
+    wantsCut1 = false;
   }
-  if (wantsCut2 && state >= ARMED) {
+  if (wantsCut2) {
     int level = pwmLevel(currentFlightVars.pwmVoltage2);
     hardwarePWM1.writePin(NICHROME_PIN2, level);
     cutStart2 = loopStart;
     bleuart.println("Starting BLE-commanded cut on channel 2");
+    wantsCut2 = false;
   }
 
   switch (state) {
@@ -424,10 +428,10 @@ void parse_command() {
   else if (command.substring(0, 3).equals("cut")) {
     int channel = command.substring(4, command.length()).toInt();
 
-
     // TODO make less ugly
     if(channel == 1) wantsCut1 = true;
     if(channel == 2) wantsCut2 = true;
+    bleuart.printf("Starting cut on channel %i\n", channel);
   }
   else {
     bleuart.print("Not a valid command.\n");
@@ -641,18 +645,14 @@ void sendFlightVariables() {
 void sendFcbData() {
   static FcbData fcbData;
   fcbData.lineCutterNumber = 1; // TODO
-  fcbData.state = 2;//currentData.state;
-  fcbData.timestamp = millis();// currentData.timestamp;
+  fcbData.state = currentData.state;
+  fcbData.timestamp = currentData.timestamp;
   fcbData.pressure = currentData.pressure;
   fcbData.altitude = currentData.altitude;
-  fcbData.avgAltitude = 100;// currentData.avgAltitude;
   fcbData.deltaAltitude = currentData.deltaAltitude;
-  fcbData.avgDeltaAltitude = currentData.avgDeltaAltitude;
   fcbData.temperature = currentData.temperature;
-  fcbData.accelX = 2;// currentData.accelX;
-  fcbData.accelY = currentData.accelY;
-  fcbData.accelZ = 4;// currentData.accelZ;
-  fcbData.battSense = currentData.battSense;
+  fcbData.accelNorm = sqrt(currentData.accelX * currentData.accelX + currentData.accelY * currentData.accelY + currentData.accelZ * currentData.accelZ);
+  fcbData.battery = getBatteryVoltage(currentData.battSense);
   fcbData.cutSense1 = currentData.cutSense1;
   fcbData.cutSense2 = currentData.cutSense2;
   fcbData.currentSense = currentData.currentSense;
@@ -686,7 +686,7 @@ void sendStruct(const T& t) {
   memcpy(arr + 1, &t, sizeof(T));
   
   // for(int i = 0; i < sizeof(arr); i++) printf("%u\n", arr[i]);
-  bleuart.write(arr, size + 1);
+  bleuart.write(arr, sizeof(T) + 1);
 }
 
 void updateFlash(uint8_t* data, int sizeOfData) {
