@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include "S25FL.h"
 
-int readMode = 1;  // set to 0 to read flight data entries, 1 to read flight variable entries
+int readMode = 0;  // set to 0 to read flight data entries, 1 to read flight variable entries
 S25FL flash;  // Starts Flash class and initializes SPI
 unsigned long flashLocation = 0x40000;
 uint8_t metadata[64];
@@ -10,6 +10,7 @@ bool done = false;
 
 struct Data {
   uint8_t structType = 0;  // data struct
+  bool isArmed;  // All these numers need updating after the addition of the isArmed variable
   uint8_t state; // 1
   uint32_t timestamp; // 2
   uint32_t pressure; // 6
@@ -103,8 +104,8 @@ void readData(uint8_t* flashData) {
 
 void print_flash_packet() {
   if (readMode == 0) {
-    Serial.printf("%u,%u,%u,%f,%f,%f,%f,%f,%f,%f,%f,%u,%u,%u,%u,%li\n",
-                  currentData.state, currentData.timestamp, currentData.pressure,
+    Serial.printf("%u,%d, %u,%u,%f,%f,%f,%f,%f,%f,%f,%f,%u,%u,%u,%u,%li\n",
+                  currentData.state, currentData.isArmed, currentData.timestamp, currentData.pressure,
                   currentData.altitude, currentData.avgAltitude, currentData.deltaAltitude, currentData.avgDeltaAltitude,
                   currentData.temperature, currentData.accelX, currentData.accelY, currentData.accelZ,
                   currentData.battSense, currentData.cutSense1, currentData.cutSense2,

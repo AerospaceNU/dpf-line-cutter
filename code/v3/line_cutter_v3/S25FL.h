@@ -28,8 +28,7 @@
 #define CHIP_SELECT digitalWrite(csPin, LOW);
 #define CHIP_DESELECT digitalWrite(csPin, HIGH);
 
-class S25FL
-{
+class S25FL {
   public:
     S25FL(uint8_t csPin);
     bool write_disable();

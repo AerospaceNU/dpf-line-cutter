@@ -3,8 +3,7 @@
 S25FL::S25FL(uint8_t cs) : csPin{cs} {}
 
 // Disable writing (enable write protect)
-bool S25FL::write_disable()
-{
+bool S25FL::write_disable() {
   CHIP_SELECT
 
   uint8_t tx = WRITE_DISABLE_CMD;
@@ -15,8 +14,7 @@ bool S25FL::write_disable()
 }
 
 // Enable writing (disable write protect)
-bool S25FL::write_enable()
-{
+bool S25FL::write_enable() {
   CHIP_SELECT
   uint8_t tx = WRITE_ENABLE_CMD;
   SPI.transfer(tx);
@@ -25,8 +23,7 @@ bool S25FL::write_enable()
 }
 
 // Returns true if a write is in progress
-bool S25FL::is_write_in_progress()
-{
+bool S25FL::is_write_in_progress() {
   CHIP_SELECT
   SPI.transfer(READ_STAT_REG_CMD);
   byte reg = SPI.transfer(0);
@@ -36,16 +33,14 @@ bool S25FL::is_write_in_progress()
 }
 
 // Sets stuff up
-void S25FL::init()
-{
+void S25FL::init() {
   pinMode(csPin, OUTPUT);
   CHIP_DESELECT
 }
 
 // Read a given number of bytes from the start, and fill a given array
 // Untested if the data spans multiple pages (blocks of 256? I think?)
-bool S25FL::read_start(uint32_t startLoc, uint8_t *pData, uint32_t numBytes)
-{
+bool S25FL::read_start(uint32_t startLoc, uint8_t *pData, uint32_t numBytes) {
   while (is_write_in_progress()) {
     delay(1);
   }
@@ -66,8 +61,7 @@ bool S25FL::read_start(uint32_t startLoc, uint8_t *pData, uint32_t numBytes)
   SPI.transfer(startLoc & 0xFF);
 
   // Read into given buffer pData
-  for (int i = 0; i < numBytes; i++)
-  {
+  for (int i = 0; i < numBytes; i++) {
     pData[i] = SPI.transfer(0);
   }
 
@@ -80,8 +74,7 @@ bool S25FL::read_start(uint32_t startLoc, uint8_t *pData, uint32_t numBytes)
 // Write a given array of bytes to a start location
 // Users should manage writing to one page at a time because I'm  l a z y
 // And should wait for is_write_in_progress to be false.
-bool S25FL::write(uint32_t startLoc, uint8_t *data, uint32_t numBytes)
-{
+bool S25FL::write(uint32_t startLoc, uint8_t *data, uint32_t numBytes) {
   while (is_write_in_progress()) {
     delay(1);
   }
@@ -109,15 +102,13 @@ bool S25FL::write(uint32_t startLoc, uint8_t *data, uint32_t numBytes)
   // Fill in TX buffer
   uint8_t txBuf[5];
   txBuf[0] = PAGE_PROGRAM_CMD;
-  for (int i = 1; i < 5; i++)
-  {
+  for (int i = 1; i < 5; i++) {
     txBuf[i] = (startLoc >> (8 * (4 - i))) & 0xFF;
   }
   //  memcpy(txBuf + 5, data, numBytes);
   SPI.transfer(txBuf, 5); // Send the location and page prgm cmd
 
-  for (int i = 0; i < numBytes; i++)
-  {
+  for (int i = 0; i < numBytes; i++) {
     SPI.transfer(data[i]);
   }
 
@@ -126,8 +117,7 @@ bool S25FL::write(uint32_t startLoc, uint8_t *data, uint32_t numBytes)
   return true;
 }
 
-bool S25FL::erase_sector_start(uint32_t sectorNum)
-{
+bool S25FL::erase_sector_start(uint32_t sectorNum) {
   // Check for valid parameters
   if (sectorNum * SECTOR_SIZE_BYTES >= FLASH_SIZE_BYTES)
     return false;
@@ -155,8 +145,7 @@ bool S25FL::erase_sector_start(uint32_t sectorNum)
 }
 
 // Erase the entire chip
-bool S25FL::erase_chip_start()
-{
+bool S25FL::erase_chip_start() {
   // Enable writing to flash (also necessary for erasing)
   if (!write_enable())
     return false;
@@ -171,11 +160,10 @@ bool S25FL::erase_chip_start()
 }
 
 // Check if no writes are in progress. returns !is_write_in_progress
-bool S25FL::is_write_completed()
-{
+bool S25FL::is_write_completed() {
   bool ret = is_write_in_progress();
-  if (ret)
-  {
+  
+  if (ret) {
     delay(1);
   }
   // This delay is here because checking write in progress too quickly causes issues
@@ -184,14 +172,12 @@ bool S25FL::is_write_completed()
 }
 
 // Same functionality as write, but different public function name is clearer for programmers at higher levels
-bool S25FL::is_erase_complete()
-{
+bool S25FL::is_erase_complete() {
   return is_write_completed();
 }
 
 // Print manufacturer info
-bool S25FL::check_connected()
-{
+bool S25FL::check_connected() {
   CHIP_SELECT
 
   SPI.transfer(0x9F);
@@ -216,4 +202,5 @@ bool S25FL::check_connected()
   Serial.println(family, HEX);
 
   CHIP_DESELECT
+  return true; // TODO: added return as part of the refactor,
 }

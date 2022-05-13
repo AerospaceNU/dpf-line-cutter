@@ -6,23 +6,18 @@
 #include "MovingAvg.h"
 
 // initialize - allocate the interval array
-void MovingAvg::begin()
-{
+void MovingAvg::begin() {
   m_readings = new double[m_interval];
 }
 
 // add a new reading and return the new moving average
-double MovingAvg::reading(double newReading)
-{
+double MovingAvg::reading(double newReading) {
   // add each new data point to the sum until the m_readings array is filled
-  if (m_nbrReadings < m_interval)
-  {
+  if (m_nbrReadings < m_interval) {
     ++m_nbrReadings;
     m_sum = m_sum + newReading;
-  }
+  } else {
   // once the array is filled, subtract the oldest data point and add the new one
-  else
-  {
     m_sum = m_sum - m_readings[m_next] + newReading;
   }
 
@@ -32,14 +27,12 @@ double MovingAvg::reading(double newReading)
 }
 
 // just return the current moving average
-double MovingAvg::getAvg()
-{
+double MovingAvg::getAvg() {
   return m_sum / m_nbrReadings;
 }
 
 // start the moving average over again
-void MovingAvg::reset()
-{
+void MovingAvg::reset() {
   m_nbrReadings = 0;
   m_sum = 0;
   m_next = 0;

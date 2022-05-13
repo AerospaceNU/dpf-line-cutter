@@ -6,8 +6,7 @@
 #ifndef MOVINGAVG_H_INCLUDED
 #define MOVINGAVG_H_INCLUDED
 
-class MovingAvg
-{
+class MovingAvg {
   public:
     MovingAvg(int interval)
       : m_interval(interval), m_nbrReadings(0), m_sum(0), m_next(0) {}
@@ -17,6 +16,7 @@ class MovingAvg
     int getCount() {
       return m_nbrReadings;
     }
+    
     void reset();
     double* getReadings() {
       return m_readings;

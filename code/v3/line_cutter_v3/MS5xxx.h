@@ -42,8 +42,7 @@
 #define MS5xxx_CMD_ADC_4096 0x08    // set ADC oversampling ratio to 4096
 #define MS5xxx_CMD_PROM_RD  0xA0    // initiate readout of PROM registers
 
-class MS5xxx
-{
+class MS5xxx {
   protected:
     unsigned int C[8];
     double P;
@@ -68,7 +67,7 @@ class MS5xxx
 
     unsigned int Read_C(unsigned int index);
 
-    double GetTemp();// Get the temp in deg C. Must call ReadProm once to calibrate, and Readout at least once, before calling this.
+    double GetTemp(); // Get the temp in deg C. Must call ReadProm once to calibrate, and Readout at least once, before calling this.
     double GetPres(); // Get the pressure in pA. Must call ReadProm once to calibrate, and Readout at least once, before calling this.
 };
 

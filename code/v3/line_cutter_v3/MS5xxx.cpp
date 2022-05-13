@@ -29,8 +29,7 @@ void MS5xxx::setI2Caddr(char aAddr) {
   i2caddr = aAddr;
 }
 
-byte MS5xxx::send_cmd(byte aCMD)
-{
+byte MS5xxx::send_cmd(byte aCMD) {
   _Wire->beginTransmission(i2caddr);
   _Wire->write(aCMD);
   uint8_t ret = _Wire->endTransmission(true);
@@ -47,8 +46,7 @@ void MS5xxx::ReadProm() {
   send_cmd(MS5xxx_CMD_RESET);
   delay(3);
 
-  for (uint8_t i = 0; i < 8; i++)
-  {
+  for (uint8_t i = 0; i < 8; i++) {
     C[i] = 0x0000;
     send_cmd(MS5xxx_CMD_PROM_RD + 2 * i);
     _Wire->requestFrom(i2caddr, 2);
@@ -61,11 +59,10 @@ void MS5xxx::ReadProm() {
 
 }
 
-unsigned int MS5xxx::Calc_CRC4(unsigned char poly)
-{
+unsigned int MS5xxx::Calc_CRC4(unsigned char poly) {
   int cnt;                   		// simple counter
-  unsigned int n_rem;                 // CRC remainder
-  unsigned int crc_read;              // original value of the CRC
+  unsigned int n_rem;           // CRC remainder
+  unsigned int crc_read;        // original value of the CRC
   unsigned int l_pol = poly;
   unsigned char n_bit;
 
@@ -74,51 +71,43 @@ unsigned int MS5xxx::Calc_CRC4(unsigned char poly)
 
   crc_read = C[ 7 ];                  // save read RCR
   C[ 7 ] = ( 0xFF00 & ( C[ 7 ] ) );   // CRC byte is replaced by 0
-  for ( cnt = 0; cnt < 16; cnt++ )    // operation is performed on bytes
-  { // choose LSB or MSB
+  for ( cnt = 0; cnt < 16; cnt++ ) {    // operation is performed on bytes
+    // choose LSB or MSB
     if ( cnt % 2 == 1 ) n_rem ^= ( unsigned short ) ( ( C[ cnt >> 1 ] ) & 0x00FF );
     else n_rem ^= ( unsigned short ) ( ( C[ cnt >> 1 ] >> 8) & 0x00FF );
 
-    for ( n_bit = 8; n_bit > 0; n_bit-- )
-    {
-      if ( n_rem & ( 0x8000 ) )
-      {
+    for ( n_bit = 8; n_bit > 0; n_bit-- ) {
+      if ( n_rem & ( 0x8000 ) ) {
         n_rem = ( n_rem << 1 ) ^ l_pol;
-      }
-      else
-      {
+      } else {
         n_rem = ( n_rem << 1 );
       }
     }
   }
+  
   C[ 7 ] = crc_read;
   n_rem = (0x000F & (n_rem >> 12)); // final 4-bit remainder is CRC code
   return n_rem;
 }
 
-unsigned int MS5xxx::Read_CRC4()
-{
-
+unsigned int MS5xxx::Read_CRC4() {
   unsigned int crc_read = ( 0x000F & ( C[ 7 ] ) );
-  return ( crc_read );
+  return (crc_read);
 }
 
-unsigned int MS5xxx::Read_C( unsigned int index)
-{
+unsigned int MS5xxx::Read_C( unsigned int index) {
   unsigned int retval = 0;
   if ( ( index >= 0) && ( index <= 7 ) )
     retval = C[ index ];
   return retval;
 }
 
-unsigned long MS5xxx::read_adc(unsigned char aCMD)
-{
+unsigned long MS5xxx::read_adc(unsigned char aCMD) {
   unsigned long value = 0;
   unsigned long c = 0;
 
   send_cmd(MS5xxx_CMD_ADC_CONV + aCMD); // start DAQ and conversion of ADC data
-  switch (aCMD & 0x0f)
-  {
+  switch (aCMD & 0x0f) {
     case MS5xxx_CMD_ADC_256 : delayMicroseconds(900);
       break;
     case MS5xxx_CMD_ADC_512 : delay(3);
@@ -186,10 +175,11 @@ double MS5xxx::GetPres() {
 }
 
 unsigned char MS5xxx::CRCcodeTest() {
-  unsigned int nprom[] = {0x3132, 0x3334, 0x3536, 0x3738, 0x3940, 0x4142, 0x4344, 0x4500}; //expected output is 0xB
+  unsigned int nprom[] = {0x3132, 0x3334, 0x3536, 0x3738, 0x3940, 0x4142, 0x4344, 0x4500};  //expected output is 0xB
   for (uint8_t i = 0; i < 8; i++) {
     C[i] = nprom[i];
   }
+  
   unsigned char crc = Calc_CRC4(); //expected output is 0xB
   ReadProm();
   return crc;
