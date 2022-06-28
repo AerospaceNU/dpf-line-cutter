@@ -235,7 +235,7 @@ void setup() {
   Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
   Bluefruit.begin(2, 0);
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName("Line Cutter nRF");
+  Bluefruit.setName("(DPF) Line Cutter 3");
   // To be consistent OTA DFU should be added first if it exists
   bledfu.begin();
   // Configure and start the BLE Uart service
@@ -644,7 +644,7 @@ void sendFlightVariables() {
 
 void sendFcbData() {
   static FcbData fcbData;
-  fcbData.lineCutterNumber = 1; // TODO
+  fcbData.lineCutterNumber = 3; // TODO
   fcbData.state = currentData.state;
   fcbData.timestamp = currentData.timestamp;
   fcbData.pressure = currentData.pressure;
