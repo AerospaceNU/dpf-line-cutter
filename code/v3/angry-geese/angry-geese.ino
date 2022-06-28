@@ -408,21 +408,21 @@ void updateDataStruct() {
 }
 
 void sendSensorData() {
-  Serial.printf("State\t");    Serial.println(stateStrings[currentData.state]);
-  Serial.printf("Time\t");     Serial.println(currentData.timestamp);
-  Serial.printf("Press\t");    Serial.println(currentData.pressure);
-  Serial.printf("CutSens1\t"); Serial.println(currentData.cutSense1);
-  Serial.printf("CutSens2\t"); Serial.println(currentData.cutSense2);
-  Serial.printf("Est Alt\t");     Serial.println(currentData.avgAltitude);
-  Serial.printf("Est Vel\t");     Serial.println(currentData.deltaAltitude);
+  Serial.print("State\t");    Serial.println(stateStrings[currentData.state]);
+  Serial.print("Time\t");     Serial.println(currentData.timestamp);
+  Serial.print("Press\t");    Serial.println(currentData.pressure);
+  Serial.print("CutSens1\t"); Serial.println(currentData.cutSense1);
+  Serial.print("CutSens2\t"); Serial.println(currentData.cutSense2);
+  Serial.print("Est Alt\t");     Serial.println(currentData.avgAltitude);
+  Serial.print("Est Vel\t");     Serial.println(currentData.deltaAltitude);
 }
 
 void sendFlightVariables() {
-  Serial.printf("Cut1Alt [%u m]\n", currentFlightVars.altitude1);
-  Serial.printf("Cut2Alt [%u m]\n", currentFlightVars.altitude2);
-  Serial.printf("TimePWM [%u ms]\n", PYRO_FIRE_DURATION);
-  Serial.printf("LevelPWm [%u/255]\n", PYRO_POWER);
-  Serial.printf("SeaLevel [%u Pa]\n", currentFlightVars.seaLevelPressure);
+  Serial.print("Cut1Alt\t"); Serial.println(currentFlightVars.altitude1);
+  Serial.print("Cut2Alt\t"); Serial.println(currentFlightVars.altitude2);
+  Serial.print("Pyro Time (ms)\t"); Serial.println(PYRO_FIRE_DURATION);
+  Serial.print("LevelPWm (/255)\t"); Serial.println(PYRO_POWER);
+  Serial.print("SeaLevel (pa)\t"); Serial.println(currentFlightVars.seaLevelPressure);
 }
 
 void updateFlash(uint8_t* data, int sizeOfData) {
@@ -517,15 +517,15 @@ void print_flash_packet(const Data& packet, unsigned long loc) {
   Serial.print(", ");
   Serial.print(packet.pressure);
   Serial.print(", ");
-  Serial.print(packet.altitude);
+  Serial.print(packet.altitude, 4);
   Serial.print(", ");
-  Serial.print(packet.avgAltitude);
+  Serial.print(packet.avgAltitude, 4);
   Serial.print(", ");
-  Serial.print(packet.deltaAltitude);
+  Serial.print(packet.deltaAltitude, 4);
   Serial.print(", ");
-  Serial.print(packet.temperature);
+  Serial.print(packet.temperature, 3);
   Serial.print(", ");
-  Serial.print(packet.accelX);
+  Serial.print(packet.accelX, 9);
   Serial.print(", ");
   Serial.print(packet.accelY);
   Serial.print(", ");
