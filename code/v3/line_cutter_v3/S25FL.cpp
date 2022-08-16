@@ -216,4 +216,5 @@ bool S25FL::check_connected()
   Serial.println(family, HEX);
 
   CHIP_DESELECT
+  return true;
 }
