@@ -11,7 +11,7 @@ typedef struct
   float accel_xout;
   float accel_yout;
   float accel_zout;
-  int16_t temp_out;
+  float temp_out;
   int16_t gyro_xout;
   int16_t gyro_yout;
   int16_t gyro_zout;
@@ -94,7 +94,7 @@ public:
       ((float) combine(buff[0], buff[1])) / sensitivity,
       ((float) combine(buff[2], buff[3])) / sensitivity,
       ((float) combine(buff[4], buff[5])) / sensitivity,
-      ((float) combine(buff[6], buff[7]) / 326.8) + 25.0,
+      (float)((float) combine(buff[6], buff[7]) / 326.8) + (float)25.0,
       combine(buff[8], buff[9]),
       combine(buff[10], buff[11]),
       combine(buff[12], buff[13]),
