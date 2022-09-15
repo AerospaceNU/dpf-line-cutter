@@ -62,7 +62,6 @@ unsigned long cutStart1 = 0;
 unsigned long cutStart2 = 0;
 bool armed = false;
 int32_t pressure;  // pascals
-bool armed = false;
 double altitude;  // meters
 double previousAltitudeAvg;
 double currentAltitudeAvg;
@@ -214,7 +213,8 @@ void setup() {
 
 
 void loop() {
-  Serial.print("In loop");
+  //Serial.print("In loop");
+  //Serial.println(analogRead(VOLTAGE_DIVIDER) * 4.0 * 3.6 / 1023.0);
   while (millis() < loopStart + DELAY) {}
 
   loopStart = millis();  // Used for timestamps in data log
@@ -354,6 +354,10 @@ void parse_command() {
   }
   else if (command.substring(0, 4).equals("data")) {
     sendSensorData();
+  }
+  else if (command.substring(0, 4).equals("test")) {
+    int level = pwmLevel(currentFlightVars.pwmVoltage2);
+    hardwarePWM2.writePin(NICHROME_PIN2, level);
   }
   else {
     bleuart.print("Not a valid command.\n");
