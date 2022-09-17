@@ -23,7 +23,7 @@ void setup() {
 }
 
 void loop() {
-  if (!completed) {
+//  if (!completed) {
     completed = flash.is_erase_complete();
     if (completed) { 
       Serial.println("Done");
@@ -32,6 +32,9 @@ void loop() {
       Serial.print(endTime-startTime);
       Serial.println("ms");
     }
+//  }
+  else {
+    Serial.print(".\n");
   }
-  delay(10);
+  delay(500);
 }

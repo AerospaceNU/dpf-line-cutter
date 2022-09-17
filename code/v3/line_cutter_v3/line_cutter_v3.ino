@@ -109,7 +109,7 @@ Data currentData;
 const int DATA_SIZE = sizeof(Data);
 
 struct __attribute__((packed)) FcbData {
-  uint8_t lineCutterNumber = 0;  // ID programmed into the line cutter. Maybe CRC of name?
+  uint8_t lineCutterNumber = 5;  // ID programmed into the line cutter. Maybe CRC of name?
   uint8_t state;
   uint32_t timestamp;
   uint32_t pressure;
@@ -142,7 +142,7 @@ struct FlightVariables {
 
 // For writing data to flash & flight variable log
 struct __attribute__((packed)) FcbFlightVars {
-  uint8_t lineCutterNumber = 2;  // See above
+  uint8_t lineCutterNumber = 5;  // See above
   float limitVel;
   uint16_t altitude1;
   uint16_t altitude2;
@@ -235,7 +235,7 @@ void setup() {
   Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
   Bluefruit.begin(2, 0);
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName("(DPF) Line Cutter 2");
+  Bluefruit.setName("(DPF) Line Cutter 5");
   // To be consistent OTA DFU should be added first if it exists
   bledfu.begin();
   // Configure and start the BLE Uart service
@@ -648,7 +648,7 @@ void sendFlightVariables() {
 
 void sendFcbData() {
   static FcbData fcbData;
-  fcbData.lineCutterNumber = 2; // TODO
+  fcbData.lineCutterNumber = 5; // TODO
   fcbData.state = currentData.state;
   fcbData.timestamp = currentData.timestamp;
   fcbData.pressure = currentData.pressure;
@@ -667,7 +667,7 @@ void sendFcbData() {
 
 void sendFcbCfg() {
   static FcbFlightVars tempVars;
-  tempVars.lineCutterNumber = 2; // TODO
+  tempVars.lineCutterNumber = 5; // TODO
   tempVars.limitVel = currentFlightVars.limitVel;
   tempVars.altitude1 = currentFlightVars.altitude1;
   tempVars.altitude2 = currentFlightVars.altitude2;
