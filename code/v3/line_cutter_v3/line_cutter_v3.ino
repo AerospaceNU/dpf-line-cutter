@@ -142,7 +142,7 @@ struct FlightVariables {
 
 // For writing data to flash & flight variable log
 struct __attribute__((packed)) FcbFlightVars {
-  uint8_t lineCutterNumber = 0;  // See above
+  uint8_t lineCutterNumber = 2;  // See above
   float limitVel;
   uint16_t altitude1;
   uint16_t altitude2;
@@ -235,7 +235,7 @@ void setup() {
   Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
   Bluefruit.begin(2, 0);
   Bluefruit.setTxPower(8);    // Check bluefruit.h for supported values
-  Bluefruit.setName("(DPF) Line Cutter 3");
+  Bluefruit.setName("(DPF) Line Cutter 2");
   // To be consistent OTA DFU should be added first if it exists
   bledfu.begin();
   // Configure and start the BLE Uart service
@@ -323,7 +323,7 @@ void loop() {
   }
   if (wantsCut2) {
     int level = pwmLevel(currentFlightVars.pwmVoltage2);
-    hardwarePWM1.writePin(NICHROME_PIN2, level);
+    hardwarePWM2.writePin(NICHROME_PIN2, level);
     cutStart2 = loopStart;
     bleuart.println("Starting BLE-commanded cut on channel 2");
     wantsCut2 = false;
@@ -423,7 +423,7 @@ void parse_command() {
   else if (command.substring(0, 4).equals("test")) {
     int level = pwmLevel(currentFlightVars.pwmVoltage2);
     hardwarePWM2.writePin(NICHROME_PIN2, level);
-  else if (command.substring(0, 7).equals("fcbdata")) {
+  } else if (command.substring(0, 7).equals("fcbdata")) {
     sendFcbData();
   }
   else if (command.substring(0, 6).equals("fcbcfg")) {
@@ -648,7 +648,7 @@ void sendFlightVariables() {
 
 void sendFcbData() {
   static FcbData fcbData;
-  fcbData.lineCutterNumber = 3; // TODO
+  fcbData.lineCutterNumber = 2; // TODO
   fcbData.state = currentData.state;
   fcbData.timestamp = currentData.timestamp;
   fcbData.pressure = currentData.pressure;
@@ -667,7 +667,7 @@ void sendFcbData() {
 
 void sendFcbCfg() {
   static FcbFlightVars tempVars;
-  tempVars.lineCutterNumber = 0; // TODO
+  tempVars.lineCutterNumber = 2; // TODO
   tempVars.limitVel = currentFlightVars.limitVel;
   tempVars.altitude1 = currentFlightVars.altitude1;
   tempVars.altitude2 = currentFlightVars.altitude2;
