@@ -38,7 +38,7 @@ void setup()
   // PWM settings
   flightVars.pwmVoltage1      = 6;  // Voltage applied to nichrome for line cuts
   flightVars.pwmVoltage2      = 6;
-  flightVars.pwmDuration      = 8000;  // Length of PWM, in milliseconds
+  flightVars.pwmDuration      = 12000;  // Length of PWM, in milliseconds
   // Photoresistor variables
   flightVars.lightThreshold   = 400;      // NOT USED
   flightVars.lightTriggerTime = 2000;     // NOT USED

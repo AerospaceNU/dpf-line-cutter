@@ -21,8 +21,8 @@ int state = WAITING;
 
 // Pins
 const int VOLTAGE_DIVIDER = A4;
-const int NICHROME_PIN1 =   11;
-const int NICHROME_PIN2 =   12;
+const int NICHROME_PIN1 =   12;
+const int NICHROME_PIN2 =   11;
 const int PHOTO_PIN =       A3;
 const int CALIBRATION_LED = PIN_LED2;
 const int CUT_SENSE1 =      A5;
