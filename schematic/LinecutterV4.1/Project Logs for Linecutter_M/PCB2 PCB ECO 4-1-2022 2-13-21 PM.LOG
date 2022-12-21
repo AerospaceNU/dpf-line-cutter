@@ -1,0 +1,15 @@
+Change Component Designator: OldDesignator=D? NewDesignator=D4
+Change Component Designator: OldDesignator=R? NewDesignator=R21
+Added Component: Designator=R23(CAPC1508X03N)
+Added Component: Designator=R26(CAPC1508X03N)
+Added Pin To Net: NetName=CAP Pin=R23-2
+Added Pin To Net: NetName=GND Pin=R26-1
+Added Pin To Net: NetName=SNS_LIGHT Pin=U4-10
+Change Net Name : Old Net Name=NetD?_1 New Net Name=NetD4_1
+Change Net Name : Old Net Name=NetU4_11 New Net Name=SNS_BAT
+Added Pin To Net: NetName=SNS_T Pin=R23-1
+Added Pin To Net: NetName=SNS_T Pin=R26-2
+Added Pin To Net: NetName=SNS_T Pin=U4-14
+Added Net: Name=SNS_T
+Added Member To Class: ClassName=Sheet5 Member=Component R23 4.99kOhm
+Added Member To Class: ClassName=Sheet5 Member=Component R26 NCU18XH103F6SRB

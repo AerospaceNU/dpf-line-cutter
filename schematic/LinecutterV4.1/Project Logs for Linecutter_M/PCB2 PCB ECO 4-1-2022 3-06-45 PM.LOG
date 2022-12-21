@@ -1,0 +1,4 @@
+Removed Pin From Net: NetName=SNS_LIGHT Pin=U4-10
+Removed Pin From Net: NetName=SNS_T Pin=U4-14
+Added Pin To Net: NetName=SNS_T Pin=U4-10
+Added Pin To Net: NetName=SNS_LIGHT Pin=U4-14

@@ -1,0 +1,11 @@
+Removed Pin From Net: NetName=G_Ctrl1 Pin=TP9-6
+Removed Pin From Net: NetName=G_Ctrl2 Pin=TP10-6
+Removed Pin From Net: NetName=SNS_BAT Pin=U4-11
+Removed Pin From Net: NetName=G_Ctrl1 Pin=U4-20
+Removed Pin From Net: NetName=CAPC_EN Pin=U4-21
+Added Pin To Net: NetName=CAPC_EN Pin=U4-11
+Added Pin To Net: NetName=SNS_BAT Pin=U4-13
+Added Pin To Net: NetName=G_Ctrl1 Pin=U4-21
+Added Room: Name=Cutter
+Added Room: Name=Sensor
+Added Room: Name=Supercap

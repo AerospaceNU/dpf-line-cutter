@@ -1,0 +1,8 @@
+Added Component: Designator=R27(RESC0402)
+Added Component: Designator=R28(RESC0402)
+Added Pin To Net: NetName=SNS_BAT Pin=R27-1
+Added Pin To Net: NetName=PWR Pin=R27-2
+Added Pin To Net: NetName=GND Pin=R28-1
+Added Pin To Net: NetName=SNS_BAT Pin=R28-2
+Added Member To Class: ClassName=Sheet3 Member=Component R27 4.99kOhm
+Added Member To Class: ClassName=Sheet3 Member=Component R28 4.99kOhm
