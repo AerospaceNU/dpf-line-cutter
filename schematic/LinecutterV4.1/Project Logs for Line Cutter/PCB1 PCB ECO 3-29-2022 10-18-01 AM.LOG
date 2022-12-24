@@ -1,0 +1,3 @@
+Removed Pin From Net: NetName=CHARGE_FI Pin=U4-54
+Added Pin To Net: NetName=CHARGE_FI Pin=U4-36
+Added Class: Name=USB

@@ -1,0 +1,29 @@
+Removed Pin From Net: NetName=SNS_VCAP Pin=R21-1
+Removed Pin From Net: NetName=SNS_VCAP Pin=R23-2
+Added Component: Designator=C30(RESC0402)
+Added Component: Designator=R18(RESC3216X05N)
+Added Component: Designator=R19(RESC0402)
+Added Component: Designator=U9(SOIC-8)
+Added Pin To Net: NetName=GND Pin=C30-1
+Added Pin To Net: NetName=3V3 Pin=C30-2
+Added Pin To Net: NetName=3V3 Pin=R18-2
+Added Pin To Net: NetName=GND Pin=R19-1
+Added Pin To Net: NetName=GND Pin=U9-4
+Added Pin To Net: NetName=SNS_VCAP Pin=U9-6
+Added Pin To Net: NetName=SNS_VCAP Pin=U9-7
+Added Pin To Net: NetName=3V3 Pin=U9-8
+Added Pin To Net: NetName=NetR18_1 Pin=R18-1
+Added Pin To Net: NetName=NetR18_1 Pin=R19-2
+Added Pin To Net: NetName=NetR18_1 Pin=U9-3
+Added Net: Name=NetR18_1
+Added Pin To Net: NetName=NetR21_1 Pin=R21-1
+Added Pin To Net: NetName=NetR21_1 Pin=R23-2
+Added Pin To Net: NetName=NetR21_1 Pin=U9-5
+Added Net: Name=NetR21_1
+Added Pin To Net: NetName=SNS_LIGHT Pin=U9-1
+Added Pin To Net: NetName=SNS_LIGHT Pin=U9-2
+Added Net: Name=SNS_LIGHT
+Added Member To Class: ClassName=Sheet1 Member=Component C30 0.1uF
+Added Member To Class: ClassName=Sheet1 Member=Component R18 R-G-1206
+Added Member To Class: ClassName=Sheet1 Member=Component R19 R-G-0402
+Added Member To Class: ClassName=Sheet1 Member=Component U9 TSZ182IDT

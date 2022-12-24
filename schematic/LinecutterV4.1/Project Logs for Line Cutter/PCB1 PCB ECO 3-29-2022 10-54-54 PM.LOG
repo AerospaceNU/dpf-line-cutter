@@ -1,0 +1,50 @@
+Removed Pin From Net: NetName=GND Pin=J1-6
+Removed Pin From Net: NetName=GND Pin=J1-7
+Removed Pin From Net: NetName=GND Pin=J1-8
+Removed Pin From Net: NetName=GND Pin=J1-9
+Removed Pin From Net: NetName=GND Pin=J1-10
+Removed Pin From Net: NetName=GND Pin=J1-11
+Change Component Footprint: Designator=X1 Old Footprint=ECS-.327-12.5-12-TR New Footprint=830062558
+Change Component Footprint: Designator=J1 Old Footprint=FP-473460001-MFG New Footprint=FCI USB 10118193-0001LF
+Change Component Comment : Designator=J1 Old Comment=473460001 New Comment=10118193-0001LF
+Change Component Comment : Designator=X1 Old Comment=ECS-.327-9-16-TR New Comment=830062558
+Change Managed Component Library Link : Designator=J1 Old VaultGUID=B7D15EC3-160A-466F-A46C-7801FE6295A7 New VaultGUID= Old ItemGUID=285100D0-19B2-4A17-89A6-7D257B0560E1 New ItemGUID= Old RevisionGUID=ADFB63CD-AF5D-4714-8456-998C998A08A3 New RevisionGUID=
+Change component parameters: Designator = "X1" ("X1"); Footprint = "ECS-.327-12.5-12-TR"; UniqueID = "\UEVKLPTO" ("\UEVKLPTO")
+Change component parameters (AddParameter): Name = "ComponentLink1Description"; Value = "New link"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "ComponentLink1URL"; Value = "https://www.digikey.com/en/products/detail/w%C3%BCrth-elektronik/830062558/13979247?s=N4IgTCBcDaIBwGYAMSBsYCsG4gLoF8g"; VariantName = "[No Variations]"
+Change component parameters: Designator = "J1" ("J1"); Footprint = "FP-473460001-MFG"; UniqueID = "\CETANXPM" ("\CETANXPM")
+Change component parameters (AddParameter): Name = "ComponentLink1Description"; Value = "Datasheet"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "ComponentLink1URL"; Value = "https://cdn.amphenol-icc.com/media/wysiwyg/files/documentation/datasheet/inputoutput/io_usb_micro.pdf"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "ComponentLink2Description"; Value = "DigiKey Link"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "ComponentLink2URL"; Value = "//digikey.com/product-detail/en/amphenol-icc-fci/10118193-0001LF/609-4616-2-ND/2785388"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Connector Type"; Value = "USB - micro B"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Current Rating (Amps)"; Value = "1.8A per Contact"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Features"; Value = "Solder Retention"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Gender"; Value = "Receptacle"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "LastUpdated"; Value = "12/9/2019 8:51:28 PM"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Lifecycle Status"; Value = "0"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Manufacturer"; Value = "Amphenol ICC (FCI)"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Mating Cycles"; Value = "10000"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Minimum Order"; Value = "1"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Mounting Feature"; Value = "Horizontal"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Mounting Type"; Value = "Surface Mount, Right Angle; Through Hole"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Number of Contacts"; Value = "5"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Number of Ports"; Value = "1"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Operating Temperature"; Value = "-30°C ~ 80°C"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Packaging"; Value = "TapeAndReel"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Part Number"; Value = "10118193-0001LF"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Part Status"; Value = "Active"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Price"; Value = "0.21"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Series"; Value = "-"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Shielding"; Value = "Shielded"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Specifications"; Value = "USB 2.0"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Supplier 1"; Value = "DigiKey"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Supplier Part Number 1"; Value = "609-4616-2-ND"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Termination"; Value = "Solder"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Voltage - Rated"; Value = "100VAC"; VariantName = "[No Variations]"
+Added Pin To Net: NetName=GND Pin=J1-S
+Added Pin To Net: NetName=GND Pin=J1-S
+Added Pin To Net: NetName=GND Pin=J1-S
+Added Pin To Net: NetName=GND Pin=J1-S
+Added Pin To Net: NetName=GND Pin=J1-S
+Added Pin To Net: NetName=GND Pin=J1-S

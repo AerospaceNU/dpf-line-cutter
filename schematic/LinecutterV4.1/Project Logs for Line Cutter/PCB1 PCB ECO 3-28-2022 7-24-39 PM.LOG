@@ -1,0 +1,22 @@
+Removed Pin From Net: NetName=USB_N Pin=R6-1
+Removed Member From Class: ClassName=Sheet2 Member=R6
+Change Component Footprint: Designator=R3 Old Footprint=FP-ERJ2R-IPC_B New Footprint=RESC0402
+Change Managed Component Library Link : Designator=R3 Old VaultGUID=B7D15EC3-160A-466F-A46C-7801FE6295A7 New VaultGUID= Old ItemGUID=9A3B1CE1-81A2-46C0-9BC6-854EF9471215 New ItemGUID= Old RevisionGUID=5C8D2BF2-5388-4FCC-9CC8-0DCE5B6D8BB9 New RevisionGUID=
+Change component parameters: Designator = "R3" ("R3"); Footprint = "FP-ERJ2R-IPC_B"; UniqueID = "\BREKIPXD" ("\BREKIPXD")
+Added Component: Designator=R^(RESC0402)
+Added Component: Designator=U8(SOT23-5)
+Added Pin To Net: NetName=VUSB Pin=D4-2
+Added Pin To Net: NetName=USB_N Pin=R^-1
+Added Pin To Net: NetName=PWR Pin=U8-1
+Added Pin To Net: NetName=GND Pin=U8-2
+Added Pin To Net: NetName=NetC10_2 Pin=U8-3
+Added Pin To Net: NetName=3V3 Pin=U8-4
+Added Pin To Net: NetName=PWR Pin=U8-5
+Added Pin To Net: NetName=NetR3_2 Pin=R3-2
+Added Pin To Net: NetName=NetR3_2 Pin=U4-35
+Added Net: Name=NetR3_2
+Added Pin To Net: NetName=NetR^_2 Pin=R^-2
+Added Pin To Net: NetName=NetR^_2 Pin=U4-34
+Added Net: Name=NetR^_2
+Added Member To Class: ClassName=Sheet2 Member=Component R^ 27 Ohm
+Added Member To Class: ClassName=Sheet2 Member=Component U8 NJM2871BF33-TE1

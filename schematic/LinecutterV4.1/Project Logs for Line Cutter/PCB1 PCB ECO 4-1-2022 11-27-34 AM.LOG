@@ -1,0 +1,18 @@
+Change Component Footprint: Designator=R19 Old Footprint=RESC0402 New Footprint=CAPC1508X03N
+Change Component Comment : Designator=R19 Old Comment=165kOhm New Comment=160kOhm
+Added Component: Designator=J6(SCREW)
+Added Component: Designator=J7(SCREW)
+Added Component: Designator=R18(RESC0402)
+Added Component: Designator=R24(RESC0402)
+Added Pin To Net: NetName=GND Pin=R18-1
+Added Pin To Net: NetName=GND Pin=R24-1
+Added Pin To Net: NetName=NetJ6_1 Pin=J6-1
+Added Pin To Net: NetName=NetJ6_1 Pin=R18-2
+Added Net: Name=NetJ6_1
+Added Pin To Net: NetName=NetJ7_1 Pin=J7-1
+Added Pin To Net: NetName=NetJ7_1 Pin=R24-2
+Added Net: Name=NetJ7_1
+Added Member To Class: ClassName=Sheet1 Member=Component J6 Screw
+Added Member To Class: ClassName=Sheet1 Member=Component J7 Screw
+Added Member To Class: ClassName=Sheet1 Member=Component R18 4.99kOhm
+Added Member To Class: ClassName=Sheet1 Member=Component R24 4.99kOhm

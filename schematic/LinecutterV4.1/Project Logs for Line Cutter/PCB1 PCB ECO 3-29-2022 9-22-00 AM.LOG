@@ -1,0 +1,7 @@
+Change Component Footprint: Designator=J2 Old Footprint=JST XH B5B-XH-A New Footprint=2355172-5
+Change Component Footprint: Designator=TP5 Old Footprint=TP New Footprint=TP2
+Change Component Footprint: Designator=TP6 Old Footprint=TP New Footprint=TP2
+Change Component Comment : Designator=J2 Old Comment=B5B-XH-A(LF)(SN) New Comment=2355172-5
+Change component parameters: Designator = "J2" ("J2"); Footprint = "JST XH B5B-XH-A"; UniqueID = "\HPMMOTZR" ("\HPMMOTZR")
+Change component parameters (AddParameter): Name = "ComponentLink1Description"; Value = "New link"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "ComponentLink1URL"; Value = "https://www.digikey.com/en/products/detail/te-connectivity-amp-connectors/2355172-5/11502911"; VariantName = "[No Variations]"

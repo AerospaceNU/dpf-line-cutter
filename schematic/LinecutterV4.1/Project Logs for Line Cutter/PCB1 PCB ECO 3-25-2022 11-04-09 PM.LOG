@@ -1,0 +1,5 @@
+Change Component Footprint: Designator=C8 Old Footprint=CAPC1508X03N New Footprint=RESC0402
+Change Component Footprint: Designator=C9 Old Footprint=CAPC1508X03N New Footprint=RESC0402
+Change Component Footprint: Designator=R2 Old Footprint=CAPC1508X03N New Footprint=RESC0402
+Change Component Comment : Designator=C8 Old Comment=0.22uF New Comment=0.1uF
+Change Component Comment : Designator=C9 Old Comment=0.22uF New Comment=0.1uF

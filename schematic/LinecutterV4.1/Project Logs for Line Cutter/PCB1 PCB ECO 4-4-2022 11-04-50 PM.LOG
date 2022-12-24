@@ -1,0 +1,10 @@
+Removed Pin From Net: NetName=GND Pin=D4-2
+Removed Pin From Net: NetName=3V3 Pin=R19-2
+Added Pin To Net: NetName=3V3 Pin=D4-1
+Added Pin To Net: NetName=GND Pin=R19-1
+Added Pin To Net: NetName=NetD4_2 Pin=D4-2
+Added Pin To Net: NetName=NetD4_2 Pin=R19-2
+Added Pin To Net: NetName=NetD4_2 Pin=U9-3
+Added Net: Name=NetD4_2
+Change Class Name : Old Net Name=Sheet1 New Net Name=Supercap
+Change Class Name : Old Net Name=Sheet2 New Net Name=Sensor

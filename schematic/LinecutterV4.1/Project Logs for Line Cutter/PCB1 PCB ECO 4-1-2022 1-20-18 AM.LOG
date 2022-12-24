@@ -1,0 +1,11 @@
+Change Component Comment : Designator=R19 Old Comment=R-G-0402 New Comment=165kOhm
+Added Component: Designator=R20(RESC0402)
+Added Component: Designator=R22(RESC0402)
+Added Pin To Net: NetName=PWR Pin=R20-2
+Added Pin To Net: NetName=GND Pin=R22-1
+Added Pin To Net: NetName=SNS_BAT Pin=R20-1
+Added Pin To Net: NetName=SNS_BAT Pin=R22-2
+Added Pin To Net: NetName=SNS_BAT Pin=U4-11
+Added Net: Name=SNS_BAT
+Added Member To Class: ClassName=Sheet1 Member=Component R20 4.99kOhm
+Added Member To Class: ClassName=Sheet1 Member=Component R22 4.99kOhm

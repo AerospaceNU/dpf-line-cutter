@@ -1,0 +1,4 @@
+Change Component Footprint: Designator=TP2 Old Footprint=TP2 New Footprint=TP
+Change Component Comment : Designator=R15 Old Comment=4.99kOhm New Comment=10.7kOhm
+Change Component Comment : Designator=TP2 Old Comment=Test Point New Comment=CAP
+Change Component Comment : Designator=TP1 Old Comment=Test Point New Comment=VCAP_PG

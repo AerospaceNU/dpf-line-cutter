@@ -1,0 +1,6 @@
+Removed Pin From Net: NetName=CAP Pin=TP2-1
+Removed Pin From Net: NetName=V_CAP Pin=TP3-1
+Change Component Comment : Designator=TP2 Old Comment=CAP New Comment=Test Point
+Change Component Comment : Designator=TP1 Old Comment=VCAP_PG New Comment=Test Point
+Added Pin To Net: NetName=V_CAP Pin=TP2-1
+Added Pin To Net: NetName=CAP Pin=TP3-1

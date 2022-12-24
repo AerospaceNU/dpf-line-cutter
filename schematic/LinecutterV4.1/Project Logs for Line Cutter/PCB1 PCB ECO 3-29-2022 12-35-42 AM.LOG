@@ -1,0 +1,26 @@
+Removed Pin From Net: NetName=PWR Pin=R1-1
+Removed Pin From Net: NetName=G_Ctrl1 Pin=U4-19
+Removed Pin From Net: NetName=G_Ctrl2 Pin=U4-20
+Removed Member From Class: ClassName=Sheet1 Member=R1
+Added Component: Designator=C27(CAPC1508X03N)
+Added Component: Designator=TP4(TP2)
+Added Component: Designator=TP5(TP)
+Added Component: Designator=TP6(TP)
+Added Component: Designator=TP7(TP)
+Added Pin To Net: NetName=GND Pin=C27-2
+Added Pin To Net: NetName=Gate2 Pin=TP5-1
+Added Pin To Net: NetName=Gate1 Pin=TP6-1
+Added Pin To Net: NetName=3V3 Pin=TP7-1
+Added Pin To Net: NetName=SNS_VCAP Pin=U4-12
+Added Pin To Net: NetName=G_Ctrl1 Pin=U4-20
+Added Pin To Net: NetName=G_Ctrl2 Pin=U4-22
+Added Pin To Net: NetName=CAPC_EN Pin=C27-1
+Added Pin To Net: NetName=CAPC_EN Pin=TP4-1
+Added Pin To Net: NetName=CAPC_EN Pin=U1-8
+Added Pin To Net: NetName=CAPC_EN Pin=U4-21
+Added Net: Name=CAPC_EN
+Added Member To Class: ClassName=Sheet1 Member=Component C27 0.1uF
+Added Member To Class: ClassName=Sheet1 Member=Component TP4 Test Point
+Added Member To Class: ClassName=Sheet1 Member=Component TP5 Test Point
+Added Member To Class: ClassName=Sheet1 Member=Component TP6 Test Point
+Added Member To Class: ClassName=Sheet2 Member=Component TP7 Test Point

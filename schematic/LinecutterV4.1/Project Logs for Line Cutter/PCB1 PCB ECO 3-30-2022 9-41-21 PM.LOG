@@ -1,0 +1,11 @@
+Added Component: Designator=J5(GRPB021VWVN-RC)
+Add component (AddParameter): Name = "ComponentLink1Description"; Value = "New link"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "ComponentLink1URL"; Value = "https://www.digikey.com/en/products/detail/sullins-connector-solutions/GRPB021VWVN-RC/1786438"; VariantName = "[No Variations]"
+Added Component: Designator=R1(CAPC1508X03N)
+Added Pin To Net: NetName=CAP Pin=J5-1
+Added Pin To Net: NetName=GND Pin=R1-1
+Added Pin To Net: NetName=NetJ5_2 Pin=J5-2
+Added Pin To Net: NetName=NetJ5_2 Pin=R1-2
+Added Net: Name=NetJ5_2
+Added Member To Class: ClassName=Sheet1 Member=Component J5 GRPB021VWVN-RC
+Added Member To Class: ClassName=Sheet1 Member=Component R1 499 Ohm

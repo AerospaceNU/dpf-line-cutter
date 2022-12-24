@@ -1,0 +1,14 @@
+Removed Pin From Net: NetName=CAP Pin=J1-1
+Removed Pin From Net: NetName=CAP Pin=J1-2
+Removed Pin From Net: NetName=GND Pin=J1-3
+Removed Pin From Net: NetName=NetC16_2 Pin=J1-4
+Removed Pin From Net: NetName=GND Pin=J1-5
+Removed Pin From Net: NetName=NetC16_2 Pin=J1-6
+Removed Member From Class: ClassName=Sheet1 Member=J1
+Added Component: Designator=J4(5-103669-4)
+Added Pin To Net: NetName=CAP Pin=J4-1
+Added Pin To Net: NetName=GND Pin=J4-2
+Added Pin To Net: NetName=NetC16_2 Pin=J4-3
+Added Pin To Net: NetName=GND Pin=J4-4
+Added Pin To Net: NetName=NetC16_2 Pin=J4-5
+Added Member To Class: ClassName=Sheet1 Member=Component J4 5-103669-4

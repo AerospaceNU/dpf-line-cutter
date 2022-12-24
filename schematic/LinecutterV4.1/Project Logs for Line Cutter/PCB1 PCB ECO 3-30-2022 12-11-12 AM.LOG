@@ -1,0 +1,6 @@
+Change Component Footprint: Designator=SW1 Old Footprint=TE FSMSMTR New Footprint=KMR231GLFS
+Change Component Comment : Designator=SW1 Old Comment=FSMSM New Comment=KMR231GLFS
+Change component parameters: Designator = "SW1" ("SW1"); Footprint = "TE FSMSMTR"; UniqueID = "\IAWCSZJL" ("\IAWCSZJL")
+Added Pin To Net: NetName=SW_NRST Pin=SW1-3
+Added Pin To Net: NetName=GND Pin=SW1-4
+Added Pin To Net: NetName=GND Pin=SW1-5

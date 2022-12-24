@@ -1,0 +1,13 @@
+Added Component: Designator=U2(8-DFN)
+Add component (AddParameter): Name = "ComponentLink1Description"; Value = "New link"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "ComponentLink1URL"; Value = "https://www.digikey.com/en/products/detail/analog-devices-inc-maxim-integrated/MAX14575CETA-T/3877475"; VariantName = "[No Variations]"
+Added Pin To Net: NetName=CHARGE_FI Pin=U2-1
+Added Pin To Net: NetName=NetR2_2 Pin=U2-2
+Added Pin To Net: NetName=NetD2_2 Pin=U2-3
+Added Pin To Net: NetName=NetD2_2 Pin=U2-4
+Added Pin To Net: NetName=V_CAP Pin=U2-5
+Added Pin To Net: NetName=V_CAP Pin=U2-6
+Added Pin To Net: NetName=CHARGE_EN Pin=U2-7
+Added Pin To Net: NetName=GND Pin=U2-8
+Added Pin To Net: NetName=GND Pin=U2-9
+Added Member To Class: ClassName=Sheet1 Member=Component U2 MAX14575CETA+T

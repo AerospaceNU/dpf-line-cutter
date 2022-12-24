@@ -1,0 +1,21 @@
+Removed Pin From Net: NetName=PWR Pin=C18-2
+Removed Pin From Net: NetName=NetC25_1 Pin=D4-1
+Removed Pin From Net: NetName=PWR Pin=U8-5
+Removed Member From Class: ClassName=Sheet2 Member=D4
+Added Component: Designator=Q1(SOT-23)
+Add component (AddParameter): Name = "ComponentLink1Description"; Value = "New link"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "ComponentLink1URL"; Value = "https://www.digikey.com/en/products/detail/infineon-technologies/IRLMS6702TRPBF/811453"; VariantName = "[No Variations]"
+Added Component: Designator=TP8(TP)
+Added Pin To Net: NetName=NetC25_1 Pin=C18-2
+Added Pin To Net: NetName=PWR Pin=Q1-1
+Added Pin To Net: NetName=PWR Pin=Q1-2
+Added Pin To Net: NetName=NetC25_1 Pin=Q1-3
+Added Pin To Net: NetName=NetC25_1 Pin=Q1-4
+Added Pin To Net: NetName=PWR Pin=Q1-5
+Added Pin To Net: NetName=PWR Pin=Q1-6
+Added Pin To Net: NetName=PWR Pin=TP8-1
+Added Pin To Net: NetName=NetC25_1 Pin=U4-32
+Added Pin To Net: NetName=NetC25_1 Pin=U8-5
+Change Net Name : Old Net Name=NetC25_1 New Net Name=VUSB
+Added Member To Class: ClassName=Sheet2 Member=Component Q1 IRLMS6702TRPBF
+Added Member To Class: ClassName=Sheet1 Member=Component TP8 Test Point
