@@ -1,7 +1,0 @@
-Added Component: Designator=TP9(PCBComponent_1)
-Added Component: Designator=TP10(PCBComponent_1)
-Added Member To Class: ClassName=Supercap Member=Component TP9 Test Point
-Added Member To Class: ClassName=Supercap Member=Component TP10 Test Point
-Added Room: Name=Cutter
-Added Room: Name=Sensor
-Added Room: Name=Supercap

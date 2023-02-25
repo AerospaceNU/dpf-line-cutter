@@ -1,0 +1,6 @@
+Removed Pin From Net: NetName=G_Ctrl1 Pin=TP9-6
+Removed Pin From Net: NetName=G_Ctrl2 Pin=TP10-6
+Add Pin To Net: Unknown Pin: Pin TP9-1
+Add Pin To Net: Unknown Pin: Pin TP10-1
+Added Room: Name=Sensor
+Added Room: Name=Supercap
