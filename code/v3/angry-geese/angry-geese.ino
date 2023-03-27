@@ -508,6 +508,8 @@ void offloadData() {
   }
 }
 
+#define 
+
 void print_flash_packet(const Data& packet, unsigned long loc) {
   Serial.print(loc);
   Serial.print(", ");
@@ -517,25 +519,25 @@ void print_flash_packet(const Data& packet, unsigned long loc) {
   Serial.print(", ");
   Serial.print(packet.pressure);
   Serial.print(", ");
-  Serial.print(packet.altitude, 4);
+  Serial.print(packet.altitude, 3);
   Serial.print(", ");
-  Serial.print(packet.avgAltitude, 4);
+  Serial.print(packet.avgAltitude, 3);
   Serial.print(", ");
-  Serial.print(packet.deltaAltitude, 4);
+  Serial.print(packet.deltaAltitude, 3);
   Serial.print(", ");
   Serial.print(packet.temperature, 3);
   Serial.print(", ");
   Serial.print(packet.accelX, 9);
   Serial.print(", ");
-  Serial.print(packet.accelY);
+  Serial.print(packet.accelY, 9);
   Serial.print(", ");
-  Serial.print(packet.accelZ);
+  Serial.print(packet.accelZ, 9);
   Serial.print(", ");
-  Serial.print(packet.gyroX);
+  Serial.print(packet.gyroX, 6);
   Serial.print(", ");
-  Serial.print(packet.gyroY);
+  Serial.print(packet.gyroY, 6);
   Serial.print(", ");
-  Serial.print(packet.gyroZ);
+  Serial.print(packet.gyroZ, 6);
   Serial.print(", ");
   Serial.print(packet.cutSense1);
   Serial.print(", ");
